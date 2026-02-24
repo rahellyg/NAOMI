@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>תקשור והעברת מסרים | Naomi</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700&family=Rubik:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-deep: #0f0e14;
+      --bg-card: #1a1822;
+      --accent: #c9a86c;
+      --accent-soft: rgba(201, 168, 108, 0.25);
+      --text: #f0ebe3;
+      --text-muted: #9a958a;
+      --border: rgba(201, 168, 108, 0.2);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Heebo', sans-serif;
+      background: var(--bg-deep);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* רקע עדין עם גרדיאנט */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: 
+        radial-gradient(ellipse 80% 50% at 50% -20%, var(--accent-soft), transparent 50%),
+        radial-gradient(ellipse 60% 40% at 80% 100%, rgba(120, 90, 60, 0.15), transparent 40%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width:  min(92vw, 880px);
+      margin: 0 auto;
+      padding: 2rem 1.5rem 4rem;
+    }
+
+    /* כותרת ראשית */
+    header {
+      text-align: center;
+      padding: 3rem 0 2.5rem;
+    }
+
+    .header-photo {
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid var(--border);
+      margin-bottom: 1.25rem;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .logo {
+      font-family: 'Rubik', sans-serif;
+      font-weight: 300;
+      font-size: 0.9rem;
+      letter-spacing: 0.2em;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+    }
+
+    h1 {
+      font-family: 'Rubik', sans-serif;
+      font-weight: 500;
+      font-size: clamp(1.75rem, 5vw, 2.25rem);
+      line-height: 1.35;
+      margin-bottom: 0.75rem;
+    }
+
+    .tagline {
+      font-weight: 300;
+      font-size: 1rem;
+      color: var(--text-muted);
+    }
+
+    .intro-text {
+      margin-top: 1.5rem;
+      padding: 1.5rem 0;
+      font-weight: 300;
+      font-size: 1.05rem;
+      line-height: 1.8;
+      color: var(--text);
+    }
+
+    .intro-text .tags {
+      margin-top: 1rem;
+      font-size: 0.95rem;
+      color: var(--accent);
+      letter-spacing: 0.02em;
+    }
+
+    .intro-text .cta {
+      margin-top: 1rem;
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    /* קישורים לרשתות */
+    .social {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .social a {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      padding: 1rem 1.5rem;
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 500;
+      background: var(--bg-card);
+      border: 2px solid var(--accent);
+      border-radius: 12px;
+      transition: background 0.2s, border-color 0.2s, transform 0.15s;
+    }
+
+    .social a:hover {
+      background: rgba(201, 168, 108, 0.12);
+      border-color: #d4b87a;
+      transform: translateY(-2px);
+    }
+
+    .social a svg {
+      width: 24px;
+      height: 24px;
+      fill: currentColor;
+    }
+
+    /* בלוק טקסט – ללא מסגרת */
+    .content-block {
+      padding: 1.5rem 0;
+      margin-bottom: 1rem;
+    }
+
+    .content-block h2 {
+      font-family: 'Rubik', sans-serif;
+      font-weight: 500;
+      font-size: 1.2rem;
+      color: var(--accent);
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+
+    .content-block p {
+      font-weight: 300;
+      font-size: 1rem;
+      line-height: 1.85;
+      color: var(--text);
+      margin-bottom: 0.9rem;
+    }
+
+    .content-block p:last-child {
+      margin-bottom: 0;
+    }
+
+    .content-block .highlight {
+      color: var(--accent);
+      font-weight: 500;
+    }
+
+    .content-block .quote {
+      font-style: italic;
+      padding: 0 0.5rem;
+      border-right: 3px solid var(--accent);
+      margin: 1rem 0;
+      color: var(--text-muted);
+    }
+
+    .content-block.with-img {
+      overflow: hidden;
+    }
+
+    .content-block .section-img-wrap {
+      width: 100%;
+      margin-bottom: 1.25rem;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .content-block .section-img-wrap img {
+      width: 100%;
+      height: auto;
+      display: block;
+      max-height: 280px;
+      object-fit: cover;
+    }
+
+    .content-block .services-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-top: 1rem;
+      justify-content: center;
+    }
+
+    .content-block .service-pill {
+      background: var(--bg-deep);
+      color: var(--accent);
+      padding: 0.5rem 1rem;
+      border-radius: 999px;
+      font-size: 0.9rem;
+      border: 1px solid var(--border);
+    }
+
+    /* מחירון – ללא מסגרת */
+    .pricing-section {
+      padding: 1.5rem 0;
+      margin-bottom: 2rem;
+    }
+
+    .pricing-section h2 {
+      font-family: 'Rubik', sans-serif;
+      font-weight: 500;
+      font-size: 1.25rem;
+      color: var(--accent);
+      margin-bottom: 1.25rem;
+      text-align: center;
+    }
+
+    .pricing-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 1rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .pricing-item:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .pricing-item .name {
+      font-weight: 400;
+      color: var(--text);
+    }
+
+    .pricing-item .price {
+      font-family: 'Rubik', sans-serif;
+      font-weight: 600;
+      color: var(--accent);
+      white-space: nowrap;
+    }
+
+    /* טופס – נשאר במרובע */
+    .form-section {
+      max-width: 480px;
+      margin: 0 auto;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2rem;
+    }
+
+    .form-section h2 {
+      font-family: 'Rubik', sans-serif;
+      font-weight: 500;
+      font-size: 1.25rem;
+      margin-bottom: 1.25rem;
+      color: var(--accent);
+    }
+
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 0.4rem;
+    }
+
+    .form-group input,
+    .form-group textarea {
+      width: 100%;
+      padding: 0.85rem 1rem;
+      background: var(--bg-deep);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 1rem;
+      transition: border-color 0.2s;
+    }
+
+    .form-group input::placeholder,
+    .form-group textarea::placeholder {
+      color: var(--text-muted);
+      opacity: 0.8;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .form-group textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    button[type="submit"] {
+      width: 100%;
+      padding: 1rem 1.5rem;
+      background: var(--accent);
+      border: none;
+      border-radius: 8px;
+      color: var(--bg-deep);
+      font-family: inherit;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s;
+    }
+
+    button[type="submit"]:hover {
+      background: #d4b87a;
+      transform: translateY(-1px);
+    }
+
+    .form-message {
+      margin-top: 1rem;
+      padding: 0.75rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      text-align: center;
+      display: none;
+    }
+
+    .form-message.success {
+      background: rgba(76, 175, 80, 0.2);
+      color: #a5d6a7;
+      display: block;
+    }
+
+    .form-message.error {
+      background: rgba(244, 67, 54, 0.2);
+      color: #ef9a9a;
+      display: block;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem 0;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <img src="נעמי.PNG" alt="נעמי" class="header-photo" width="200" height="200">
+      <p class="logo">Naomi</p>
+      <h1>תקשור והעברת מסרים</h1>
+      <p class="tagline">חיבור לעולמות העדינים והעברת מסרים עבורך</p>
+      <div class="intro-text">
+        <p>עברתי דרך ארוכה, שאלתי הרבה שאלות, עולם המספרים זה המקום היחיד שמצאתי בו תשובות להכל.</p>
+        <p class="tags">נומרולוגיה | תודעה | מסרים מהיקום | אינטואיציה | פתיח בקלפים</p>
+        <p class="cta">🦋 בואו להבין מי אתם 🦋</p>
+      </div>
+    </header>
+
+    <nav class="social" aria-label="רשתות חברתיות">
+      <a href="https://vt.tiktok.com/ZSmXpBHSu/" target="_blank" rel="noopener noreferrer">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/></svg>
+        TikTok
+      </a>
+      <a href="https://www.instagram.com/nomi.amselem818?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" target="_blank" rel="noopener noreferrer">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+        Instagram
+      </a>
+      <a href="https://wa.me/972545719158" target="_blank" rel="noopener noreferrer">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        WhatsApp
+      </a>
+    </nav>
+
+    <section class="content-block" aria-label="קצת עלי והשירות">
+      <h2>המספרים מדברים – ואני כאן כדי לתרגם</h2>
+      <p>לכל אחד ואחת יש <span class="highlight">מפת מספרים</span> ייחודית: תאריך לידה, שם, ומה שהקול הפנימי כבר יודע אבל עדיין לא מוּדע. הנומרולוגיה והתקשור עוזרים לחשוף את זה – לא כדי לחזות עתיד, אלא כדי להבין טוב יותר מי אתם, מה מניע אתכם, ואיפה יש לכם פוטנציאל לצמוח.</p>
+      <p class="quote">"המסרים לא מגיעים רק ממני – הם עוברים דרכי. היקום מדבר; אני רק עוזרת להקשיב."</p>
+      <p>אם יש לכם שאלה פתוחה, רצון להעמיק בעצמכם, או סקרנות למסר שמחכה – <span class="highlight">אשמח שתשאירו פרטים</span> או תכתבו ישירות בוואטסאפ. נפגש שם 🦋</p>
+    </section>
+
+    <section class="content-block with-img" aria-label="פתיח בקלפים">
+      <div class="section-img-wrap">
+        <img src="קלפים.jpg" alt="פתיח בקלפים" class="section-img" width="560" height="280">
+      </div>
+      <h2>גם פתיח בקלפים 🃏</h2>
+      <p>הקלפים פותחים צוהר לרגע – למה שמבקש תשומת לב עכשיו, להכוונה עדינה, או למסר שהיקום שולח דרכם. כל פתיחה היא שיחה: בין השאלה שלכם לבין הסמלים, הדימויים והאינטואיציה.</p>
+      <p>מתאים למי שמחפש <span class="highlight">בהירות בהחלטות</span>, מבט על יחסים, כיוון בקריירה, או פשוט רצון להקשיב למה שהקלפים רוצים להגיד. נומרולוגיה, תקשור וקלפים – כולם יחד בשבילכם.</p>
+      <div class="services-row">
+        <span class="service-pill">נומרולוגיה</span>
+        <span class="service-pill">תקשור</span>
+        <span class="service-pill">פתיח בקלפים</span>
+        <span class="service-pill">מסרים מהיקום</span>
+      </div>
+    </section>
+
+    <section class="pricing-section" aria-label="מחירון">
+      <h2>מחירון</h2>
+      <div class="pricing-item">
+        <span class="name">שאלה</span>
+        <span class="price">₪111</span>
+      </div>
+      <div class="pricing-item">
+        <span class="name">סדנה של חודשיים</span>
+        <span class="price">₪999</span>
+      </div>
+      <div class="pricing-item">
+        <span class="name">קורס בפתיחת קלפים</span>
+        <span class="price">₪1,500</span>
+      </div>
+    </section>
+
+    <section class="form-section">
+      <h2>השאירו פרטים</h2>
+      <iframe name="sheets-submit" id="sheets-submit" style="display:none" title="שליחה לגיליון"></iframe>
+      <form id="contact-form" method="POST" target="sheets-submit">
+        <div class="form-group">
+          <label for="name">שם מלא</label>
+          <input type="text" id="name" name="name" placeholder="השם שלך" required>
+        </div>
+        <div class="form-group">
+          <label for="email">אימייל</label>
+          <input type="email" id="email" name="email" placeholder="example@email.com" required>
+        </div>
+        <div class="form-group">
+          <label for="phone">טלפון</label>
+          <input type="tel" id="phone" name="phone" placeholder="050-0000000">
+        </div>
+        <div class="form-group">
+          <label for="message">הודעה (אופציונלי)</label>
+          <textarea id="message" name="message" placeholder="כתוב כאן את המסר או הבקשה שלך..."></textarea>
+        </div>
+        <button type="submit">שליחה</button>
+        <div id="form-message" class="form-message" role="status"></div>
+      </form>
+    </section>
+
+    <footer>
+      <p>© כל הזכויות שמורות</p>
+    </footer>
+  </div>
+
+  <script>
+    // הדביקי כאן את כתובת אפליקציית האינטרנט מ-Google Apps Script (אחרי הפריסה)
+    var GOOGLE_SCRIPT_URL = '';
+
+    document.getElementById('contact-form').addEventListener('submit', function(e) {
+      var msgEl = document.getElementById('form-message');
+      msgEl.classList.remove('success', 'error');
+      msgEl.textContent = '';
+
+      var name = document.getElementById('name').value.trim();
+      var email = document.getElementById('email').value.trim();
+      var phone = document.getElementById('phone').value.trim();
+      var message = document.getElementById('message').value.trim();
+
+      if (!name || !email) {
+        e.preventDefault();
+        msgEl.textContent = 'נא למלא שם ואימייל.';
+        msgEl.classList.add('error');
+        return;
+      }
+
+      if (GOOGLE_SCRIPT_URL) {
+        this.action = GOOGLE_SCRIPT_URL;
+      }
+
+      // בניית טקסט ההודעה לוואטסאפ
+      var text = 'שלום, הגעתי מהדף נחיתה.\n\n';
+      text += 'שם: ' + name + '\n';
+      text += 'אימייל: ' + email + '\n';
+      if (phone) text += 'טלפון: ' + phone + '\n';
+      if (message) text += '\nהודעה: ' + message;
+
+      var whatsappUrl = 'https://wa.me/972549329225?text=' + encodeURIComponent(text);
+      window.open(whatsappUrl, '_blank');
+
+      msgEl.textContent = 'הפרטים נשמרו. נפתח חלון וואטסאפ – שלח/י את ההודעה כדי לשלוח אלינו.';
+      msgEl.classList.add('success');
+      var form = this;
+      setTimeout(function() { form.reset(); }, 200);
+    });
+  </script>
+</body>
+</html>
