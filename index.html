@@ -44,6 +44,25 @@
       z-index: 0;
     }
 
+    .side-wand {
+      position: fixed;
+      left: 2%;
+      top: 50%;
+      transform: translateY(-50%);
+      width: auto;
+      height: 60vh;
+      max-height: 480px;
+      object-fit: contain;
+      object-position: center center;
+      opacity: 0.75;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    @media (max-width: 900px) {
+      .side-wand { display: none; }
+    }
+
     .container {
       position: relative;
       z-index: 1;
@@ -71,10 +90,10 @@
     .logo {
       font-family: 'Rubik', sans-serif;
       font-weight: 600;
-      font-size: 1.75rem;
+      font-size: 1.2rem;
       letter-spacing: 0.15em;
       color: var(--accent);
-      margin-bottom: 1rem;
+      margin-bottom: 2.5rem;
       text-shadow: 0 0 24px var(--accent-soft);
     }
 
@@ -511,31 +530,29 @@
       font-size: 0.85rem;
       color: var(--text-muted);
     }
+
+    footer a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
   </style>
 </head>
 <body>
+  <img src="https://imagescdn2.ravpages.co.il/xsite_resources/user_content/79/6b/c7/c7/796bc7c76b31089a6c1177d8ff50e23a/images/c53d9e595b9a54efc0501439bfd72a9a.jpg?editor&maxWidth=1400&rxc=1705555703" alt="" class="side-wand" width="120" height="400">
   <div class="container">
     <header>
-      <img src="naomi.jpg" alt="נעמי" class="header-photo" width="200" height="200">
+      <img src="https://images.ravpages.co.il/xsite_resources/user_content/79/6b/c7/c7/796bc7c76b31089a6c1177d8ff50e23a/images/f3f4aa5e9345264effc1c321fdff07e1.jpg?editor" alt="נעמי" class="header-photo" width="200" height="200">
       <p class="logo">נעמי</p>
       <h1>מה אם הכול כבר מסונכרן —<br>ואתם פשוט עוד לא רואים את זה?</h1>
-      <p class="tagline">זה לא צירוף מקרים.<br>זו מערכת מדויקת שפועלת מאחורי הקלעים</p>
-      <div class="intro-text">
-        <p>עברתי דרך ארוכה, שאלתי הרבה שאלות, עולם המספרים זה המקום היחיד שמצאתי בו תשובות להכל.</p>
-        <p class="tags">נומרולוגיה | תודעה | מסרים מהיקום | אינטואיציה | פתיח בקלפים</p>
-        <p class="cta">🦋 בואו להבין מי אתם 🦋</p>
-      </div>
+      <p class="tagline">החיים זה לא צירוף מקרים.<br>זו מערכת מדויקת שפועלת מאחורי הקלעים</p>
     </header>
 
-    <section class="content-block" aria-label="קצת עלי והשירות">
-      <h2>המספרים מדברים – ואני כאן כדי לתרגם</h2>
-      <p>לכל אחד ואחת יש <span class="highlight">מפת מספרים</span> ייחודית: תאריך לידה, שם, ומה שהקול הפנימי כבר יודע אבל עדיין לא מוּדע. הנומרולוגיה והתקשור עוזרים לחשוף את זה – לא כדי לחזות עתיד, אלא כדי להבין טוב יותר מי אתם, מה מניע אתכם, ואיפה יש לכם פוטנציאל לצמוח.</p>
-      <p class="quote">"המסרים לא מגיעים רק ממני – הם עוברים דרכי. היקום מדבר; אני רק עוזרת להקשיב."</p>
-      <p>אם יש לכם שאלה פתוחה, רצון להעמיק בעצמכם, או סקרנות למסר שמחכה – <span class="highlight">אשמח שתשאירו פרטים</span> 🦋</p>
-    </section>
-
     <nav class="social" aria-label="רשתות חברתיות">
-      <a href="https://vt.tiktok.com/ZSmXpBHSu/" target="_blank" rel="noopener noreferrer">
+      <a href="https://www.tiktok.com/@itslolet3?_r=1&_t=ZS-94BiaUPDDxl" target="_blank" rel="noopener noreferrer">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/></svg>
         TikTok
       </a>
@@ -546,7 +563,7 @@
     </nav>
 
     <section class="channel-intro" aria-label="על הערוץ">
-      <p>אם הגעתם לכאן…</p>
+      <p>אם הגעתם לכאן</p>
       <p>כנראה שאתם כבר מרגישים את זה.</p>
       <p>שיש עומק. שיש חוקיות. שיש משהו שקורה מאחורי הקלעים של החיים שלכם.</p>
       <p>סיטואציות שחוזרות. אנשים שנכנסים בדיוק בזמן. מספרים שמופיעים שוב ושוב. תחושות בטן שלא מרפות.</p>
@@ -576,12 +593,12 @@
       <p class="intro-divider">⸻</p>
 
       <p class="intro-subtitle">למי זה מתאים</p>
-      <p>למי שמרגישים שמשהו בתוכם מתעורר. למי שכבר מבינים שהחיים הם לא רק מה שרואים בעיניים. למי שרוצים להפסיק להילחם במציאות — ולהתחיל להסתנכרן איתה.</p>
+      <p>למי שמרגיש שמשהו בתוכו מתעורר. למי שכבר מבין שהחיים הם לא רק מה שרואים בעיניים. למי שרוצה להפסיק להילחם במציאות — ולהתחיל להסתנכרן איתה.</p>
       <p>לא לכולם זה ידבר. וזה בדיוק העניין.</p>
       <p class="intro-divider">⸻</p>
 
       
-      <p>אם משהו זז בכם עכשיו — תקשיבו לזה.</p>
+      <p>אם משהו זז בך עכשיו — תקשיב לזה.</p>
       <p>לא צריך להבין הכול. רק להסכים להיכנס.</p>
       <form class="channel-intro-form" id="channel-entry-form">
         <div class="form-group">
@@ -607,41 +624,44 @@
       </div>
     </section>
 
-    <section class="content-block with-img" aria-label="פתיח בקלפים">
-      <div class="section-img-wrap">
-        <img src="cards.jpg" alt="פתיח בקלפים" class="section-img" width="560" height="280">
-      </div>
-      <h2>גם פתיח בקלפים 🃏</h2>
-      <p>הקלפים פותחים צוהר לרגע – למה שמבקש תשומת לב עכשיו, להכוונה עדינה, או למסר שהיקום שולח דרכם. כל פתיחה היא שיחה: בין השאלה שלכם לבין הסמלים, הדימויים והאינטואיציה.</p>
-      <p>מתאים למי שמחפש <span class="highlight">בהירות בהחלטות</span>, מבט על יחסים, כיוון בקריירה, או פשוט רצון להקשיב למה שהקלפים רוצים להגיד. נומרולוגיה, תקשור וקלפים – כולם יחד בשבילכם.</p>
-      <div class="services-row">
-        <span class="service-pill">נומרולוגיה</span>
-        <span class="service-pill">תקשור</span>
-        <span class="service-pill">פתיח בקלפים</span>
-        <span class="service-pill">מסרים מהיקום</span>
-      </div>
-    </section>
-
     <section class="pricing-section" aria-label="מחירון">
       <h2>מחירון</h2>
       <div class="pricing-item">
-        <span class="name">שאלה</span>
+        <span class="name">שאלה אחת</span>
         <span class="price">לא זמין כרגע</span>
       </div>
       <div class="pricing-item">
-        <span class="name">סדנה של חודשיים</span>
-        <span class="price">לא זמין כרגע</span>
-      </div>
-      <div class="pricing-item">
-        <span class="name">קורס בפתיחת קלפים</span>
+        <span class="name">פגישה אישית</span>
         <span class="price">לא זמין כרגע</span>
       </div>
     </section>
 
     <footer>
-      <p>© כל הזכויות שמורות</p>
+      <p>© כל הזכויות שמורות ל <a href="https://rahellyg.github.io/busipro/" target="_blank" rel="noopener noreferrer">ביזנס פרו</a></p>
     </footer>
   </div>
 
+  <script>
+    (function() {
+      var channelLink = 'https://private.invoice4u.co.il/newsite/he/clearing/public/i4u-clearing?ProductGuid=0c28eaf4-187d-4356-ad1b-c014da828446';
+      var btn = document.getElementById('entry-channel-btn');
+      if (!btn) return;
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        var nameEl = document.getElementById('intro-name');
+        var emailEl = document.getElementById('intro-email');
+        var phoneEl = document.getElementById('intro-phone');
+        var name = (nameEl && nameEl.value.trim()) || '';
+        var email = (emailEl && emailEl.value.trim()) || '';
+        var phone = (phoneEl && phoneEl.value.trim()) || '';
+        if (!name || !email) {
+          alert('נא למלא שם ומייל');
+          return;
+        }
+        var url = channelLink + '&subscribers_name=' + encodeURIComponent(name) + '&subscribers_email=' + encodeURIComponent(email) + '&subscribers_phone=' + encodeURIComponent(phone) + '&day=0&encoding=UTF-8';
+        window.open(url, '_blank');
+      });
+    })();
+  </script>
 </body>
 </html>
