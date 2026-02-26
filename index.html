@@ -44,6 +44,17 @@
       z-index: 0;
     }
 
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(circle at 10% 25%, rgba(230, 184, 255, 0.12), transparent 35%),
+        radial-gradient(circle at 90% 70%, rgba(230, 184, 255, 0.1), transparent 38%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
     .side-wand {
       position: fixed;
       left: 2%;
@@ -63,10 +74,18 @@
       .side-wand { display: none; }
     }
 
+    @media (max-width: 640px) {
+      .mystic-elements span {
+        width: 46px;
+        height: 46px;
+        font-size: 1.1rem;
+      }
+    }
+
     .container {
       position: relative;
       z-index: 1;
-      max-width:  min(92vw, 880px);
+      max-width:  min(94vw, 1040px);
       margin: 0 auto;
       padding: 2rem 1.5rem 4rem;
     }
@@ -109,6 +128,46 @@
       font-weight: 300;
       font-size: 1rem;
       color: var(--text-muted);
+    }
+
+    .mystic-elements {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 0.9rem;
+      margin-top: 1rem;
+    }
+
+    .mystic-elements span {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--accent);
+      font-size: 1.25rem;
+      box-shadow: 0 0 24px rgba(230, 184, 255, 0.18);
+    }
+
+    .section-divider {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      margin: 0.75rem 0 1.75rem;
+      color: var(--accent);
+      opacity: 0.9;
+    }
+
+    .section-divider::before,
+    .section-divider::after {
+      content: '';
+      width: clamp(80px, 18vw, 180px);
+      height: 1px;
+      background: linear-gradient(to left, transparent, var(--border), transparent);
     }
 
     .intro-text {
@@ -198,15 +257,23 @@
     .channel-intro {
       padding: 1.5rem 0 2rem;
       margin-top: 0.5rem;
-      text-align: center;
+      text-align: right;
+      max-width: min(96vw, 980px);
+      margin-left: auto;
+      margin-right: auto;
     }
 
     .channel-intro p {
       font-weight: 300;
-      font-size: 1.02rem;
+      font-size: 1.22rem;
       line-height: 1.9;
       color: var(--text);
       margin-bottom: 0.85rem;
+    }
+
+    .channel-intro p.main-copy {
+      font-size: 1.42rem;
+      line-height: 2;
     }
 
     .channel-intro p:last-child {
@@ -216,6 +283,91 @@
     .channel-intro .highlight {
       color: var(--accent);
       font-weight: 500;
+    }
+
+    .how-it-starts {
+      margin: 1.5rem 0 1.75rem;
+      padding: 1.25rem 1.25rem 1.1rem;
+      background: linear-gradient(135deg, rgba(230, 184, 255, 0.12), rgba(26, 24, 36, 0.8));
+      border: 1px solid var(--border);
+      border-right: 4px solid var(--accent);
+      border-radius: 14px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.22);
+    }
+
+    .how-it-starts h3 {
+      font-family: 'Rubik', sans-serif;
+      font-weight: 600;
+      font-size: 1.15rem;
+      color: var(--accent);
+      margin-bottom: 0.7rem;
+      text-align: right;
+    }
+
+    .how-it-starts p {
+      font-size: 1.06rem;
+      line-height: 1.9;
+      margin-bottom: 0.65rem;
+    }
+
+    .how-it-starts p:last-child {
+      margin-bottom: 0;
+    }
+
+    .welcome-highlight {
+      position: relative;
+      margin: 1.1rem auto 1.5rem;
+      padding: 0.85rem 1.1rem;
+      max-width: 720px;
+      text-align: center;
+      border-radius: 16px;
+      background: linear-gradient(135deg, rgba(156, 39, 176, 0.42), rgba(230, 184, 255, 0.22));
+      border: 1px solid rgba(230, 184, 255, 0.55);
+      box-shadow: 0 0 28px rgba(156, 39, 176, 0.35);
+      overflow: hidden;
+    }
+
+    .welcome-highlight .welcome-text {
+      margin: 0;
+      font-family: 'Rubik', sans-serif;
+      font-size: clamp(1.35rem, 2.7vw, 1.8rem);
+      font-weight: 600;
+      color: #f3deff;
+      letter-spacing: 0.03em;
+      text-shadow: 0 0 12px rgba(230, 184, 255, 0.5);
+      position: relative;
+      z-index: 2;
+    }
+
+    .welcome-highlight .float {
+      position: absolute;
+      color: rgba(243, 222, 255, 0.8);
+      font-size: 1rem;
+      z-index: 1;
+      animation: floatSpark 4.2s ease-in-out infinite;
+    }
+
+    .welcome-highlight .float-1 {
+      top: 20%;
+      right: 10%;
+      animation-delay: 0s;
+    }
+
+    .welcome-highlight .float-2 {
+      top: 58%;
+      left: 12%;
+      animation-delay: 0.7s;
+    }
+
+    .welcome-highlight .float-3 {
+      top: 35%;
+      left: 48%;
+      animation-delay: 1.4s;
+    }
+
+    @keyframes floatSpark {
+      0%, 100% { transform: translateY(0px) scale(1); opacity: 0.5; }
+      50% { transform: translateY(-8px) scale(1.15); opacity: 1; }
     }
 
     .channel-intro-form {
@@ -312,6 +464,20 @@
       background: #d4b87a;
       color: var(--bg-deep);
       border-color: #d4b87a;
+    }
+
+    .elements-showcase {
+      padding: 0.5rem 0 1.75rem;
+      text-align: center;
+    }
+
+    .elements-showcase img {
+      width: min(100%, 462px);
+      height: auto;
+      display: block;
+      margin: 0 auto;
+      border-radius: 12px;
+      border: 1px solid var(--border);
     }
 
     .channel-intro .intro-divider {
@@ -549,6 +715,11 @@
       <p class="logo">נעמי</p>
       <h1>מה אם הכול כבר מסונכרן —<br>ואתם פשוט עוד לא רואים את זה?</h1>
       <p class="tagline">החיים זה לא צירוף מקרים.<br>זו מערכת מדויקת שפועלת מאחורי הקלעים</p>
+      <div class="mystic-elements" aria-hidden="true">
+        <span>✦</span>
+        <span>☾</span>
+        <span>✧</span>
+      </div>
     </header>
 
     <nav class="social" aria-label="רשתות חברתיות">
@@ -562,44 +733,41 @@
       </a>
     </nav>
 
+   
+
+    <div class="section-divider" aria-hidden="true">✦</div>
+
     <section class="channel-intro" aria-label="על הערוץ">
-      <p>אם הגעתם לכאן</p>
-      <p>כנראה שאתם כבר מרגישים את זה.</p>
-      <p>שיש עומק. שיש חוקיות. שיש משהו שקורה מאחורי הקלעים של החיים שלכם.</p>
-      <p>סיטואציות שחוזרות. אנשים שנכנסים בדיוק בזמן. מספרים שמופיעים שוב ושוב. תחושות בטן שלא מרפות.</p>
-      <p>זה לא מקרי. פשוט לא לימדו אותנו לקרוא את זה.</p>
+      <p class="main-copy">אתם הולכים להבין את היקום, איך הוא פועל, מה באמת באתם לעשות פה, אתם הולכים להכיר את עצמכם, להבין את עצמכם ולהבין איזה מדויקת הדרך שעברתם.</p>
       <p class="intro-divider">⸻</p>
 
-      <p class="intro-subtitle">מאחורי הקלעים של המציאות</p>
-      <p>היקום פועל לפי חוקים. מדויקים. שקטים. עקביים.</p>
-      <p>כשלא מכירים אותם — נלחמים. שואלים "למה זה קורה לי". מתנגשים בקירות.</p>
-      <p>וכשמכירים אותם — מתחילים להסתנכרן.</p>
-      <p>לא הולכים ראש בראש עם מה שקורה, אלא מבינים איך לנוע בתוכו.</p>
-      <p>והתנועה משתנה. התגובות משתנות. החיים מתחילים להתחבר.</p>
-      <p class="intro-divider">⸻</p>
+      <p class="main-copy">אתם הולכים להכיר את המדריכים הרוחניים שלכם, את החברים הכי טובים שלכם, אתם הולכים לדבר עם מלאכים, לראות קסמים ולראות ניסים, לדפוק את הראש בקיר כלכך הרבה פעמים, אתם הולכים לצרוח, אתם הולכים לבכות, אתם הולכים להתרגש ואתם הולכים להשתגע.</p>
 
-      <p class="intro-subtitle">הרגע שבו הכול התחיל להתחבר לי</p>
-      <p>ברגע שנכנסתי לעולם הזה, הדברים הפסיקו להרגיש אקראיים.</p>
-      <p>העבר קיבל משמעות. הבחירות שלי קיבלו הקשר. גם מה שכאב — היה מדויק.</p>
-      <p>לא כי הכול היה מושלם. אלא כי פתאום הבנתי את החוקיות.</p>
-      <p>וזה שינה את הדרך שבה אני חיה.</p>
-      <p>הערוץ הזה נפתח כדי להעביר את ההבנות האלה הלאה. את הדרך. את מאחורי הקלעים.</p>
-      <p class="intro-divider">⸻</p>
 
-      <p class="intro-subtitle">איך זה מתחיל</p>
-      <p>כרגע מחכים לכם כאן כמה סרטונים קצרים. הם הבסיס. היסודות. נקודת פתיחה להסתכלות אחרת.</p>
-      <p>הגישה פתוחה, ותכנים נוספים יעלו בהמשך.</p>
-      <p>זה מרחב שנבנה בהדרגה. כמו התעוררות.</p>
-      <p class="intro-divider">⸻</p>
+      <div class="welcome-highlight" aria-label="ברוך הבא לעולם שלי">
+        <span class="float float-1" aria-hidden="true">✦</span>
+        <span class="float float-2" aria-hidden="true">✧</span>
+        <span class="float float-3" aria-hidden="true">✦</span>
+        <p class="welcome-text">ברוך הבא לעולם שלי</p>
+      </div>
 
-      <p class="intro-subtitle">למי זה מתאים</p>
-      <p>למי שמרגיש שמשהו בתוכו מתעורר. למי שכבר מבין שהחיים הם לא רק מה שרואים בעיניים. למי שרוצה להפסיק להילחם במציאות — ולהתחיל להסתנכרן איתה.</p>
-      <p>לא לכולם זה ידבר. וזה בדיוק העניין.</p>
-      <p class="intro-divider">⸻</p>
+ 
+      <p class="intro-subtitle">עם מה יוצאים מהקורס?</p>
+      <p>אני מקווה שעם הרבה שאלות, סקרנות ורצון לנסות</p>
+      <p class="intro-subtitle">תוצאה סופית</p>
+      <p>בסופו של דבר, אתם תגיעו למצב שאתם סומכים על האינטואיציה שלכם</p>
+      <p>לא משנה לאן היא תקח אתכם</p>
+      <p>ואתם צוחקים עם עצמכם ברחוב</p>
+      <p>כי המלאכים והמדריכים שלכם הפכו לחברים הכי טובים שלכם</p>
 
-      
-      <p>אם משהו זז בך עכשיו — תקשיב לזה.</p>
-      <p>לא צריך להבין הכול. רק להסכים להיכנס.</p>
+      <div class="how-it-starts" aria-label="מה תקבלו בהרשמה?">
+        <h3>מה תקבלו בהרשמה?</h3>
+        <p>⭐ תוכן לשיעורים ללא הגבלת זמן ושימוש</p>
+        <p>⭐ תוכן מתעדכן שעולה בתדירות גבוהה</p>
+        <p>⭐ שעורים קצרים ומגוונים בול בשבילכם</p>
+        <p>⭐ תשלום חד פעמי לערוץ שיאיר לכם את הדרך קדימה</p>
+      </div>
+
       <form class="channel-intro-form" id="channel-entry-form">
         <div class="form-group">
           <label for="intro-name">שם</label>
@@ -619,13 +787,17 @@
           <iframe src="https://www.tiktok.com/embed/v2/7609752909256854802" allow="autoplay; fullscreen" allowfullscreen title="סרטון טיקטוק"></iframe>
         </div>
         <p class="channel-intro-cta">
-          <a href="#" id="entry-channel-btn" class="cta-link btn">כניסה לערוץ</a>
+          <a href="#" id="entry-channel-btn" class="cta-link btn">הרשמה לערוץ</a>
         </p>
       </div>
     </section>
 
     <section class="pricing-section" aria-label="מחירון">
       <h2>מחירון</h2>
+      <div class="pricing-item">
+        <span class="name">הרשמה לערוץ</span>
+        <span class="price">333 ₪</span>
+      </div>
       <div class="pricing-item">
         <span class="name">שאלה אחת</span>
         <span class="price">לא זמין כרגע</span>
