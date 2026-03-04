@@ -9,13 +9,14 @@
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700&family=Rubik:wght@300;400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-deep: #0f0a1e;
-      --bg-card: #1a1824;
-      --accent: #e6b8ff;
-      --accent-soft: e6b8ff(201, 168, 108, 0.25);
-      --text: #e8e6f3;
-      --text-muted: #a5a1c4;
-      --border: e6b8ff(201, 168, 108, 0.35);
+      --bg-deep: #b87ad4;
+      --bg-card: #79418f;
+      --accent: #5c2d7a;
+      --accent-soft: rgba(92, 45, 122, 0.25);
+      --text: #2d2438;
+      --text-muted: #4a3d5c;
+      --border: rgba(92, 45, 122, 0.4);
+      --text-on-accent: #fff;
     }
 
     * {
@@ -32,27 +33,10 @@
       overflow-x: hidden;
     }
 
-    /* רקע עדין עם גרדיאנט סגול אינדיגו */
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background: 
-        radial-gradient(ellipse 80% 50% at 50% -20%, var(--accent-soft), transparent 50%),
-        radial-gradient(ellipse 60% 40% at 80% 100%, rgba(201, 168, 108, 0.15), transparent 40%);
-      pointer-events: none;
-      z-index: 0;
-    }
-
+    /* רקע אחיד כמו בצדדים – ללא גרדיאנט במרכז */
+    body::before,
     body::after {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background:
-        radial-gradient(circle at 10% 25%, rgba(230, 184, 255, 0.12), transparent 35%),
-        radial-gradient(circle at 90% 70%, rgba(230, 184, 255, 0.1), transparent 38%);
-      pointer-events: none;
-      z-index: 0;
+      display: none;
     }
 
     .side-wand {
@@ -70,8 +54,20 @@
       pointer-events: none;
     }
 
+    .wand-mobile {
+      display: none;
+    }
+
     @media (max-width: 900px) {
       .side-wand { display: none; }
+      .wand-mobile {
+        display: block;
+        width: auto;
+        max-height: 140px;
+        margin: 0 auto 1.25rem;
+        object-fit: contain;
+        opacity: 0.85;
+      }
     }
 
     @media (max-width: 640px) {
@@ -90,20 +86,21 @@
       padding: 2rem 1.5rem 4rem;
     }
 
+    @keyframes sparkle {
+      0%, 100% { opacity: 1; filter: brightness(1); }
+      50% { opacity: 0.96; filter: brightness(1.06); }
+    }
+
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.5; transform: scale(0.98); }
+      50% { opacity: 0.85; transform: scale(1.03); }
+    }
+
     /* כותרת ראשית */
     header {
       text-align: center;
       padding: 3rem 0 2.5rem;
-    }
-
-    .header-photo {
-      width: 200px;
-      height: 200px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 3px solid var(--border);
-      margin-bottom: 1.25rem;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      position: relative;
     }
 
     .logo {
@@ -111,23 +108,82 @@
       font-weight: 600;
       font-size: 1.2rem;
       letter-spacing: 0.15em;
-      color: var(--accent);
+      color: #f0ebf8;
       margin-bottom: 2.5rem;
-      text-shadow: 0 0 24px var(--accent-soft);
+      text-shadow:
+        0 0 4px rgba(240, 235, 248, 0.9),
+        0 0 12px rgba(240, 235, 248, 0.7),
+        0 0 24px rgba(240, 235, 248, 0.5),
+        0 0 48px rgba(240, 235, 248, 0.35),
+        0 0 80px rgba(240, 235, 248, 0.2);
+      animation: sparkle 3.5s ease-in-out infinite;
+    }
+
+    .title-star {
+      display: block;
+      color: #fff;
+      font-size: 1.25rem;
+      margin: 0.6rem 0;
+      text-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
     }
 
     h1 {
       font-family: 'Rubik', sans-serif;
       font-weight: 500;
-      font-size: clamp(1.75rem, 5vw, 2.25rem);
+      font-size: clamp(1.45rem, 4.2vw, 1.9rem);
       line-height: 1.35;
       margin-bottom: 0.75rem;
+      color: #f0ebf8;
+      text-shadow:
+        0 0 6px rgba(240, 235, 248, 0.85),
+        0 0 16px rgba(240, 235, 248, 0.6),
+        0 0 32px rgba(240, 235, 248, 0.45),
+        0 0 56px rgba(240, 235, 248, 0.3),
+        0 0 96px rgba(240, 235, 248, 0.2);
+      animation: sparkle 3.2s ease-in-out infinite 0.3s;
     }
+
+    .sparkle {
+      position: absolute;
+      font-size: 0.75rem;
+      color: rgba(240, 235, 248, 0.8);
+      text-shadow: 0 0 6px rgba(240, 235, 248, 0.45);
+      pointer-events: none;
+      animation: twinkle 2.5s ease-in-out infinite;
+    }
+    .sparkle:nth-child(1) { top: 8%; left: 12%; animation-delay: 0s; }
+    .sparkle:nth-child(2) { top: 15%; right: 18%; animation-delay: 0.4s; }
+    .sparkle:nth-child(3) { top: 22%; left: 22%; animation-delay: 0.8s; }
+    .sparkle:nth-child(4) { top: 12%; right: 8%; animation-delay: 0.2s; }
+    .sparkle:nth-child(5) { top: 28%; left: 8%; animation-delay: 0.6s; }
+    .sparkle:nth-child(6) { top: 18%; right: 28%; animation-delay: 1s; }
+    .sparkle:nth-child(7) { top: 5%; left: 25%; animation-delay: 0.1s; }
+    .sparkle:nth-child(8) { top: 25%; right: 5%; animation-delay: 0.5s; }
+    .sparkle:nth-child(9) { top: 10%; right: 25%; animation-delay: 0.7s; }
+    .sparkle:nth-child(10) { top: 30%; left: 15%; animation-delay: 0.3s; }
 
     .tagline {
       font-weight: 300;
       font-size: 1rem;
       color: var(--text-muted);
+    }
+
+    .page-content {
+      text-align: center;
+      padding: 2rem 1.5rem 4rem;
+      max-width: 36rem;
+      margin: 0 auto;
+    }
+
+    .page-content p {
+      font-size: 1.15rem;
+      line-height: 1.7;
+      color: var(--text);
+      margin-bottom: 1rem;
+    }
+
+    .page-content p:last-child {
+      margin-bottom: 0;
     }
 
     .mystic-elements {
@@ -200,25 +256,36 @@
       margin-bottom: 2.5rem;
     }
 
+    /* From https://css.glass */
     .social a {
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 0.75rem;
       padding: 1rem 1.5rem;
-      color: var(--text);
+      color: rgba(255, 255, 255, 0.98);
       text-decoration: none;
       font-weight: 500;
-      background: var(--bg-card);
-      border: 2px solid var(--accent);
-      border-radius: 12px;
-      transition: background 0.2s, border-color 0.2s, transform 0.15s;
+      background: rgba(255, 255, 255, 0.39);
+      border-radius: 16px;
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+      border: 1px solid rgba(255, 255, 255, 0.43);
+      transition: background 0.2s, border-color 0.2s, transform 0.15s, box-shadow 0.2s;
     }
 
     .social a:hover {
-      background: rgba(201, 168, 108, 0.12);
-      border-color: #d4b87a;
+      background: rgba(255, 255, 255, 0.48);
+      border-color: rgba(255, 255, 255, 0.55);
+      box-shadow: 0 6px 32px rgba(0, 0, 0, 0.12);
       transform: translateY(-2px);
+    }
+
+    @supports not (backdrop-filter: blur(5px)) {
+      .social a {
+        background: rgba(255, 255, 255, 0.5);
+      }
     }
 
     .social a svg {
@@ -226,6 +293,55 @@
       height: 24px;
       fill: currentColor;
     }
+
+    .social a .link-sparkle {
+      font-size: 0.65em;
+      opacity: 0.9;
+      margin: 0 0.15em;
+      animation: twinkle 2s ease-in-out infinite;
+    }
+    .social a .link-sparkle:first-child { animation-delay: 0s; }
+    .social a .link-sparkle:last-child { animation-delay: 0.5s; }
+
+    .page-content {
+      position: relative;
+    }
+    .page-sparkle {
+      position: absolute;
+      font-size: 0.7rem;
+      color: rgba(255, 255, 255, 0.7);
+      text-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
+      pointer-events: none;
+      animation: twinkle 2.5s ease-in-out infinite;
+    }
+    .page-content .page-sparkle:nth-child(1) { top: 5%; left: 8%; animation-delay: 0s; }
+    .page-content .page-sparkle:nth-child(2) { top: 20%; right: 10%; animation-delay: 0.3s; }
+    .page-content .page-sparkle:nth-child(3) { top: 40%; left: 5%; animation-delay: 0.6s; }
+    .page-content .page-sparkle:nth-child(4) { top: 60%; right: 8%; animation-delay: 0.2s; }
+    .page-content .page-sparkle:nth-child(5) { top: 80%; left: 12%; animation-delay: 0.9s; }
+    .page-content .page-sparkle:nth-child(6) { top: 15%; right: 18%; animation-delay: 0.1s; }
+    .page-content .page-sparkle:nth-child(7) { top: 70%; left: 20%; animation-delay: 0.5s; }
+    .page-content .page-sparkle:nth-child(8) { top: 35%; right: 5%; animation-delay: 0.7s; }
+
+    .channel-intro-youtube {
+      position: relative;
+    }
+    .channel-intro-youtube .page-sparkle:nth-child(1) { top: 5%; left: 5%; animation-delay: 0s; }
+    .channel-intro-youtube .page-sparkle:nth-child(2) { top: 5%; right: 5%; animation-delay: 0.4s; }
+    .channel-intro-youtube .page-sparkle:nth-child(3) { top: 50%; left: 2%; animation-delay: 0.2s; }
+    .channel-intro-youtube .page-sparkle:nth-child(4) { top: 50%; right: 2%; animation-delay: 0.6s; }
+    .channel-intro-youtube .page-sparkle:nth-child(5) { bottom: 10%; left: 10%; top: auto; animation-delay: 0.1s; }
+    .channel-intro-youtube .page-sparkle:nth-child(6) { bottom: 10%; right: 10%; top: auto; animation-delay: 0.5s; }
+
+    .channel-intro {
+      position: relative;
+    }
+    .channel-intro .page-sparkle:nth-child(1) { top: 10%; left: 8%; animation-delay: 0s; }
+    .channel-intro .page-sparkle:nth-child(2) { top: 25%; right: 5%; animation-delay: 0.5s; }
+    .channel-intro .page-sparkle:nth-child(3) { top: 50%; left: 5%; animation-delay: 0.2s; }
+    .channel-intro .page-sparkle:nth-child(4) { top: 75%; right: 10%; animation-delay: 0.7s; }
+    .channel-intro .page-sparkle:nth-child(5) { bottom: 25%; left: 12%; top: auto; animation-delay: 0.3s; }
+    .channel-intro .page-sparkle:nth-child(6) { bottom: 15%; right: 8%; top: auto; animation-delay: 0.4s; }
 
     /* בלוק טקסט – ללא מסגרת */
     .content-block {
@@ -389,7 +505,7 @@
     .channel-intro-form .form-group input {
       width: 100%;
       padding: 0.75rem 1rem;
-      background: var(--bg-card);
+      background: #fff;
       border: 1px solid var(--border);
       border-radius: 8px;
       color: var(--text);
@@ -424,6 +540,7 @@
       margin-left: auto;
       margin-right: auto;
       max-width: 560px;
+      margin-bottom: 2.5rem;
     }
 
     .channel-intro-youtube iframe {
@@ -459,13 +576,13 @@
 
     .channel-intro .cta-link.btn {
       background: var(--accent);
-      color: var(--bg-deep);
+      color: var(--text-on-accent);
       border-color: var(--accent);
     }
 
     .channel-intro .cta-link.btn:hover {
       background: #d4b87a;
-      color: var(--bg-deep);
+      color: #2d2438;
       border-color: #d4b87a;
     }
 
@@ -659,7 +776,7 @@
       background: var(--accent);
       border: none;
       border-radius: 8px;
-      color: var(--bg-deep);
+      color: var(--text-on-accent);
       font-family: inherit;
       font-weight: 600;
       font-size: 1rem;
@@ -669,6 +786,7 @@
 
     button[type="submit"]:hover {
       background: #d4b87a;
+      color: #2d2438;
       transform: translateY(-1px);
     }
 
@@ -714,16 +832,29 @@
   <img src="https://imagescdn2.ravpages.co.il/xsite_resources/user_content/79/6b/c7/c7/796bc7c76b31089a6c1177d8ff50e23a/images/c53d9e595b9a54efc0501439bfd72a9a.jpg?editor&maxWidth=1400&rxc=1705555703" alt="" class="side-wand" width="120" height="400">
   <div class="container">
     <header>
-      <img src="https://images.ravpages.co.il/xsite_resources/user_content/79/6b/c7/c7/796bc7c76b31089a6c1177d8ff50e23a/images/f3f4aa5e9345264effc1c321fdff07e1.jpg?editor" alt="נעמי" class="header-photo" width="200" height="200">
-      <p class="logo">נעמי</p>
-      <h1>מה אם הכול כבר מסונכרן —<br>ואתם פשוט עוד לא רואים את זה?</h1>
-      <p class="tagline">החיים זה לא צירוף מקרים.<br>זו מערכת מדויקת שפועלת מאחורי הקלעים</p>
-      <div class="mystic-elements" aria-hidden="true">
-        <span>✦</span>
-        <span>☾</span>
-        <span>✧</span>
-      </div>
+      <img src="https://imagescdn2.ravpages.co.il/xsite_resources/user_content/79/6b/c7/c7/796bc7c76b31089a6c1177d8ff50e23a/images/c53d9e595b9a54efc0501439bfd72a9a.jpg?editor&maxWidth=1400&rxc=1705555703" alt="שרביט" class="wand-mobile" width="80" height="140">
+      <span class="sparkle" aria-hidden="true">✦</span>
+      <span class="sparkle" aria-hidden="true">✧</span>
+      <span class="sparkle" aria-hidden="true">⋆</span>
+      <span class="sparkle" aria-hidden="true">✦</span>
+      <span class="sparkle" aria-hidden="true">✧</span>
+      <span class="sparkle" aria-hidden="true">⋆</span>
+      <span class="sparkle" aria-hidden="true">✦</span>
+      <span class="sparkle" aria-hidden="true">✧</span>
+      <span class="sparkle" aria-hidden="true">⋆</span>
+      <span class="sparkle" aria-hidden="true">✦</span>
+      <h1>אני לא הולכת להשתמש בטריקים פסיכולוגיים כדי לגרום לך לקנות.<br><span class="title-star">★</span><br>אלוהים רוצה לדבר איתך.<br><span class="title-star">★</span><br>הנשמה שלך צורחת שזה אמת?<br>בוא/י<br><span class="title-star">★</span><br>יש בך התנגדות?<br>זה עוד לא הזמן שלך.<br>כזה פשוט</h1>
     </header>
+
+    <div class="channel-intro-youtube">
+      <span class="page-sparkle" aria-hidden="true">✦</span>
+      <span class="page-sparkle" aria-hidden="true">✧</span>
+      <span class="page-sparkle" aria-hidden="true">⋆</span>
+      <span class="page-sparkle" aria-hidden="true">✦</span>
+      <span class="page-sparkle" aria-hidden="true">✧</span>
+      <span class="page-sparkle" aria-hidden="true">⋆</span>
+      <iframe width="560" height="315" src="https://www.youtube.com/embed/a5ld0nHCs8Y?autoplay=1&mute=1" title="YouTube video" frameborder="0" allowfullscreen></iframe>
+    </div>
 
     <nav class="social" aria-label="רשתות חברתיות">
       <a href="https://www.tiktok.com/@itslolet3?_r=1&_t=ZS-94BiaUPDDxl" target="_blank" rel="noopener noreferrer">
@@ -736,38 +867,24 @@
       </a>
     </nav>
 
-    <div class="channel-intro-youtube">
-      <iframe width="560" height="315" src="https://www.youtube.com/embed/a5ld0nHCs8Y?autoplay=1&mute=1" frameborder="0" allowfullscreen></iframe>
-    </div>
+    <main class="page-content" aria-hidden="true">
+      <span class="page-sparkle" aria-hidden="true">✦</span>
+      <span class="page-sparkle" aria-hidden="true">✧</span>
+      <span class="page-sparkle" aria-hidden="true">⋆</span>
+      <span class="page-sparkle" aria-hidden="true">✦</span>
+      <span class="page-sparkle" aria-hidden="true">✧</span>
+      <span class="page-sparkle" aria-hidden="true">⋆</span>
+      <span class="page-sparkle" aria-hidden="true">✦</span>
+      <span class="page-sparkle" aria-hidden="true">✧</span>
+    </main>
 
-    <div class="section-divider" aria-hidden="true">✦</div>
-
-    <section class="channel-intro" aria-label="על הערוץ">
-      <p class="main-copy">אתם הולכים להבין את היקום, איך הוא פועל, מה באמת באתם לעשות פה, אתם הולכים להכיר את עצמכם, להבין את עצמכם ולהבין איזה מדויקת הדרך שעברתם.</p>
-      <p class="intro-divider">⸻</p>
-
-      <p class="main-copy">אתם הולכים להכיר את המדריכים הרוחניים שלכם, את החברים הכי טובים שלכם, אתם הולכים לדבר עם מלאכים, לראות קסמים ולראות ניסים, לדפוק את הראש בקיר כלכך הרבה פעמים, אתם הולכים לצרוח, אתם הולכים לבכות, אתם הולכים להתרגש ואתם הולכים להשתגע.</p>
-
-
-      <div class="welcome-highlight" aria-label="ברוך הבא לעולם שלי">
-        <span class="float float-1" aria-hidden="true">✦</span>
-        <span class="float float-2" aria-hidden="true">✧</span>
-        <span class="float float-3" aria-hidden="true">✦</span>
-        <p class="welcome-text">ברוך הבא לעולם שלי</p>
-      </div>
-      <p class="intro-subtitle">תוצאה סופית</p>
-      <p>בסופו של דבר, אתם תגיעו למצב שאתם סומכים על האינטואיציה שלכם</p>
-      <p>לא משנה לאן היא תקח אתכם</p>
-      <p>תיצרו לכם את חיי החלומות שלכם</p> 
-      <p>החלומות האמיתיים שלכם</p> 
-      <p>החלומות של הנשמה שלכם</p> 
-      <p>הייעוד שלשמו הגעתם לפה</p>
-      <div class="how-it-starts" aria-label="מה תקבלו בהרשמה?">
-        <h3>מה תקבלו בהרשמה?</h3>
-        <p>⭐ גישה פתוחה לכל סודות הייקום</p>
-        <p>⭐ תשלום חד פעמי התוכן ממשיך לעלות</p>
-      </div>
-
+    <section class="channel-intro" aria-label="הרשמה">
+      <span class="page-sparkle" aria-hidden="true">✦</span>
+      <span class="page-sparkle" aria-hidden="true">✧</span>
+      <span class="page-sparkle" aria-hidden="true">⋆</span>
+      <span class="page-sparkle" aria-hidden="true">✦</span>
+      <span class="page-sparkle" aria-hidden="true">✧</span>
+      <span class="page-sparkle" aria-hidden="true">⋆</span>
       <form class="channel-intro-form" id="channel-entry-form">
         <div class="form-group">
           <label for="intro-name">שם</label>
@@ -788,26 +905,6 @@
         </p>
       </div>
     </section>
-
-    <section class="pricing-section" aria-label="מחירון">
-      <h2>מחירון</h2>
-      <div class="pricing-item">
-        <span class="name">הרשמה לערוץ</span>
-        <span class="price">444 ₪</span>
-      </div>
-      <div class="pricing-item">
-        <span class="name">שאלה אחת</span>
-        <span class="price">לא זמין כרגע</span>
-      </div>
-      <div class="pricing-item">
-        <span class="name">פגישה אישית</span>
-        <span class="price">לא זמין כרגע</span>
-      </div>
-    </section>
-
-    <footer>
-      <p>© כל הזכויות שמורות ל <a href="https://rahellyg.github.io/busipro/" target="_blank" rel="noopener noreferrer">ביזנס פרו</a></p>
-    </footer>
   </div>
 
   <script>
@@ -834,7 +931,6 @@
   </script>
 </body>
 </html>
-
 
 
 
