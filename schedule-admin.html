@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ניהול זמינות פגישות | פרטי</title>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700&family=Rubik:wght@500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #b87ad4;
+      --card: #79418f;
+      --accent: #5c2d7a;
+      --text: #2d2438;
+      --muted: #4a3d5c;
+      --white-glass: rgba(255, 255, 255, 0.39);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Heebo', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 1.5rem;
+    }
+    .wrap { max-width: 560px; margin: 0 auto; }
+    h1 {
+      font-family: 'Rubik', sans-serif;
+      font-size: 1.35rem;
+      color: var(--accent);
+      margin-bottom: 0.35rem;
+      text-align: center;
+    }
+    .sub {
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 1.5rem;
+      line-height: 1.5;
+    }
+    .card {
+      background: var(--white-glass);
+      backdrop-filter: blur(5px);
+      border: 1px solid rgba(255, 255, 255, 0.43);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    .card h2 {
+      font-size: 1rem;
+      margin-bottom: 0.75rem;
+      color: var(--accent);
+    }
+    label { display: block; font-size: 0.88rem; margin-bottom: 0.35rem; color: var(--muted); }
+    input[type="password"], input[type="number"], input[type="time"], textarea {
+      width: 100%;
+      padding: 0.65rem 0.75rem;
+      border-radius: 8px;
+      border: 1px solid rgba(92, 45, 122, 0.35);
+      font-family: inherit;
+      margin-bottom: 0.75rem;
+    }
+    textarea { min-height: 72px; resize: vertical; }
+    .row2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+    @media (max-width: 400px) { .row2 { grid-template-columns: 1fr; } }
+    button {
+      width: 100%;
+      padding: 0.85rem;
+      border: none;
+      border-radius: 10px;
+      font-family: inherit;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      margin-top: 0.35rem;
+    }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-secondary { background: rgba(255,255,255,0.5); color: var(--accent); margin-top: 0.5rem; }
+    .btn-file { margin-top: 0.5rem; }
+    .msg { margin-top: 0.75rem; padding: 0.6rem; border-radius: 8px; font-size: 0.88rem; text-align: center; display: none; }
+    .msg.ok { display: block; background: rgba(76, 175, 80, 0.2); color: #1b5e20; }
+    .msg.err { display: block; background: rgba(244, 67, 54, 0.15); color: #b71c1c; }
+    #login-gate { margin-top: 2rem; }
+    #admin-panel[hidden] { display: none !important; }
+    .warn {
+      background: rgba(255, 193, 7, 0.2);
+      border: 1px solid rgba(255, 152, 0, 0.4);
+      border-radius: 10px;
+      padding: 0.75rem;
+      font-size: 0.82rem;
+      margin-bottom: 1rem;
+      line-height: 1.5;
+    }
+    .cal-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      margin-bottom: 0.65rem;
+    }
+    .cal-nav h3 {
+      font-size: 1rem;
+      color: var(--accent);
+      font-weight: 600;
+      margin: 0;
+      flex: 1;
+      text-align: center;
+    }
+    .cal-nav button {
+      width: auto;
+      min-width: 2.5rem;
+      padding: 0.45rem 0.65rem;
+      margin: 0;
+      font-size: 0.85rem;
+      background: rgba(255,255,255,0.55);
+      color: var(--accent);
+    }
+    .cal-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.65rem;
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-bottom: 0.5rem;
+    }
+    .cal-legend span { display: inline-flex; align-items: center; gap: 0.25rem; }
+    .cal-legend i {
+      display: inline-block;
+      width: 0.75rem;
+      height: 0.75rem;
+      border-radius: 3px;
+      border: 1px solid rgba(92, 45, 122, 0.25);
+    }
+    .cal-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+      direction: rtl;
+      user-select: none;
+    }
+    .cal-head {
+      text-align: center;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--muted);
+      padding: 0.25rem 0;
+    }
+    .cal-cell {
+      aspect-ratio: 1;
+      max-height: 2.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      border-radius: 8px;
+      border: 1px solid rgba(92, 45, 122, 0.2);
+      background: rgba(255,255,255,0.35);
+      cursor: default;
+      transition: transform 0.12s, box-shadow 0.12s;
+    }
+    .cal-cell.empty { visibility: hidden; pointer-events: none; border: none; background: transparent; }
+    .cal-cell.past {
+      opacity: 0.38;
+      pointer-events: none;
+    }
+    .cal-cell.available {
+      background: rgba(129, 199, 132, 0.45);
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .cal-cell.available:hover {
+      transform: scale(1.04);
+      box-shadow: 0 2px 8px rgba(92, 45, 122, 0.2);
+    }
+    .cal-cell.blocked {
+      background: rgba(239, 154, 154, 0.55);
+      cursor: pointer;
+      text-decoration: line-through;
+      font-weight: 600;
+    }
+    .cal-cell.blocked:hover {
+      transform: scale(1.04);
+      box-shadow: 0 2px 8px rgba(183, 28, 28, 0.15);
+    }
+    .cal-hint {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-top: 0.65rem;
+      line-height: 1.45;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>ניהול זמינות לפגישות</h1>
+    <p class="sub">דף פרטי – אל תשתפי קישור. אחרי שמירה: ייצאי קובץ והעליתי ליד <code>index.html</code> בשם <strong>naomi-availability.json</strong></p>
+
+    <div id="login-gate" class="card">
+      <h2>כניסה</h2>
+      <label for="admin-pass">סיסמה</label>
+      <input type="password" id="admin-pass" autocomplete="current-password" placeholder="הסיסמה שהגדרת בקוד">
+      <button type="button" class="btn-primary" id="btn-login">כניסה לניהול</button>
+      <p class="msg err" id="login-err"></p>
+    </div>
+
+    <div id="admin-panel" hidden>
+      <div class="warn">
+        <strong>חשוב:</strong> הגדרות נשמרות גם בדפדפן הזה. כדי שהאתר הציבורי יציג את אותן חלונות – לחצי <strong>ייצוא לקובץ</strong> ושמרי את <code>naomi-availability.json</code> באותה תיקייה כמו <code>index.html</code> (באחסון / GitHub Pages).
+      </div>
+
+      <div class="card">
+        <h2>יומן זמינות</h2>
+        <p style="font-size:0.82rem;color:var(--muted);margin-bottom:0.65rem;">כל הימים <strong>פתוחים</strong> כברירת מחדל. <strong>לחיצה</strong> על תאריך עתידי = סוגרת אותו לקביעות (אדום). לחיצה שוב = פותחת. השעות והמרווח מוגדרים בכרטיס „שעות” למטה.</p>
+        <div class="cal-legend">
+          <span><i style="background:rgba(129,199,132,0.45);"></i> פתוח לקביעה</span>
+          <span><i style="background:rgba(239,154,154,0.55);"></i> חסום</span>
+        </div>
+        <div class="cal-nav">
+          <button type="button" class="btn-cal-prev" aria-label="חודש קודם">›</button>
+          <h3 id="cal-title"></h3>
+          <button type="button" class="btn-cal-next" aria-label="חודש הבא">‹</button>
+        </div>
+        <div class="cal-grid" id="cal-grid"></div>
+        <p class="cal-hint">חודשים שעברו באפור. בסוף: <strong>שמירה + ייצוא</strong> והעלאת <code>naomi-availability.json</code> ליד האתר.</p>
+      </div>
+
+      <textarea id="blocked" hidden aria-hidden="true"></textarea>
+
+      <div class="card">
+        <h2>שעות</h2>
+        <p style="font-size:0.82rem;color:var(--muted);margin-bottom:0.75rem;">שעת התחלה ושעת סיום כוללות <strong>דקות</strong> (למשל 09:30–18:45). סוף החלון = המועד האחרון שבו פגישה יכולה <strong>להסתיים</strong>.</p>
+        <div class="row2">
+          <div>
+            <label for="start-time">שעת התחלה</label>
+            <input type="time" id="start-time" value="09:00" step="60">
+          </div>
+          <div>
+            <label for="end-time">שעת סיום (סוף חלון)</label>
+            <input type="time" id="end-time" value="18:00" step="60">
+          </div>
+        </div>
+        <label for="slot-min">מרווח בין תחילות פגישות (דקות)</label>
+        <input type="number" id="slot-min" min="5" max="120" step="5" value="30">
+        <label for="meet-len">אורך פגישה (דקות)</label>
+        <input type="number" id="meet-len" min="30" max="180" step="15" value="45">
+      </div>
+
+      <div class="card">
+        <button type="button" class="btn-primary" id="btn-save">שמירה בדפדפן + הורדת naomi-availability.json</button>
+        <button type="button" class="btn-secondary" id="btn-export">ייצוא לקובץ בלבד</button>
+        <label class="btn-file" style="margin-top:0.75rem;display:block;">
+          <span style="font-size:0.85rem;color:var(--muted);">ייבוא מקובץ קיים</span>
+          <input type="file" id="import-file" accept=".json,application/json" style="margin-top:0.35rem;width:100%;">
+        </label>
+        <p class="msg" id="save-msg"></p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /**
+     * שינוי כאן – סיסמה לדף הניהול בלבד (אל תשתפי).
+     */
+    var ADMIN_PASSWORD = '123456';
+
+    var STORAGE_KEY = 'naomi_meeting_availability';
+    /** כל ימי השבוע – הניהול הוא רק דרך לוח השנה (חסימות). */
+    var DAYS_OPEN_ALL = [0, 1, 2, 3, 4, 5, 6];
+    var MONTH_NAMES_HE = [
+      'ינואר', 'פברואר', 'מרץ', 'אפריל', 'מאי', 'יוני',
+      'יולי', 'אוגוסט', 'ספטמבר', 'אוקטובר', 'נובמבר', 'דצמבר'
+    ];
+    var CAL_WEEK_SHORT = ['א׳', 'ב׳', 'ג׳', 'ד׳', 'ה׳', 'ו׳', 'ש׳'];
+
+    var calViewYear;
+    var calViewMonth;
+
+    function pad2(n) {
+      return n < 10 ? '0' + n : '' + n;
+    }
+
+    function dateKeyFromParts(y, mo, d) {
+      return y + '-' + pad2(mo + 1) + '-' + pad2(d);
+    }
+
+    function getBlockedFromTextarea() {
+      return (document.getElementById('blocked').value || '')
+        .split(/\r?\n/)
+        .map(function(l) { return l.trim(); })
+        .filter(function(l) { return /^\d{4}-\d{2}-\d{2}$/.test(l); });
+    }
+
+    function setBlockedTextarea(arr) {
+      var u = {};
+      arr.forEach(function(x) { u[x] = true; });
+      var sorted = Object.keys(u).sort();
+      document.getElementById('blocked').value = sorted.join('\n');
+    }
+
+    function todayKey() {
+      var t = new Date();
+      return dateKeyFromParts(t.getFullYear(), t.getMonth(), t.getDate());
+    }
+
+    function renderMonthCalendar() {
+      var grid = document.getElementById('cal-grid');
+      var title = document.getElementById('cal-title');
+      if (!grid || !title) return;
+      var y = calViewYear;
+      var m = calViewMonth;
+      title.textContent = MONTH_NAMES_HE[m] + ' ' + y;
+
+      var blocked = getBlockedFromTextarea();
+      var blockedSet = {};
+      blocked.forEach(function(b) { blockedSet[b] = true; });
+
+      var today = todayKey();
+
+      grid.innerHTML = '';
+      for (var c = 0; c < 7; c++) {
+        var h = document.createElement('div');
+        h.className = 'cal-head';
+        h.textContent = CAL_WEEK_SHORT[c];
+        grid.appendChild(h);
+      }
+
+      var firstWd = new Date(y, m, 1).getDay();
+      var dim = new Date(y, m + 1, 0).getDate();
+
+      for (var pad = 0; pad < firstWd; pad++) {
+        var e = document.createElement('div');
+        e.className = 'cal-cell empty';
+        grid.appendChild(e);
+      }
+
+      for (var day = 1; day <= dim; day++) {
+        var key = dateKeyFromParts(y, m, day);
+        var cell = document.createElement('div');
+        cell.className = 'cal-cell';
+        cell.textContent = day;
+        cell.setAttribute('data-date', key);
+
+        if (key < today) {
+          cell.classList.add('past');
+        } else if (blockedSet[key]) {
+          cell.classList.add('blocked');
+          cell.title = 'לחצי לפתיחת היום לקביעות';
+          cell.addEventListener('click', onCalCellClick);
+        } else {
+          cell.classList.add('available');
+          cell.title = 'לחצי לסגירת היום לקביעות';
+          cell.addEventListener('click', onCalCellClick);
+        }
+        grid.appendChild(cell);
+      }
+    }
+
+    function onCalCellClick() {
+      var key = this.getAttribute('data-date');
+      if (!key || key < todayKey()) return;
+
+      var arr = getBlockedFromTextarea().slice();
+      var i = arr.indexOf(key);
+      if (i === -1) {
+        arr.push(key);
+      } else {
+        arr.splice(i, 1);
+      }
+      setBlockedTextarea(arr);
+      renderMonthCalendar();
+    }
+
+    function calInitNav() {
+      var t = new Date();
+      calViewYear = t.getFullYear();
+      calViewMonth = t.getMonth();
+    }
+
+    function bindCalendarNav() {
+      document.querySelector('.btn-cal-prev').addEventListener('click', function() {
+        calViewMonth--;
+        if (calViewMonth < 0) {
+          calViewMonth = 11;
+          calViewYear--;
+        }
+        renderMonthCalendar();
+      });
+      document.querySelector('.btn-cal-next').addEventListener('click', function() {
+        calViewMonth++;
+        if (calViewMonth > 11) {
+          calViewMonth = 0;
+          calViewYear++;
+        }
+        renderMonthCalendar();
+      });
+    }
+
+    function parseTimeField(id, fallbackH, fallbackM) {
+      var el = document.getElementById(id);
+      var s = el && el.value ? String(el.value).trim() : '';
+      var m = s.match(/^(\d{1,2}):(\d{2})(?::\d{2})?$/);
+      if (!m) return { h: fallbackH, min: fallbackM };
+      var h = Math.max(0, Math.min(23, parseInt(m[1], 10) || 0));
+      var min = Math.max(0, Math.min(59, parseInt(m[2], 10) || 0));
+      return { h: h, min: min };
+    }
+
+    function defaultConfig() {
+      return {
+        version: 1,
+        daysOpen: DAYS_OPEN_ALL.slice(),
+        startHour: 9,
+        startMinute: 0,
+        endHour: 18,
+        endMinute: 0,
+        slotMinutes: 30,
+        meetingDurationMinutes: 45,
+        blockedDates: [],
+        onlyOpenDates: []
+      };
+    }
+
+    function parseDateLinesTextarea(id) {
+      return (document.getElementById(id).value || '')
+        .split(/\r?\n/)
+        .map(function(l) { return l.trim(); })
+        .filter(function(l) { return /^\d{4}-\d{2}-\d{2}$/.test(l); });
+    }
+
+    function loadFromStorage() {
+      try {
+        var s = localStorage.getItem(STORAGE_KEY);
+        if (s) return JSON.parse(s);
+      } catch (e) {}
+      return defaultConfig();
+    }
+
+    function saveToStorage(cfg) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(cfg, null, 0));
+    }
+
+    function exportJson(cfg) {
+      var blob = new Blob([JSON.stringify(cfg, null, 2)], { type: 'application/json;charset=utf-8' });
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'naomi-availability.json';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+
+    function formToConfig() {
+      var blocked = parseDateLinesTextarea('blocked');
+      var st = parseTimeField('start-time', 9, 0);
+      var et = parseTimeField('end-time', 18, 0);
+      return {
+        version: 1,
+        daysOpen: DAYS_OPEN_ALL.slice(),
+        startHour: st.h,
+        startMinute: st.min,
+        endHour: et.h,
+        endMinute: et.min,
+        slotMinutes: Math.max(5, parseInt(document.getElementById('slot-min').value, 10) || 30),
+        meetingDurationMinutes: Math.max(15, parseInt(document.getElementById('meet-len').value, 10) || 45),
+        blockedDates: blocked,
+        onlyOpenDates: []
+      };
+    }
+
+    function configToForm(cfg) {
+      cfg = cfg || defaultConfig();
+      var sh = cfg.startHour != null ? cfg.startHour : 9;
+      var sm = cfg.startMinute != null ? cfg.startMinute : 0;
+      var eh = cfg.endHour != null ? cfg.endHour : 18;
+      var em = cfg.endMinute != null ? cfg.endMinute : 0;
+      if (eh === 24 && (cfg.endMinute == null || cfg.endMinute === 0)) {
+        eh = 23;
+        em = 59;
+      }
+      document.getElementById('start-time').value = pad2(sh) + ':' + pad2(sm);
+      document.getElementById('end-time').value = pad2(eh) + ':' + pad2(em);
+      document.getElementById('slot-min').value = cfg.slotMinutes || 30;
+        document.getElementById('meet-len').value = cfg.meetingDurationMinutes || 45;
+      document.getElementById('blocked').value = (cfg.blockedDates || []).join('\n');
+      if (typeof calViewYear === 'number') renderMonthCalendar();
+    }
+
+    function showSaveMsg(text, ok) {
+      var el = document.getElementById('save-msg');
+      el.textContent = text;
+      el.className = 'msg ' + (ok ? 'ok' : 'err');
+    }
+
+    document.getElementById('blocked').addEventListener('input', function() {
+      if (typeof calViewYear === 'number') renderMonthCalendar();
+    });
+
+    calInitNav();
+    bindCalendarNav();
+
+    document.getElementById('btn-login').addEventListener('click', function() {
+      var pass = (document.getElementById('admin-pass').value || '').trim();
+      var err = document.getElementById('login-err');
+      if (pass !== ADMIN_PASSWORD) {
+        err.textContent = 'סיסמה שגויה';
+        err.style.display = 'block';
+        err.className = 'msg err';
+        return;
+      }
+      err.style.display = 'none';
+      document.getElementById('login-gate').hidden = true;
+      document.getElementById('admin-panel').hidden = false;
+      configToForm(loadFromStorage());
+      calInitNav();
+      renderMonthCalendar();
+    });
+
+    document.getElementById('btn-save').addEventListener('click', function() {
+      var cfg = formToConfig();
+      var openStart = cfg.startHour * 60 + (cfg.startMinute || 0);
+      var openEnd = cfg.endHour * 60 + (cfg.endMinute || 0);
+      if (cfg.endHour === 24 && (cfg.endMinute == null || cfg.endMinute === 0)) {
+        openEnd = 24 * 60;
+      }
+      if (openStart >= openEnd) {
+        showSaveMsg('שעת התחלה חייבת להיות לפני שעת הסיום', false);
+        return;
+      }
+      saveToStorage(cfg);
+      exportJson(cfg);
+      showSaveMsg('נשמר והקובץ ירד. העליתי את naomi-availability.json ליד index.html. אם פותחים את index מהדיסק: הדביקי את אותו JSON גם לתג naomi-availability-embed ב-index.html.', true);
+    });
+
+    document.getElementById('btn-export').addEventListener('click', function() {
+      var cfg = formToConfig();
+      exportJson(cfg);
+      showSaveMsg('הקובץ ירד.', true);
+    });
+
+    document.getElementById('import-file').addEventListener('change', function(e) {
+      var f = e.target.files && e.target.files[0];
+      if (!f) return;
+      var reader = new FileReader();
+      reader.onload = function() {
+        try {
+          var cfg = JSON.parse(reader.result);
+          cfg.daysOpen = DAYS_OPEN_ALL.slice();
+          if (cfg.onlyOpenDates && cfg.onlyOpenDates.length) {
+            cfg.onlyOpenDates = [];
+            showSaveMsg('ייבוא בוצע. רשימת onlyOpenDates הוסרה – הניהול הוא דרך הלוח בלבד. שמרי מחדש לייצוא.', true);
+          } else {
+            showSaveMsg('ייבוא הצליח ונשמר בדפדפן', true);
+          }
+          if (!cfg.blockedDates) cfg.blockedDates = [];
+          configToForm(cfg);
+          saveToStorage(cfg);
+        } catch (err) {
+          showSaveMsg('קובץ לא תקין', false);
+        }
+      };
+      reader.readAsText(f);
+      e.target.value = '';
+    });
+  </script>
+</body>
+</html>

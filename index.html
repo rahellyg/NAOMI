@@ -802,6 +802,117 @@
       white-space: nowrap;
     }
 
+    .booking-section {
+      max-width: 480px;
+      margin: 0 auto 2rem;
+      padding: 1.5rem 1.25rem 2rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      text-align: right;
+    }
+
+    .booking-section h2 {
+      font-family: 'Rubik', sans-serif;
+      font-weight: 500;
+      font-size: 1.25rem;
+      color: var(--accent);
+      margin-bottom: 0.5rem;
+      text-align: center;
+    }
+
+    .booking-section .booking-note {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+      margin-bottom: 1.25rem;
+      text-align: center;
+    }
+
+    .booking-section .booking-questionnaire-title {
+      font-family: 'Rubik', sans-serif;
+      font-weight: 600;
+      font-size: 1rem;
+      color: var(--text);
+      margin-bottom: 0.75rem;
+      text-align: right;
+    }
+
+    .booking-section .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+
+    @media (max-width: 520px) {
+      .booking-section .form-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .booking-section input[type="date"],
+    .booking-section input[type="time"],
+    .booking-section input[type="tel"],
+    .booking-section input[type="text"] {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 1rem;
+      background: #fff;
+      color: var(--text);
+    }
+
+    .booking-section button[type="submit"] {
+      width: 100%;
+      margin-top: 0.5rem;
+      padding: 0.9rem 1rem;
+      background: var(--accent);
+      color: var(--text-on-accent);
+      border: none;
+      border-radius: 8px;
+      font-family: inherit;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    .booking-section button[type="submit"]:hover {
+      filter: brightness(1.08);
+    }
+
+    .booking-section .booking-secondary {
+      margin-top: 0.75rem;
+      text-align: center;
+    }
+
+    .booking-section .booking-secondary a {
+      color: var(--accent);
+      font-size: 0.9rem;
+    }
+
+    .booking-msg {
+      margin-top: 0.75rem;
+      padding: 0.65rem;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      text-align: center;
+      display: none;
+    }
+
+    .booking-msg.ok {
+      display: block;
+      background: rgba(76, 175, 80, 0.15);
+      color: #2e7d32;
+    }
+
+    .booking-msg.err {
+      display: block;
+      background: rgba(244, 67, 54, 0.12);
+      color: #c62828;
+    }
+
     /* טופס – נשאר במרובע */
     .form-section {
       max-width: 480px;
@@ -917,9 +1028,120 @@
     footer a:hover {
       text-decoration: underline;
     }
+
+    /* גישה לדף – קוד כניסה (הגדרה בסקריפט בתחתית) */
+    .access-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      background: rgba(92, 45, 122, 0.92);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+
+    .access-overlay[hidden] {
+      display: none !important;
+    }
+
+    .access-box {
+      width: 100%;
+      max-width: 380px;
+      padding: 1.75rem 1.5rem;
+      background: rgba(255, 255, 255, 0.39);
+      border-radius: 16px;
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.15);
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+      border: 1px solid rgba(255, 255, 255, 0.43);
+      text-align: center;
+    }
+
+    .access-box h2 {
+      font-family: 'Rubik', sans-serif;
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 0.5rem;
+    }
+
+    .access-box p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+    }
+
+    .access-box input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 1rem;
+      margin-bottom: 0.75rem;
+      text-align: center;
+    }
+
+    .access-box button {
+      width: 100%;
+      padding: 0.85rem 1rem;
+      background: var(--accent);
+      color: var(--text-on-accent);
+      border: none;
+      border-radius: 8px;
+      font-family: inherit;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    .access-box button:hover {
+      filter: brightness(1.08);
+    }
+
+    .access-box .access-error {
+      color: #c62828;
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+      min-height: 1.2em;
+    }
+
+    body.access-locked .site-content {
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
   </style>
 </head>
 <body>
+  <div id="access-overlay" class="access-overlay" hidden>
+    <div class="access-box" role="dialog" aria-labelledby="access-title" aria-modal="true">
+      <h2 id="access-title">גישה לדף</h2>
+      <p>הזינו את קוד הגישה שקיבלתם</p>
+      <form id="access-form" novalidate>
+        <label class="visually-hidden" for="access-code-input">קוד גישה</label>
+        <input type="password" id="access-code-input" name="accesscode" autocomplete="current-password" placeholder="קוד גישה" required>
+        <button type="submit">כניסה</button>
+        <p class="access-error" id="access-error" aria-live="polite"></p>
+      </form>
+    </div>
+  </div>
+
+  <div class="site-content">
   <img src="https://imagescdn2.ravpages.co.il/xsite_resources/user_content/79/6b/c7/c7/796bc7c76b31089a6c1177d8ff50e23a/images/c53d9e595b9a54efc0501439bfd72a9a.jpg?editor&maxWidth=1400&rxc=1705555703" alt="" class="side-wand" width="120" height="400">
   <div class="container">
     <div class="title-video-row">
@@ -990,6 +1212,56 @@
       </section>
     </div>
 
+    <section class="pricing-section" aria-label="מחירון">
+      <h2>מחירון</h2>
+      <div class="pricing-item">
+        <span class="name">רישום לערוץ</span>
+        <span class="price">222 ₪</span>
+      </div>
+      <div class="pricing-item">
+        <span class="name">פגישה דרך הזום</span>
+        <span class="price">400 ₪</span>
+      </div>
+      <div class="pricing-item">
+        <span class="name">שאלה</span>
+        <span class="price">111 ₪</span>
+      </div>
+    </section>
+
+    <section class="booking-section" id="booking-meeting" aria-label="קביעת פגישה">
+      <h2>קביעת פגישת זום</h2>
+      <p class="booking-note">בחרו תאריך פגישה ושעת פגישה. אחרי האישור יורד קובץ ליומן – <strong>שעה לפני הפגישה</strong> היומן יציג את ההודעה המלאה (כולל קישור זום) בתזכורת. שליחת וואטסאפ אוטומטית בזמן אמת דורשת שירות נפרד.</p>
+      <p class="booking-note" id="booking-availability-hint" style="margin-top:-0.75rem;font-size:0.78rem;opacity:0.95;"></p>
+      <form id="booking-form" novalidate>
+        <p class="booking-questionnaire-title">שאלון</p>
+        <div class="form-group">
+          <label for="booking-name">שם מלא <span aria-hidden="true">*</span></label>
+          <input type="text" id="booking-name" name="bookingName" placeholder="שם פרטי ומשפחה" required autocomplete="name">
+        </div>
+        <div class="form-group">
+          <label for="booking-birthdate">תאריך לידה <span aria-hidden="true">*</span></label>
+          <input type="date" id="booking-birthdate" name="bookingBirthdate" required autocomplete="bday" aria-label="תאריך לידה">
+        </div>
+        <div class="form-group">
+          <label for="booking-phone">טלפון (לוואטסאפ) <span aria-hidden="true">*</span></label>
+          <input type="tel" id="booking-phone" name="bookingPhone" placeholder="050-1234567" required autocomplete="tel">
+        </div>
+        <div class="form-row">
+          <div class="form-group" style="margin-bottom: 0.75rem;">
+            <label for="booking-date">תאריך פגישה: <span aria-hidden="true">*</span></label>
+            <input type="date" id="booking-date" name="bookingDate" required>
+          </div>
+          <div class="form-group" style="margin-bottom: 0.75rem;">
+            <label for="booking-time">שעת פגישה: <span aria-hidden="true">*</span></label>
+            <input type="time" id="booking-time" name="bookingTime" required>
+          </div>
+        </div>
+        <button type="submit">אישור – הורדה ליומן + פתיחת וואטסאפ</button>
+        <p class="booking-msg" id="booking-msg" role="status"></p>
+        <p class="booking-secondary"><a href="#" id="booking-ics-only">רק הורדת קובץ יומן (בלי וואטסאפ)</a></p>
+      </form>
+    </section>
+
     <main class="page-content" aria-hidden="true">
       <span class="page-sparkle" aria-hidden="true">✦</span>
       <span class="page-sparkle" aria-hidden="true">✧</span>
@@ -1001,6 +1273,72 @@
       <span class="page-sparkle" aria-hidden="true">✧</span>
     </main>
   </div>
+  </div>
+
+  <script>
+    /**
+     * הגדרת גישה לדף:
+     * PAGE_ACCESS_CODE – ריק ('') = הדף פתוח לכולם.
+     * מחרוזת (למשל 'הקודשלי') = חובה להזין את הקוד כדי לראות את הדף.
+     * ACCESS_REMEMBER_DAYS – כמה ימים לזכור גישה בדפדפן (אחרי כניסה מוצלחת).
+     */
+    (function() {
+      var PAGE_ACCESS_CODE = '';
+      var ACCESS_REMEMBER_DAYS = 14;
+      var STORAGE_KEY = 'naomiPageAccessOk';
+
+      function unlockPage() {
+        document.body.classList.remove('access-locked');
+        var ov = document.getElementById('access-overlay');
+        if (ov) ov.hidden = true;
+      }
+
+      function lockPage() {
+        document.body.classList.add('access-locked');
+        var ov = document.getElementById('access-overlay');
+        if (ov) ov.hidden = false;
+      }
+
+      if (!PAGE_ACCESS_CODE || PAGE_ACCESS_CODE.trim() === '') {
+        unlockPage();
+        return;
+      }
+
+      var until = null;
+      try {
+        until = localStorage.getItem(STORAGE_KEY);
+      } catch (e) {}
+      if (until && parseInt(until, 10) > Date.now()) {
+        unlockPage();
+        return;
+      }
+
+      lockPage();
+
+      var form = document.getElementById('access-form');
+      var input = document.getElementById('access-code-input');
+      var err = document.getElementById('access-error');
+      if (form && input) {
+        form.addEventListener('submit', function(e) {
+          e.preventDefault();
+          err.textContent = '';
+          var val = (input.value || '').trim();
+          if (val === PAGE_ACCESS_CODE) {
+            try {
+              var exp = Date.now() + ACCESS_REMEMBER_DAYS * 24 * 60 * 60 * 1000;
+              localStorage.setItem(STORAGE_KEY, String(exp));
+            } catch (e2) {}
+            unlockPage();
+          } else {
+            err.textContent = 'קוד לא נכון, נסו שוב';
+            input.value = '';
+            input.focus();
+          }
+        });
+        input.focus();
+      }
+    })();
+  </script>
 
   <script>
     (function() {
@@ -1022,6 +1360,418 @@
         var url = channelLink + '&subscribers_name=' + encodeURIComponent(name) + '&subscribers_email=' + encodeURIComponent(email) + '&subscribers_phone=' + encodeURIComponent(phone) + '&day=0&encoding=UTF-8';
         window.open(url, '_blank');
       });
+    })();
+  </script>
+
+  <!-- גיבוי לוח זמנים: אם הדף לא מצליח לטעון naomi-availability.json (למשל פתיחה כקובץ מהמחשב), הדביקי כאן את אותו תוכן כמו בקובץ. -->
+  <script type="application/json" id="naomi-availability-embed">{"version":1,"daysOpen":[0,1,2,3,4,5,6],"startHour":9,"startMinute":0,"endHour":18,"endMinute":0,"slotMinutes":30,"meetingDurationMinutes":45,"blockedDates":[],"onlyOpenDates":[]}</script>
+
+  <script>
+    /**
+     * קביעת פגישה:
+     * BOOKING_WHATSAPP_OWNER – מספר וואטסאפ של נעמי בפורמט בינלאומי ללא + (למשל 972501234567).
+     * ריק = לא ייפתח קישור וואטסאפ, רק הורדת קובץ יומן.
+     * BOOKING_ZOOM_LINK – קישור קבוע לפגישת זום (יופיע באירוע ובתזכורת שעה לפני).
+     * תזכורת שעה לפני: טקסט מלא + קישור זום דרך קובץ ה-.ics (יומן בטלפון).
+     * BOOKING_ALARM_DEBUG_MINUTES – לבדיקה מקומית בלבד: מספר דקות לפני הפגישה (למשל 2).
+     *   השאירי null בפרודקשן. דוגמה: debug=2 ופגישה בעוד 5 דקות → תזכורת בעוד ~3 דקות.
+     */
+    (function() {
+      var BOOKING_WHATSAPP_OWNER = '';
+      var BOOKING_ZOOM_LINK = '';
+      /** לבדיקה: null = שעה אחת לפני. מספר = דקות לפני (אל תשכחי להחזיר null לפני פרסום). */
+      var BOOKING_ALARM_DEBUG_MINUTES = null;
+
+      var PRE_MEETING_REMINDER_HE =
+        'היי אהובה\n' +
+        'ממש בקרוב אנחנו נפגשות 🤍\n' +
+        '\n' +
+        'חשוב לי לשתף בכמה דברים קטנים מראש, כדי שהפגישה תהיה הכי מדויקת ואפקטיבית עבורך:\n' +
+        '\n' +
+        'משך הפגישה הוא 45 דקות.\n' +
+        'במידה ותרצי להמשיך מעבר לכך – כל רבע שעה נוספת היא בעלות של 50₪,\n' +
+        'עד מקסימום תוספת של 45 דקות.\n' +
+        '(כלומר פגישה של שעה וחצי = תוספת של 150₪).\n' +
+        '\n' +
+        'אם תרצי לשאול גם על אנשים נוספים\n' +
+        '(ילדים / בני זוג / שותפים וכו\') –\n' +
+        'אשמח שתשלחי לי מראש את הפרטים שלהם, כדי שאוכל להכין את החישובים לפני הפגישה.\n' +
+        '\n' +
+        '🦋ממליצה בחום להכין מראש נושאים או שאלות שחשוב לך לגעת בהם\n' +
+        '🌸ממליצה גם להגיע עם מחברת ועט –\n' +
+        'האנרגיה בפגישה גבוהה וכדאי לקרקע את הדברים שמהדהדים\n' +
+        '\n' +
+        '🪐בונוס לרציניות : כמה דק לפני הפגישה- נטילת ידיים לסירוגין בלי ברכה,לקרוא 3 פרקי תהילים/כל דבר אחר שאת מתחברת אליו, גם במילים שלך\n' +
+        'תעצמי עיניים, תדמייני כדור אור /מגן דוד עוטף אותך ותגידי ״מימיני מיכאל משמאלי גבריאל מלפני אוריאל מאחורי רפאל ועל ראשי שכינת אל ״\n' +
+        'תבקשי, במילים שלך, מבורא עולם, מההדרכה שלך\n' +
+        'שיהיו איתך, שיראו לך מה שאת צריכה לראות , ושתשמעי מה שאת צריכה לשמוע\n' +
+        'לטובתך הגבוהה ביותר\n' +
+        'מחכה לך 🤍✨';
+      var meetingAvailability = null;
+      var availabilityLoadSource = 'none';
+      var AVAILABILITY_JSON = 'naomi-availability.json';
+      var DAYS_OPEN_DEFAULT = [0, 1, 2, 3, 4, 5, 6];
+
+      function parseEmbeddedAvailability() {
+        var el = document.getElementById('naomi-availability-embed');
+        if (!el) return null;
+        var raw = String(el.textContent || '').replace(/^\uFEFF/, '').trim();
+        if (!raw) return null;
+        try {
+          return JSON.parse(raw);
+        } catch (e) {
+          return null;
+        }
+      }
+
+      function normalizeAvailability(raw) {
+        if (!raw || typeof raw !== 'object') return null;
+        var cfg = raw;
+        cfg.version = cfg.version != null ? cfg.version : 1;
+        cfg.blockedDates = (cfg.blockedDates || []).map(function(s) {
+          return String(s).trim();
+        }).filter(function(s) {
+          return /^\d{4}-\d{2}-\d{2}$/.test(s);
+        });
+        cfg.onlyOpenDates = (cfg.onlyOpenDates || []).map(function(s) {
+          return String(s).trim();
+        }).filter(function(s) {
+          return /^\d{4}-\d{2}-\d{2}$/.test(s);
+        });
+        if (!cfg.daysOpen || !cfg.daysOpen.length) {
+          if (!cfg.onlyOpenDates || !cfg.onlyOpenDates.length) {
+            cfg.daysOpen = DAYS_OPEN_DEFAULT.slice();
+          }
+        }
+        return cfg;
+      }
+
+      function isBlockedDateStr(dateStr, cfg) {
+        if (!cfg || !cfg.blockedDates || !cfg.blockedDates.length) return false;
+        var d = String(dateStr || '').trim();
+        for (var i = 0; i < cfg.blockedDates.length; i++) {
+          if (String(cfg.blockedDates[i]).trim() === d) return true;
+        }
+        return false;
+      }
+
+      function isSlotAllowed(dateStr, timeStr, cfg) {
+        if (!cfg || cfg.version == null) return true;
+        var d = new Date(dateStr + 'T12:00:00');
+        if (isNaN(d.getTime())) return false;
+        var w = d.getDay();
+        var only = cfg.onlyOpenDates;
+        if (only && only.length > 0) {
+          if (only.indexOf(dateStr) === -1) return false;
+        } else {
+          var days = cfg.daysOpen;
+          if (!days || !days.length) return false;
+          if (days.indexOf(w) === -1) return false;
+        }
+        if (isBlockedDateStr(dateStr, cfg)) return false;
+        var parts = (timeStr || '').split(':');
+        var h = parseInt(parts[0], 10);
+        var mi = parseInt(parts[1] || '0', 10);
+        if (isNaN(h) || isNaN(mi)) return false;
+        var startMin = h * 60 + mi;
+        var sh = cfg.startHour != null ? cfg.startHour : 9;
+        var sm = cfg.startMinute != null ? cfg.startMinute : 0;
+        var eh = cfg.endHour != null ? cfg.endHour : 18;
+        var em = cfg.endMinute != null ? cfg.endMinute : 0;
+        var slot = cfg.slotMinutes || 30;
+        var meetLen = cfg.meetingDurationMinutes || 60;
+        var openStart = sh * 60 + sm;
+        var openEnd = eh * 60 + em;
+        if (eh === 24 && (em === 0 || cfg.endMinute == null)) {
+          openEnd = 24 * 60;
+        }
+        if (startMin < openStart) return false;
+        if (startMin + meetLen > openEnd) return false;
+        if ((startMin - openStart) % slot !== 0) return false;
+        return true;
+      }
+
+      function escapeIcs(s) {
+        return String(s || '').replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\n/g, '\\n');
+      }
+
+      function pad2(n) {
+        return n < 10 ? '0' + n : '' + n;
+      }
+
+      function toWaPhone(raw) {
+        var d = String(raw || '').replace(/\D/g, '');
+        if (d.indexOf('972') === 0) return d;
+        if (d.charAt(0) === '0') return '972' + d.slice(1);
+        if (d.length === 9) return '972' + d;
+        return d;
+      }
+
+      function buildIcs(start, end, fullName, birthDateStr, phone) {
+        var stamp = new Date();
+        var uid = 'booking-' + stamp.getTime() + '-' + Math.random().toString(36).slice(2, 9) + '@naomi-landing';
+        var stampStr = stamp.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z');
+        var y = start.getFullYear();
+        var m = pad2(start.getMonth() + 1);
+        var day = pad2(start.getDate());
+        var hh = pad2(start.getHours());
+        var mm = pad2(start.getMinutes());
+        var dtStart = '' + y + m + day + 'T' + hh + mm + '00';
+        var ey = end.getFullYear();
+        var em = pad2(end.getMonth() + 1);
+        var ed = pad2(end.getDate());
+        var ehh = pad2(end.getHours());
+        var emm = pad2(end.getMinutes());
+        var dtEnd = '' + ey + em + ed + 'T' + ehh + emm + '00';
+        var summary = escapeIcs('פגישת זום – נעמי');
+        var birthHuman = birthDateStr ? birthDateStr.split('-').reverse().join('/') : '';
+        var zoomLink = String(BOOKING_ZOOM_LINK || '').trim();
+        var reminderForClient = PRE_MEETING_REMINDER_HE;
+        if (zoomLink) {
+          reminderForClient += '\n\nקישור לזום:\n' + zoomLink;
+        }
+        var descLines = ['פגישה דרך זום.'];
+        if (fullName) descLines.push('שם מלא: ' + fullName);
+        if (birthHuman) descLines.push('תאריך לידה: ' + birthHuman);
+        descLines.push('טלפון: ' + (phone || ''));
+        descLines.push('');
+        var alarmLabel = 'שעה לפני';
+        if (BOOKING_ALARM_DEBUG_MINUTES != null && BOOKING_ALARM_DEBUG_MINUTES > 0) {
+          alarmLabel = BOOKING_ALARM_DEBUG_MINUTES + ' דק׳ לפני (בדיקה)';
+        }
+        descLines.push('— הודעה שתופיע בתזכורת (' + alarmLabel + ') —');
+        descLines.push(reminderForClient);
+        var desc = escapeIcs(descLines.join('\n'));
+        var alarmDesc = escapeIcs(reminderForClient);
+        var lines = [
+          'BEGIN:VCALENDAR',
+          'VERSION:2.0',
+          'PRODID:-//Naomi//Booking//HE',
+          'CALSCALE:GREGORIAN',
+          'METHOD:PUBLISH',
+          'BEGIN:VEVENT',
+          'UID:' + uid,
+          'DTSTAMP:' + stampStr,
+          'DTSTART:' + dtStart,
+          'DTEND:' + dtEnd,
+          'SUMMARY:' + summary,
+          'DESCRIPTION:' + desc
+        ];
+        if (zoomLink) {
+          lines.push('URL:' + String(zoomLink).replace(/[\r\n]/g, ''));
+        }
+        var alarmTrigger = 'TRIGGER:-PT1H';
+        if (BOOKING_ALARM_DEBUG_MINUTES != null && BOOKING_ALARM_DEBUG_MINUTES > 0 && BOOKING_ALARM_DEBUG_MINUTES <= 1440) {
+          alarmTrigger = 'TRIGGER:-PT' + Math.floor(BOOKING_ALARM_DEBUG_MINUTES) + 'M';
+        }
+        lines.push(
+          'BEGIN:VALARM',
+          alarmTrigger,
+          'ACTION:DISPLAY',
+          'DESCRIPTION:' + alarmDesc,
+          'END:VALARM',
+          'END:VEVENT',
+          'END:VCALENDAR'
+        );
+        return lines.join('\r\n');
+      }
+
+      function downloadIcs(icsText) {
+        var blob = new Blob([icsText], { type: 'text/calendar;charset=utf-8' });
+        var a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'meeting-zoom.ics';
+        a.click();
+        URL.revokeObjectURL(a.href);
+      }
+
+      function showMsg(el, text, ok) {
+        if (!el) return;
+        el.textContent = text;
+        el.className = 'booking-msg ' + (ok ? 'ok' : 'err');
+      }
+
+      function runBooking(openWa) {
+        var form = document.getElementById('booking-form');
+        var msg = document.getElementById('booking-msg');
+        if (!form) return;
+        var name = (document.getElementById('booking-name') || {}).value || '';
+        var birthStr = (document.getElementById('booking-birthdate') || {}).value || '';
+        var phone = (document.getElementById('booking-phone') || {}).value || '';
+        var dateStr = (document.getElementById('booking-date') || {}).value || '';
+        var timeStr = (document.getElementById('booking-time') || {}).value || '';
+        name = name.trim();
+        birthStr = birthStr.trim();
+        phone = phone.trim();
+        if (!name) {
+          showMsg(msg, 'נא למלא שם מלא', false);
+          return;
+        }
+        if (!birthStr) {
+          showMsg(msg, 'נא לבחור תאריך לידה', false);
+          return;
+        }
+        var birthD = new Date(birthStr + 'T12:00:00');
+        if (isNaN(birthD.getTime()) || birthD.getTime() > Date.now()) {
+          showMsg(msg, 'תאריך לידה לא תקין', false);
+          return;
+        }
+        if (!phone) {
+          showMsg(msg, 'נא למלא מספר טלפון', false);
+          return;
+        }
+        if (!dateStr || !timeStr) {
+          showMsg(msg, 'נא לבחור תאריך פגישה ושעת פגישה', false);
+          return;
+        }
+        var start = new Date(dateStr + 'T' + timeStr + ':00');
+        if (isNaN(start.getTime())) {
+          showMsg(msg, 'תאריך פגישה או שעת פגישה לא תקינים', false);
+          return;
+        }
+        if (start.getTime() < Date.now() - 60000) {
+          showMsg(msg, 'בחרו תאריך פגישה ושעת פגישה עתידיים', false);
+          return;
+        }
+        if (meetingAvailability && isBlockedDateStr(dateStr, meetingAvailability)) {
+          showMsg(msg, 'תאריך זה חסום לפי לוח הזמנים. בחרו תאריך אחר או עדכנו את naomi-availability.json (והטמעה בדף אם יש).', false);
+          return;
+        }
+        if (meetingAvailability && !isSlotAllowed(dateStr, timeStr, meetingAvailability)) {
+          var slotM = meetingAvailability.slotMinutes || 30;
+          showMsg(msg, 'היום או השעה לא פתוחים לפי לוח הזמנים. בחרו יום פתוח ושעה במרווח של ' + slotM + ' דקות מתוך חלון השעות.', false);
+          return;
+        }
+        var meetMs = (meetingAvailability && meetingAvailability.meetingDurationMinutes)
+          ? meetingAvailability.meetingDurationMinutes * 60 * 1000
+          : 60 * 60 * 1000;
+        var end = new Date(start.getTime() + meetMs);
+        var ics = buildIcs(start, end, name, birthStr, phone);
+        downloadIcs(ics);
+        var okText = 'הקובץ ירד – הוסיפו ליומן. שעה לפני תופיע התזכורת עם ההודעה המלאה';
+        if (!String(BOOKING_ZOOM_LINK || '').trim()) {
+          okText += ' (הוסיפי BOOKING_ZOOM_LINK בקוד כדי שיופיע קישור הזום בתזכורת).';
+        } else {
+          okText += ' וקישור הזום.';
+        }
+        if (BOOKING_ALARM_DEBUG_MINUTES != null && BOOKING_ALARM_DEBUG_MINUTES > 0) {
+          okText += ' [מצב בדיקה: תזכורת ' + BOOKING_ALARM_DEBUG_MINUTES + ' דק׳ לפני – החזירי BOOKING_ALARM_DEBUG_MINUTES ל-null לפני פרסום.]';
+        }
+        showMsg(msg, okText, true);
+
+        if (openWa && BOOKING_WHATSAPP_OWNER && String(BOOKING_WHATSAPP_OWNER).replace(/\D/g, '').length >= 9) {
+          var owner = String(BOOKING_WHATSAPP_OWNER).replace(/\D/g, '');
+          var humanDate = dateStr.split('-').reverse().join('/');
+          var birthHuman = birthStr.split('-').reverse().join('/');
+          var lines = [
+            'הזמנת פגישת זום מהדף',
+            'שם מלא: ' + name,
+            'תאריך לידה: ' + birthHuman,
+            'תאריך פגישה: ' + humanDate,
+            'שעת פגישה: ' + timeStr,
+            'טלפון: ' + phone
+          ];
+          var url = 'https://wa.me/' + owner + '?text=' + encodeURIComponent(lines.join('\n'));
+          window.open(url, '_blank', 'noopener,noreferrer');
+        } else if (openWa && !BOOKING_WHATSAPP_OWNER) {
+          showMsg(msg, 'הקובץ ירד ליומן. הגדירו BOOKING_WHATSAPP_OWNER בסקריפט לשליחה אוטומטית לוואטסאפ שלכם.', true);
+        }
+      }
+
+      function refreshBookingSlotHint() {
+        var msg = document.getElementById('booking-msg');
+        var dateStr = (document.getElementById('booking-date') || {}).value || '';
+        var timeStr = (document.getElementById('booking-time') || {}).value || '';
+        if (!msg || !meetingAvailability || !dateStr || !timeStr) return;
+        if (isBlockedDateStr(dateStr, meetingAvailability)) {
+          showMsg(msg, 'תאריך זה חסום לפי לוח הזמנים.', false);
+          return;
+        }
+        if (!isSlotAllowed(dateStr, timeStr, meetingAvailability)) {
+          var slotM = meetingAvailability.slotMinutes || 30;
+          showMsg(msg, 'השעה או התאריך לא מתאימים ללוח (חלון שעות / מרווח ' + slotM + ' דק׳).', false);
+          return;
+        }
+        msg.textContent = '';
+        msg.className = 'booking-msg';
+      }
+
+      function initBookingUI() {
+        var hint = document.getElementById('booking-availability-hint');
+        if (hint) {
+          if (!meetingAvailability) {
+            hint.innerHTML = '<strong style="color:#b71c1c">לא נטען לוח זמנים</strong> – כל התאריכים ייראו אפשריים אבל אין סנכרון. פתחי את האתר דרך שרת (לא קובץ ישירות), או הדביקי את תוכן <code>naomi-availability.json</code> לתג <code>&lt;script id="naomi-availability-embed"&gt;</code> ב־index.html.';
+          } else if (availabilityLoadSource === 'embed') {
+            hint.innerHTML = 'לוח זמנים נטען מ<strong>הטמעה בדף</strong> (גיבוי). לעדכון: עדכנו גם את הקובץ באתר וגם את התוכן בתג <code>naomi-availability-embed</code>, או השתמשי בשרת.';
+          } else if (meetingAvailability.onlyOpenDates && meetingAvailability.onlyOpenDates.length) {
+            hint.innerHTML = 'ניתן לקבוע רק בתאריכים הספציפיים שמופיעים בלוח (קובץ <code>naomi-availability.json</code>) + שעות לפי המרווח.';
+          } else if (meetingAvailability.daysOpen && meetingAvailability.daysOpen.length) {
+            hint.innerHTML = 'הזמנות לפי <strong>לוח זמנים שפורסם</strong> (<code>naomi-availability.json</code>). תאריכים אדומים בניהול = חסומים כאן.';
+          } else {
+            hint.innerHTML = 'לוח זמנים נטען; בדקי הגדרות ימים בקובץ.';
+          }
+        }
+
+        var timeInput = document.getElementById('booking-time');
+        if (timeInput && meetingAvailability && meetingAvailability.slotMinutes) {
+          timeInput.step = meetingAvailability.slotMinutes * 60;
+        } else if (timeInput) {
+          timeInput.step = 900;
+        }
+
+        var form = document.getElementById('booking-form');
+        var icsOnly = document.getElementById('booking-ics-only');
+        if (form) {
+          form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            runBooking(true);
+          });
+        }
+        if (icsOnly) {
+          icsOnly.addEventListener('click', function(e) {
+            e.preventDefault();
+            runBooking(false);
+          });
+        }
+
+        var dateInput = document.getElementById('booking-date');
+        if (dateInput) {
+          var t = new Date();
+          var min = t.getFullYear() + '-' + pad2(t.getMonth() + 1) + '-' + pad2(t.getDate());
+          dateInput.min = min;
+        }
+
+        var birthInput = document.getElementById('booking-birthdate');
+        if (birthInput) {
+          var today = new Date();
+          var maxBirth = today.getFullYear() + '-' + pad2(today.getMonth() + 1) + '-' + pad2(today.getDate());
+          birthInput.max = maxBirth;
+        }
+
+        var dateEl = document.getElementById('booking-date');
+        var timeEl = document.getElementById('booking-time');
+        if (dateEl) dateEl.addEventListener('change', refreshBookingSlotHint);
+        if (timeEl) timeEl.addEventListener('change', refreshBookingSlotHint);
+      }
+
+      var fetchUrl = AVAILABILITY_JSON.indexOf('?') >= 0
+        ? AVAILABILITY_JSON + '&_=' + Date.now()
+        : AVAILABILITY_JSON + '?_=' + Date.now();
+      fetch(fetchUrl, { cache: 'no-store' })
+        .then(function(r) {
+          if (!r.ok) throw new Error('no');
+          return r.json();
+        })
+        .then(function(j) {
+          meetingAvailability = normalizeAvailability(j);
+          availabilityLoadSource = 'fetch';
+        })
+        .catch(function() {
+          var emb = parseEmbeddedAvailability();
+          meetingAvailability = normalizeAvailability(emb);
+          availabilityLoadSource = meetingAvailability ? 'embed' : 'none';
+        })
+        .finally(initBookingUI);
     })();
   </script>
 </body>
