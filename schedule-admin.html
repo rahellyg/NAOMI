@@ -317,8 +317,8 @@
       <div class="card" id="bookings-card">
         <h2>פגישות שנקבעו</h2>
         <p style="font-size:0.82rem;color:var(--muted);margin-bottom:0.65rem;line-height:1.5;">
-          <strong>דפדפן אחר / טלפון:</strong> רשימת הפגישות מגיעה מ־<strong>GitHub</strong> (קובץ <code>naomi-bookings.json</code> בענף <code>main</code>) – לא מ־localStorage של הלקוחות. אחרי כל הזמנה מהדף הציבורי חייב להתעדכן הקובץ ב־repo: <strong>BOOKING_LEDGER_WEBHOOK</strong> (Make → commit) או עדכון ידני + <strong>שמור פגישות ל-GitHub</strong>.
-          <strong>רענון</strong> מושך מחדש מ־GitHub (זהה בכל מכשיר). <strong>localStorage</strong> רק במחשב שבו נפתח דף ההזמנה – לא מחליף את הקובץ בשרת.
+          <strong>לראות פגישות מכל כרום:</strong> הגדירי <strong>Supabase</strong> (<code>NAOMI_SUPABASE_URL</code> + <code>NAOMI_SUPABASE_ANON_KEY</code> ב־index ובדף הזה) – הוראות: <code>BOOKING-SYNC-SUPABASE.md</code>. בלי זה – רק <strong>GitHub JSON</strong> (Webhook/Make) או <strong>localStorage</strong> של הלקוחה.
+          <strong>רענון</strong> ממזג GitHub Raw + Supabase + localStorage של דפדפן זה.
           <strong>וואטסאפ ללקוחה:</strong> כפתור ירוק בכל פגישה.
         </p>
         <div class="bookings-toolbar">
@@ -386,6 +386,9 @@
     var GITHUB_BOOKINGS_PATH = 'naomi-bookings.json';
     var BOOKINGS_STORAGE_KEY = 'naomi_bookings_v1';
     var UPDATE_JSON_STORAGE_KEY = 'UPDATE_JSON_KEY';
+    var SUPABASE_URL = '';
+    var SUPABASE_ANON_KEY = '';
+    var SUPABASE_BOOKINGS_TABLE = 'naomi_bookings';
 
     var meetingsBookings = [];
 
@@ -851,6 +854,59 @@
       return fetchBookingsJsonFromUrl(getBookingsFetchUrlPages());
     }
 
+    function supabaseRowToBooking(row) {
+      if (!row || !row.date_str || !/^\d{4}-\d{2}-\d{2}$/.test(String(row.date_str))) return null;
+      var ts = row.time_str != null ? String(row.time_str).trim() : '00:00';
+      var tm = ts.match(/^(\d{1,2}):(\d{2})/);
+      if (tm) ts = pad2(parseInt(tm[1], 10) || 0) + ':' + pad2(parseInt(tm[2], 10) || 0);
+      return {
+        id: row.id || 'sb-' + Math.random().toString(36).slice(2),
+        createdAt: row.created_at || new Date().toISOString(),
+        dateStr: String(row.date_str),
+        timeStr: ts,
+        durationMinutes:
+          row.duration_minutes != null && !isNaN(Number(row.duration_minutes))
+            ? parseInt(row.duration_minutes, 10)
+            : null,
+        fullName: row.full_name || '',
+        phone: row.phone || '',
+        email: row.email || '',
+        birthDate: row.birth_date || ''
+      };
+    }
+
+    function fetchBookingsFromSupabase() {
+      var w = typeof window !== 'undefined' ? window : {};
+      var base = String(w.NAOMI_SUPABASE_URL || SUPABASE_URL || '')
+        .trim()
+        .replace(/\/$/, '');
+      var key = String(w.NAOMI_SUPABASE_ANON_KEY || SUPABASE_ANON_KEY || '').trim();
+      var table = String(w.NAOMI_SUPABASE_TABLE || SUPABASE_BOOKINGS_TABLE || 'naomi_bookings').trim();
+      if (!base || !key) return Promise.resolve([]);
+      return fetch(
+        base +
+          '/rest/v1/' +
+          encodeURIComponent(table) +
+          '?select=*&order=date_str.asc,time_str.asc',
+        {
+          headers: {
+            apikey: key,
+            Authorization: 'Bearer ' + key,
+            Accept: 'application/json'
+          },
+          cache: 'no-store'
+        }
+      )
+        .then(function(r) {
+          if (!r.ok) throw new Error('Supabase HTTP ' + r.status);
+          return r.json();
+        })
+        .then(function(rows) {
+          if (!Array.isArray(rows)) return [];
+          return rows.map(supabaseRowToBooking).filter(Boolean);
+        });
+    }
+
     function showBookingsMsg(text, ok) {
       var el = document.getElementById('bookings-msg');
       if (!el) return;
@@ -925,7 +981,7 @@
         var empty = document.createElement('li');
         empty.style.opacity = '0.88';
         empty.textContent =
-          'אין פגישות בקובץ GitHub (או ריק). ודאי ש־naomi-bookings.json מתעדכן אחרי הזמנות (Webhook/Make), או ייבוא JSON. רענון מהקובץ ב-GitHub.';
+          'אין פגישות. אם עדיין לא הגדרת Supabase – ראי BOOKING-SYNC-SUPABASE.md. אחרת: ודאי ש־naomi-bookings.json ב-GitHub מתעדכן, או ייבוא JSON.';
         ul.appendChild(empty);
         return;
       }
@@ -983,17 +1039,18 @@
 
     function loadAllBookings() {
       var local = loadBookingsFromLocalStorage();
-      return fetchBookingsFromRemote()
-        .then(function(remote) {
-          meetingsBookings = mergeBookingsArrays(remote, local);
-        })
-        .catch(function() {
-          meetingsBookings = local.slice();
-        })
-        .then(function() {
-          renderMonthCalendar();
-          renderBookingsList();
-        });
+      var pGit = fetchBookingsFromRemote().catch(function() {
+        return [];
+      });
+      var pSb = fetchBookingsFromSupabase().catch(function() {
+        return [];
+      });
+      return Promise.all([pGit, pSb]).then(function(pair) {
+        var merged = mergeBookingsArrays(pair[0], pair[1]);
+        meetingsBookings = mergeBookingsArrays(merged, local);
+        renderMonthCalendar();
+        renderBookingsList();
+      });
     }
 
     function getUpdateJsonKeyToken() {

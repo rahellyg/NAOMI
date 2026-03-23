@@ -971,7 +971,7 @@
       <span class="page-sparkle" aria-hidden="true">✦</span>
       <span class="page-sparkle" aria-hidden="true">✧</span>
       <span class="page-sparkle" aria-hidden="true">⋆</span>
-      <iframe width="560" height="315" src="https://www.youtube.com/embed/Nyh_4341qQg?autoplay=1&mute=1" title="YouTube video" frameborder="0" allowfullscreen></iframe>
+      <iframe width="560" height="315" src="https://www.youtube.com/embed/Cmc2zo_T6ok?si=1FaAR45pOJT9XLI_?autoplay=1&mute=1" title="YouTube video" frameborder="0" allowfullscreen></iframe>
       </div>
     </div>
 
@@ -1176,6 +1176,7 @@
      *   • BOOKING_NOTIFY_WEBHOOK – JSON ל־Make/Zapier/n8n → וואטסאפ (אם השירות מאפשר CORS מהדפדפן).
      * אפשר גם לפני הסקריפט: window.NAOMI_BOOKING_WEB3FORMS_KEY / window.NAOMI_BOOKING_NOTIFY_WEBHOOK
      * BOOKING_LEDGER_WEBHOOK – אופציונלי: POST עם { booking } לעדכון naomi-bookings.json דרך Make/GitHub.
+     * Supabase (מומלץ לראות פגישות מכל דפדפן): NAOMI_SUPABASE_URL + NAOMI_SUPABASE_ANON_KEY – ראי BOOKING-SYNC-SUPABASE.md
      */
     (function() {
       /** מינימום שעות מראש לתחילת הפגישה */
@@ -1193,6 +1194,10 @@
       var BOOKING_NOTIFY_SECRET = '';
       /** Webhook נפרד לרישום פגישה (למשל Make → עדכון naomi-bookings.json ב-GitHub). */
       var BOOKING_LEDGER_WEBHOOK = '';
+      /** Supabase – ראי BOOKING-SYNC-SUPABASE.md (ריק = בלי סנכרון ענן). */
+      var SUPABASE_URL = '';
+      var SUPABASE_ANON_KEY = '';
+      var SUPABASE_BOOKINGS_TABLE = 'naomi_bookings';
 
       var PRE_MEETING_REMINDER_HE =
         'היי אהובה\n' +
@@ -1526,6 +1531,39 @@
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ source: 'naomi-landing', type: 'booking_append', booking: booking }),
+          mode: 'cors',
+          keepalive: true
+        }).catch(function() {});
+      }
+
+      function syncBookingToSupabase(entry) {
+        var w = typeof window !== 'undefined' ? window : {};
+        var base = String(w.NAOMI_SUPABASE_URL || SUPABASE_URL || '')
+          .trim()
+          .replace(/\/$/, '');
+        var key = String(w.NAOMI_SUPABASE_ANON_KEY || SUPABASE_ANON_KEY || '').trim();
+        var table = String(w.NAOMI_SUPABASE_TABLE || SUPABASE_BOOKINGS_TABLE || 'naomi_bookings').trim();
+        if (!base || !key) return;
+        var row = {
+          id: entry.id,
+          created_at: entry.createdAt,
+          date_str: entry.dateStr,
+          time_str: entry.timeStr,
+          duration_minutes: entry.durationMinutes,
+          full_name: entry.fullName,
+          phone: entry.phone,
+          email: entry.email,
+          birth_date: entry.birthDate
+        };
+        fetch(base + '/rest/v1/' + encodeURIComponent(table), {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            apikey: key,
+            Authorization: 'Bearer ' + key,
+            Prefer: 'return=minimal'
+          },
+          body: JSON.stringify(row),
           mode: 'cors',
           keepalive: true
         }).catch(function() {});
@@ -1924,6 +1962,7 @@
           };
           appendBookingToLocalLedger(ledgerEntry);
           postBookingLedgerWebhook(ledgerEntry);
+          syncBookingToSupabase(ledgerEntry);
         }
       }
 
