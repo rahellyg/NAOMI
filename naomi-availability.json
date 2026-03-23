@@ -1,13 +1,19 @@
 {
   "version": 1,
   "availabilityBySelectedDatesOnly": false,
-  "daysOpen": [0, 1, 2, 3, 4],
   "startHour": 11,
   "startMinute": 30,
-  "endHour": 23,
+  "endHour": 13,
   "endMinute": 0,
   "slotMinutes": 30,
   "meetingDurationMinutes": 45,
+  "daysOpen": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
   "blockedDates": [],
   "onlyOpenDates": []
 }
