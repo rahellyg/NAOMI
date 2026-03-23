@@ -51,7 +51,7 @@
       color: var(--accent);
     }
     label { display: block; font-size: 0.88rem; margin-bottom: 0.35rem; color: var(--muted); }
-    input[type="password"], input[type="number"], input[type="time"], textarea {
+    input[type="password"], input[type="text"], input[type="number"], input[type="time"], textarea {
       width: 100%;
       padding: 0.65rem 0.75rem;
       border-radius: 8px;
@@ -196,7 +196,7 @@
 <body>
   <div class="wrap">
     <h1>ניהול זמינות לפגישות</h1>
-    <p class="sub">דף פרטי – אל תשתפי קישור. אחרי שמירה: ייצאי קובץ והעליתי ליד <code>index.html</code> בשם <strong>naomi-availability.json</strong></p>
+    <p class="sub">דף פרטי – אל תשתפי קישור. לחצי <strong>שמור</strong> – עדכון ל-GitHub (אם מולאו פרטים) או העתקת JSON ללוח.</p>
 
     <div id="login-gate" class="card">
       <h2>כניסה</h2>
@@ -208,7 +208,15 @@
 
     <div id="admin-panel" hidden>
       <div class="warn">
-        <strong>חשוב:</strong> הגדרות נשמרות גם בדפדפן הזה. כדי שהאתר הציבורי יציג את אותן חלונות – לחצי <strong>ייצוא לקובץ</strong> ושמרי את <code>naomi-availability.json</code> באותה תיקייה כמו <code>index.html</code> (באחסון / GitHub Pages).
+        <strong>סנכרון עם דף „קביעת פגישה”:</strong> הדף הציבורי קורא את <code>naomi-availability.json</code> מהאתר. אם ה-<code>fetch</code> נכשל, נטען <strong>גיבוי</strong> מתוך <code>index.html</code> (תג <code>naomi-availability-embed</code>) – חייב להיות <strong>זהה</strong> לקובץ.<br><br>
+        <strong>GitHub Pages – אחרי כל שינוי בלוח:</strong>
+        <ol style="margin:0.5rem 1.1rem 0;line-height:1.55;font-size:0.82rem;">
+          <li>לחצי <strong>שמור</strong> – עם פרטי GitHub מלאים הקובץ יעלה לריפו (אם הדפדפן מאפשר). בלי פרטים – יועתק JSON ללוח להדבקה ב־<code>index.html</code> / בעריכה ב-GitHub.</li>
+          <li>ב־<code>index.html</code> עדכני את <strong>כל התוכן</strong> בשורה של <code>&lt;script type="application/json" id="naomi-availability-embed"&gt;</code> (שורה אחת, אותו JSON כמו בקובץ).</li>
+          <li>אם ערכת ידנית: <code>git add</code> → <code>commit</code> → <code>push</code> לענף שממנו נבנה האתר (לרוב <code>main</code>).</li>
+          <li>המתיני דקה לפריסה, רענון קשיח (Ctrl+F5).</li>
+        </ol>
+        <span style="font-size:0.8rem;">מדריך מפורט: <code>github-schedule-sync.md</code> בתיקיית הפרויקט.</span>
       </div>
 
       <div class="card">
@@ -224,7 +232,7 @@
           <button type="button" class="btn-cal-next" aria-label="חודש הבא">‹</button>
         </div>
         <div class="cal-grid" id="cal-grid"></div>
-        <p class="cal-hint">חודשים שעברו באפור. בסוף: <strong>שמירה + ייצוא</strong> והעלאת <code>naomi-availability.json</code> ליד האתר.</p>
+        <p class="cal-hint">חודשים שעברו באפור. בסוף: לחצי <strong>שמור</strong> לעדכון ב-GitHub או להעתקת JSON.</p>
       </div>
 
       <textarea id="blocked" hidden aria-hidden="true"></textarea>
@@ -249,14 +257,55 @@
       </div>
 
       <div class="card">
-        <button type="button" class="btn-primary" id="btn-save">שמירה בדפדפן + הורדת naomi-availability.json</button>
-        <button type="button" class="btn-secondary" id="btn-export">ייצוא לקובץ בלבד</button>
+        <button type="button" class="btn-primary" id="btn-save">שמור</button>
         <label class="btn-file" style="margin-top:0.75rem;display:block;">
           <span style="font-size:0.85rem;color:var(--muted);">ייבוא מקובץ קיים</span>
           <input type="file" id="import-file" accept=".json,application/json" style="margin-top:0.35rem;width:100%;">
         </label>
         <p class="msg" id="save-msg"></p>
+        <p class="msg sync-msg" id="sync-msg" style="display:none;margin-top:0.4rem;font-size:0.84rem;"></p>
       </div>
+
+      <details class="card details-advanced" id="github-settings-details">
+        <summary style="cursor:pointer;font-weight:600;color:var(--accent);font-size:1rem;list-style-position:outside;padding:0.15rem 0;">
+          הגדרות סנכרון GitHub (מתקדם)
+        </summary>
+        <div style="margin-top:1rem;padding-top:0.5rem;border-top:1px solid rgba(92,45,122,0.2);">
+        <p style="font-size:0.82rem;color:var(--muted);margin-bottom:0.75rem;line-height:1.5;">
+          מלאי פרטי המאגר ו-<strong>Personal Access Token</strong> (GitHub → Settings → Developer settings → Fine-grained token: הרשאת <code>Contents</code> read+write על הריפו).
+          <br>כשהשדות מלאים, לחיצה על <strong>שמור</strong> בראש הדף תדחוף את <code>naomi-availability.json</code> לריפו. אם הדפדפן חוסם (CORS) – „דחיפה ידנית”, „פתיחת עריכה” או <code>tools/push-availability.mjs</code>.
+        </p>
+        <div class="row2">
+          <div>
+            <label for="gh-owner">בעלים (owner)</label>
+            <input type="text" id="gh-owner" placeholder="username" autocomplete="off">
+          </div>
+          <div>
+            <label for="gh-repo">שם ריפו (repo)</label>
+            <input type="text" id="gh-repo" placeholder="NaomilandingPage" autocomplete="off">
+          </div>
+        </div>
+        <div class="row2">
+          <div>
+            <label for="gh-branch">ענף (branch)</label>
+            <input type="text" id="gh-branch" placeholder="main" value="main" autocomplete="off">
+          </div>
+          <div>
+            <label for="gh-path">נתיב קובץ</label>
+            <input type="text" id="gh-path" placeholder="naomi-availability.json" value="naomi-availability.json" autocomplete="off">
+          </div>
+        </div>
+        <label for="gh-token">GitHub token (לא נשמר בקוד – אופציונלי בדפדפן)</label>
+        <input type="password" id="gh-token" placeholder="github_pat_..." autocomplete="off">
+        <label style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.75rem;cursor:pointer;">
+          <input type="checkbox" id="gh-remember-token" style="width:auto;margin:0;">
+          <span style="font-size:0.85rem;color:var(--muted);">זכור טוקן ב־sessionStorage (רק במחשב זה, עד סגירת הדפדפן)</span>
+        </label>
+        <button type="button" class="btn-secondary" id="btn-github-push">דחיפה ידנית ל-GitHub (אותו תוכן כמו עכשיו בטופס)</button>
+        <button type="button" class="btn-secondary" id="btn-github-open">פתיחת עריכת הקובץ ב-GitHub (דפדפן)</button>
+        <p class="msg" id="github-msg"></p>
+        </div>
+      </details>
     </div>
   </div>
 
@@ -266,7 +315,8 @@
      */
     var ADMIN_PASSWORD = '123456';
 
-    var STORAGE_KEY = 'naomi_meeting_availability';
+    var GH_UI_KEY = 'naomi_schedule_github_ui';
+    var GH_TOKEN_SESSION = 'naomi_schedule_github_token_session';
     /** כל ימי השבוע – הניהול הוא רק דרך לוח השנה (חסימות). */
     var DAYS_OPEN_ALL = [0, 1, 2, 3, 4, 5, 6];
     var MONTH_NAMES_HE = [
@@ -430,27 +480,6 @@
         .filter(function(l) { return /^\d{4}-\d{2}-\d{2}$/.test(l); });
     }
 
-    function loadFromStorage() {
-      try {
-        var s = localStorage.getItem(STORAGE_KEY);
-        if (s) return JSON.parse(s);
-      } catch (e) {}
-      return defaultConfig();
-    }
-
-    function saveToStorage(cfg) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(cfg, null, 0));
-    }
-
-    function exportJson(cfg) {
-      var blob = new Blob([JSON.stringify(cfg, null, 2)], { type: 'application/json;charset=utf-8' });
-      var a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = 'naomi-availability.json';
-      a.click();
-      URL.revokeObjectURL(a.href);
-    }
-
     function formToConfig() {
       var blocked = parseDateLinesTextarea('blocked');
       var st = parseTimeField('start-time', 9, 0);
@@ -493,6 +522,128 @@
       el.className = 'msg ' + (ok ? 'ok' : 'err');
     }
 
+    function showGithubMsg(text, ok) {
+      var el = document.getElementById('github-msg');
+      if (!el) return;
+      el.textContent = text;
+      el.className = 'msg ' + (ok ? 'ok' : 'err');
+    }
+
+    function setSyncMsg(text, ok, visible) {
+      var el = document.getElementById('sync-msg');
+      if (!el) return;
+      if (!visible) {
+        el.style.display = 'none';
+        el.textContent = '';
+        return;
+      }
+      el.textContent = text;
+      el.className = 'msg sync-msg ' + (ok ? 'ok' : 'err');
+      el.style.display = 'block';
+    }
+
+    /**
+     * דחיפת cfg ל-GitHub Contents API. מחזיר Promise.
+     */
+    function pushAvailabilityToGithub(cfg) {
+      var owner = (document.getElementById('gh-owner').value || '').trim();
+      var repo = (document.getElementById('gh-repo').value || '').trim();
+      var branch = (document.getElementById('gh-branch').value || '').trim() || 'main';
+      var path = (document.getElementById('gh-path').value || '').trim() || 'naomi-availability.json';
+      var token = (document.getElementById('gh-token').value || '').trim();
+      if (!owner || !repo || !token) {
+        return Promise.reject(new Error('חסרים owner, repo או token'));
+      }
+      var jsonStr = JSON.stringify(cfg, null, 2);
+      var contentB64 = utf8ToBase64(jsonStr);
+      var apiUrl = githubContentsUrl(owner, repo, path);
+
+      return fetch(apiUrl + '?ref=' + encodeURIComponent(branch), {
+        headers: {
+          'Authorization': 'Bearer ' + token,
+          'Accept': 'application/vnd.github+json',
+          'X-GitHub-Api-Version': '2022-11-28'
+        }
+      })
+        .then(function(r) {
+          if (r.status === 404) return null;
+          if (!r.ok) {
+            return r.json().then(function(j) {
+              throw new Error(j.message || 'HTTP ' + r.status);
+            });
+          }
+          return r.json();
+        })
+        .then(function(fileData) {
+          var body = {
+            message: 'Update naomi-availability.json (schedule-admin)',
+            content: contentB64,
+            branch: branch
+          };
+          if (fileData && fileData.sha) body.sha = fileData.sha;
+          return fetch(apiUrl, {
+            method: 'PUT',
+            headers: {
+              'Authorization': 'Bearer ' + token,
+              'Accept': 'application/vnd.github+json',
+              'Content-Type': 'application/json',
+              'X-GitHub-Api-Version': '2022-11-28'
+            },
+            body: JSON.stringify(body)
+          });
+        })
+        .then(function(r) {
+          if (!r.ok) {
+            return r.json().then(function(j) {
+              throw new Error(j.message || 'HTTP ' + r.status);
+            });
+          }
+          return r.json();
+        });
+    }
+
+    function loadGithubUiFields() {
+      try {
+        var s = localStorage.getItem(GH_UI_KEY);
+        if (!s) return;
+        var o = JSON.parse(s);
+        if (o.owner) document.getElementById('gh-owner').value = o.owner;
+        if (o.repo) document.getElementById('gh-repo').value = o.repo;
+        if (o.branch) document.getElementById('gh-branch').value = o.branch;
+        if (o.path) document.getElementById('gh-path').value = o.path;
+      } catch (e) {}
+      try {
+        var tok = sessionStorage.getItem(GH_TOKEN_SESSION);
+        if (tok) document.getElementById('gh-token').value = tok;
+      } catch (e2) {}
+    }
+
+    function saveGithubUiFields() {
+      var o = {
+        owner: (document.getElementById('gh-owner').value || '').trim(),
+        repo: (document.getElementById('gh-repo').value || '').trim(),
+        branch: (document.getElementById('gh-branch').value || '').trim() || 'main',
+        path: (document.getElementById('gh-path').value || '').trim() || 'naomi-availability.json'
+      };
+      try {
+        localStorage.setItem(GH_UI_KEY, JSON.stringify(o));
+      } catch (e) {}
+      if (document.getElementById('gh-remember-token').checked) {
+        try {
+          sessionStorage.setItem(GH_TOKEN_SESSION, document.getElementById('gh-token').value || '');
+        } catch (e2) {}
+      }
+    }
+
+    function utf8ToBase64(str) {
+      return btoa(unescape(encodeURIComponent(str)));
+    }
+
+    function githubContentsUrl(owner, repo, filepath) {
+      var parts = filepath.split('/').filter(Boolean).map(encodeURIComponent).join('/');
+      return 'https://api.github.com/repos/' + encodeURIComponent(owner) + '/' + encodeURIComponent(repo) + '/contents/' + parts;
+    }
+
     document.getElementById('blocked').addEventListener('input', function() {
       if (typeof calViewYear === 'number') renderMonthCalendar();
     });
@@ -512,10 +663,24 @@
       err.style.display = 'none';
       document.getElementById('login-gate').hidden = true;
       document.getElementById('admin-panel').hidden = false;
-      configToForm(loadFromStorage());
+      configToForm(defaultConfig());
       calInitNav();
       renderMonthCalendar();
+      loadGithubUiFields();
     });
+
+    function copyConfigToClipboard(cfg, onOk, onFail) {
+      var text = JSON.stringify(cfg);
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(onOk).catch(function() {
+          window.prompt('העתיקי את הטקסט:', text);
+          if (onOk) onOk();
+        });
+      } else {
+        window.prompt('העתיקי את הטקסט:', text);
+        if (onOk) onOk();
+      }
+    }
 
     document.getElementById('btn-save').addEventListener('click', function() {
       var cfg = formToConfig();
@@ -526,17 +691,91 @@
       }
       if (openStart >= openEnd) {
         showSaveMsg('שעת התחלה חייבת להיות לפני שעת הסיום', false);
+        setSyncMsg('', false, false);
         return;
       }
-      saveToStorage(cfg);
-      exportJson(cfg);
-      showSaveMsg('נשמר והקובץ ירד. העליתי את naomi-availability.json ליד index.html. אם פותחים את index מהדיסק: הדביקי את אותו JSON גם לתג naomi-availability-embed ב-index.html.', true);
+      saveGithubUiFields();
+      var token = (document.getElementById('gh-token').value || '').trim();
+      var owner = (document.getElementById('gh-owner').value || '').trim();
+      var repo = (document.getElementById('gh-repo').value || '').trim();
+
+      if (owner && repo && token) {
+        setSyncMsg('שולחת ל-GitHub…', true, true);
+        pushAvailabilityToGithub(cfg)
+          .then(function() {
+            showSaveMsg('נשמר.', true);
+            setSyncMsg('הקובץ עודכן ב-GitHub. המתיני עד דקה ל-Pages ואז רענון קשיח. כדאי לעדכן גם את ההטמעה ב-index אם צריך.', true, true);
+          })
+          .catch(function(err) {
+            var m = err && err.message ? String(err.message) : String(err);
+            if (m.indexOf('Failed to fetch') !== -1 || m.indexOf('NetworkError') !== -1 || m.toLowerCase().indexOf('network') !== -1) {
+              m = 'הדפדפן חסם (CORS/רשת). נסי דחיפה ידנית, עריכה ב-GitHub או node tools/push-availability.mjs.';
+            }
+            showSaveMsg('העלאה ל-GitHub נכשלה.', false);
+            setSyncMsg(m, false, true);
+            showGithubMsg(m, false);
+          });
+      } else {
+        setSyncMsg('', false, false);
+        copyConfigToClipboard(cfg, function() {
+          showSaveMsg('אין owner/repo/token מלאים – הועתק JSON ללוח. הדביקי ב־index בתג naomi-availability-embed ובקובץ naomi-availability.json ב-GitHub אם צריך.', true);
+        });
+      }
     });
 
-    document.getElementById('btn-export').addEventListener('click', function() {
+    function validateTimeWindow(cfg) {
+      var openStart = cfg.startHour * 60 + (cfg.startMinute || 0);
+      var openEnd = cfg.endHour * 60 + (cfg.endMinute || 0);
+      if (cfg.endHour === 24 && (cfg.endMinute == null || cfg.endMinute === 0)) {
+        openEnd = 24 * 60;
+      }
+      return openStart < openEnd;
+    }
+
+    document.getElementById('btn-github-open').addEventListener('click', function() {
+      saveGithubUiFields();
+      var owner = (document.getElementById('gh-owner').value || '').trim();
+      var repo = (document.getElementById('gh-repo').value || '').trim();
+      var branch = (document.getElementById('gh-branch').value || '').trim() || 'main';
+      var path = (document.getElementById('gh-path').value || '').trim() || 'naomi-availability.json';
+      if (!owner || !repo) {
+        showGithubMsg('מלאי owner ו-repo', false);
+        return;
+      }
+      var url = 'https://github.com/' + encodeURIComponent(owner) + '/' + encodeURIComponent(repo) + '/edit/' + encodeURIComponent(branch) + '/' + path.split('/').map(encodeURIComponent).join('/');
+      window.open(url, '_blank', 'noopener,noreferrer');
+      showGithubMsg('נפתח עורך GitHub – הדביקי JSON (למשל אחרי שמירה שהעתיקה ללוח, או מייבוא).', true);
+    });
+
+    document.getElementById('btn-github-push').addEventListener('click', function() {
       var cfg = formToConfig();
-      exportJson(cfg);
-      showSaveMsg('הקובץ ירד.', true);
+      if (!validateTimeWindow(cfg)) {
+        showGithubMsg('שעת התחלה חייבת להיות לפני שעת הסיום', false);
+        return;
+      }
+      saveGithubUiFields();
+      var owner = (document.getElementById('gh-owner').value || '').trim();
+      var repo = (document.getElementById('gh-repo').value || '').trim();
+      var token = (document.getElementById('gh-token').value || '').trim();
+      if (!owner || !repo || !token) {
+        showGithubMsg('מלאי owner, repo וטוקן GitHub', false);
+        return;
+      }
+
+      showGithubMsg('שולח ל-GitHub…', true);
+      document.getElementById('github-msg').className = 'msg ok';
+
+      pushAvailabilityToGithub(cfg)
+        .then(function() {
+          showGithubMsg('הצלחה: הקובץ עודכן ב-GitHub. המתיני ~1 דק׳ ל-Pages ואז עדכנו גם את ההטמעה ב-index אם צריך.', true);
+        })
+        .catch(function(err) {
+          var m = err && err.message ? String(err.message) : String(err);
+          if (m.indexOf('Failed to fetch') !== -1 || m.indexOf('NetworkError') !== -1 || m.toLowerCase().indexOf('network') !== -1) {
+            m = 'הדפדפן חסם את הבקשה (CORS או רשת). הריצי מהמחשב: node tools/push-availability.mjs או השתמשי ב„פתיחת עריכה ב-GitHub”.';
+          }
+          showGithubMsg(m, false);
+        });
     });
 
     document.getElementById('import-file').addEventListener('change', function(e) {
@@ -549,13 +788,12 @@
           cfg.daysOpen = DAYS_OPEN_ALL.slice();
           if (cfg.onlyOpenDates && cfg.onlyOpenDates.length) {
             cfg.onlyOpenDates = [];
-            showSaveMsg('ייבוא בוצע. רשימת onlyOpenDates הוסרה – הניהול הוא דרך הלוח בלבד. שמרי מחדש לייצוא.', true);
+            showSaveMsg('ייבוא בוצע. רשימת onlyOpenDates הוסרה – הניהול הוא דרך הלוח בלבד. לחצי שמור לעדכון.', true);
           } else {
-            showSaveMsg('ייבוא הצליח ונשמר בדפדפן', true);
+            showSaveMsg('ייבוא הצליח.', true);
           }
           if (!cfg.blockedDates) cfg.blockedDates = [];
           configToForm(cfg);
-          saveToStorage(cfg);
         } catch (err) {
           showSaveMsg('קובץ לא תקין', false);
         }
