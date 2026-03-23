@@ -1,8 +1,26 @@
 # Syncing `naomi-availability.json` with the booking page (GitHub Pages)
 
+## GitHub Secrets (`UPDATE_JSON_KEY`) — protected, not in the browser
+
+Repository **Secrets** in GitHub are **protected by design**:
+
+- They are **encrypted at rest** and **not shown** in logs or the UI after you save (only update/replace).
+- They are exposed **only** to **GitHub Actions** (or similar) when you pass them explicitly, e.g. `env: UPDATE_JSON_KEY: ${{ secrets.UPDATE_JSON_KEY }}` in a workflow step.
+- A **static page** like `schedule-admin.html` on GitHub Pages **cannot** read `secrets.UPDATE_JSON_KEY`. If it could, anyone opening the site would get your token. So “the variable is in GitHub Secrets” does **not** mean the admin page can load it automatically.
+
+**Ways to use the secret safely:**
+
+| Where | How the token is used |
+|--------|------------------------|
+| **GitHub Actions** | Reference `secrets.UPDATE_JSON_KEY` only inside workflow YAML (server-side). |
+| **Your PC** | `export UPDATE_JSON_KEY=...` or `node tools/push-availability.mjs` — stays on your machine. |
+| **Browser admin** | Optional: same PAT value stored once in `localStorage` under key `UPDATE_JSON_KEY` (your choice; keep the admin URL private). |
+
+---
+
 ## Update JSON from the manage calendar page
 
-1. **`schedule-admin.html` → שמור** – Copies formatted JSON to the clipboard. Paste into **`naomi-availability.json`** at the project root (and optionally the same JSON into **`naomi-availability-embed`** in `index.html` if you rely on the embed fallback).
+1. **`schedule-admin.html` → שמור** – Uses the same token as env/secret **`UPDATE_JSON_KEY`**, but **GitHub Actions secrets are not available in the browser**. One-time in the browser console (F12) on that site: `localStorage.setItem('UPDATE_JSON_KEY', 'your_pat_here')`, or set `window.UPDATE_JSON_KEY` from a local script (do not commit). Then **שמור** uploads **`naomi-availability.json`** via the API to **`rahellyg/NAOMI`** (`GITHUB_PUSH_*` in the page script). If **CORS** blocks, JSON is copied to the clipboard; use **`push-availability.mjs`** or git.
 
 2. **Push to GitHub – Node script** (from project folder; file must contain the JSON you want live):
    - Set **`UPDATE_JSON_KEY`** (preferred) or **`GITHUB_TOKEN`** to your fine-grained PAT (Contents: read+write on the repo).
@@ -14,8 +32,18 @@
    export UPDATE_JSON_KEY=github_pat_...
    node tools/push-availability.mjs rahellyg NAOMI main naomi-availability.json
    ```
-   Uses the file `naomi-availability.json` in the project root.  
-   For **GitHub Actions**, add repository secret `UPDATE_JSON_KEY` and pass it as `env: UPDATE_JSON_KEY: ${{ secrets.UPDATE_JSON_KEY }}` in the workflow step that runs the script.
+   Uses the file `naomi-availability.json` in the project root.
+
+---
+
+## GitHub Action (after you push the JSON)
+
+Workflow: **`.github/workflows/naomi-availability.yml`**
+
+- **Triggers** when `naomi-availability.json` changes on **push** or **pull request**, and on **workflow_dispatch** (Run workflow in the Actions tab).
+- **Runs** `node tools/validate-availability.mjs` so invalid JSON fails the check before you merge or so you see a red ✗ on the commit.
+
+Pushing `naomi-availability.json` to the branch that **GitHub Pages** builds is enough for the live site to serve the new file (wait ~1 minute, then hard refresh). The Action does **not** need `UPDATE_JSON_KEY`; that secret is only for `push-availability.mjs` from your PC when you upload via API instead of git push.
 
 ---
 
