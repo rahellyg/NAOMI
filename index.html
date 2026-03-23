@@ -71,14 +71,6 @@
       }
     }
 
-    @media (max-width: 640px) {
-      .mystic-elements span {
-        width: 46px;
-        height: 46px;
-        font-size: 1.1rem;
-      }
-    }
-
     .container {
       position: relative;
       z-index: 1;
@@ -205,92 +197,6 @@
     .sparkle:nth-child(9) { top: 10%; right: 25%; animation-delay: 0.7s; }
     .sparkle:nth-child(10) { top: 30%; left: 15%; animation-delay: 0.3s; }
 
-    .tagline {
-      font-weight: 300;
-      font-size: 1rem;
-      color: var(--text-muted);
-    }
-
-    .page-content {
-      text-align: center;
-      padding: 2rem 1.5rem 4rem;
-      max-width: 36rem;
-      margin: 0 auto;
-    }
-
-    .page-content p {
-      font-size: 1.15rem;
-      line-height: 1.7;
-      color: var(--text);
-      margin-bottom: 1rem;
-    }
-
-    .page-content p:last-child {
-      margin-bottom: 0;
-    }
-
-    .mystic-elements {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 0.9rem;
-      margin-top: 1rem;
-    }
-
-    .mystic-elements span {
-      width: 52px;
-      height: 52px;
-      border-radius: 50%;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      color: var(--accent);
-      font-size: 1.25rem;
-      box-shadow: 0 0 24px rgba(230, 184, 255, 0.18);
-    }
-
-    .section-divider {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.75rem;
-      margin: 0.75rem 0 1.75rem;
-      color: var(--accent);
-      opacity: 0.9;
-    }
-
-    .section-divider::before,
-    .section-divider::after {
-      content: '';
-      width: clamp(80px, 18vw, 180px);
-      height: 1px;
-      background: linear-gradient(to left, transparent, var(--border), transparent);
-    }
-
-    .intro-text {
-      margin-top: 1.5rem;
-      padding: 1.5rem 0;
-      font-weight: 300;
-      font-size: 1.05rem;
-      line-height: 1.8;
-      color: var(--text);
-    }
-
-    .intro-text .tags {
-      margin-top: 1rem;
-      font-size: 0.95rem;
-      color: var(--accent);
-      letter-spacing: 0.02em;
-    }
-
-    .intro-text .cta {
-      margin-top: 1rem;
-      font-weight: 500;
-      color: var(--text);
-    }
-
     /* קישורים לרשתות */
     .links-form-row {
       display: flex;
@@ -373,9 +279,6 @@
     .social a .link-sparkle:first-child { animation-delay: 0s; }
     .social a .link-sparkle:last-child { animation-delay: 0.5s; }
 
-    .page-content {
-      position: relative;
-    }
     .page-sparkle {
       position: absolute;
       font-size: 0.7rem;
@@ -384,15 +287,6 @@
       pointer-events: none;
       animation: twinkle 2.5s ease-in-out infinite;
     }
-    .page-content .page-sparkle:nth-child(1) { top: 5%; left: 8%; animation-delay: 0s; }
-    .page-content .page-sparkle:nth-child(2) { top: 20%; right: 10%; animation-delay: 0.3s; }
-    .page-content .page-sparkle:nth-child(3) { top: 40%; left: 5%; animation-delay: 0.6s; }
-    .page-content .page-sparkle:nth-child(4) { top: 60%; right: 8%; animation-delay: 0.2s; }
-    .page-content .page-sparkle:nth-child(5) { top: 80%; left: 12%; animation-delay: 0.9s; }
-    .page-content .page-sparkle:nth-child(6) { top: 15%; right: 18%; animation-delay: 0.1s; }
-    .page-content .page-sparkle:nth-child(7) { top: 70%; left: 20%; animation-delay: 0.5s; }
-    .page-content .page-sparkle:nth-child(8) { top: 35%; right: 5%; animation-delay: 0.7s; }
-
     .channel-intro-youtube {
       position: relative;
     }
@@ -405,42 +299,6 @@
 
     .channel-intro {
       position: relative;
-    }
-    .channel-intro .page-sparkle:nth-child(1) { top: 10%; left: 8%; animation-delay: 0s; }
-    .channel-intro .page-sparkle:nth-child(2) { top: 25%; right: 5%; animation-delay: 0.5s; }
-    .channel-intro .page-sparkle:nth-child(3) { top: 50%; left: 5%; animation-delay: 0.2s; }
-    .channel-intro .page-sparkle:nth-child(4) { top: 75%; right: 10%; animation-delay: 0.7s; }
-    .channel-intro .page-sparkle:nth-child(5) { bottom: 25%; left: 12%; top: auto; animation-delay: 0.3s; }
-    .channel-intro .page-sparkle:nth-child(6) { bottom: 15%; right: 8%; top: auto; animation-delay: 0.4s; }
-
-    /* בלוק טקסט – ללא מסגרת */
-    .content-block {
-      padding: 1.5rem 0;
-      margin-bottom: 1rem;
-    }
-
-    .content-block h2 {
-      font-family: 'Rubik', sans-serif;
-      font-weight: 500;
-      font-size: 1.2rem;
-      color: var(--accent);
-      margin-bottom: 1rem;
-      text-align: center;
-    }
-
-    .content-block p {
-      font-weight: 300;
-      font-size: 1rem;
-      line-height: 1.85;
-      color: var(--text);
-      margin-bottom: 0.9rem;
-    }
-
-    .content-block p:last-child {
-      margin-bottom: 0;
-    }
-
-    .channel-intro {
       padding: 1.5rem 0 2rem;
       margin-top: 0.5rem;
       text-align: right;
@@ -448,113 +306,12 @@
       margin-left: auto;
       margin-right: auto;
     }
-
-    .channel-intro p {
-      font-weight: 300;
-      font-size: 1.22rem;
-      line-height: 1.9;
-      color: var(--text);
-      margin-bottom: 0.85rem;
-    }
-
-    .channel-intro p.main-copy {
-      font-size: 1.42rem;
-      line-height: 2;
-    }
-
-    .channel-intro p:last-child {
-      margin-bottom: 0;
-    }
-
-    .channel-intro .highlight {
-      color: var(--accent);
-      font-weight: 500;
-    }
-
-    .how-it-starts {
-      margin: 1.5rem 0 1.75rem;
-      padding: 1.25rem 1.25rem 1.1rem;
-      background: linear-gradient(135deg, rgba(230, 184, 255, 0.12), rgba(26, 24, 36, 0.8));
-      border: 1px solid var(--border);
-      border-right: 4px solid var(--accent);
-      border-radius: 14px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.22);
-    }
-
-    .how-it-starts h3 {
-      font-family: 'Rubik', sans-serif;
-      font-weight: 600;
-      font-size: 1.15rem;
-      color: var(--accent);
-      margin-bottom: 0.7rem;
-      text-align: right;
-    }
-
-    .how-it-starts p {
-      font-size: 1.06rem;
-      line-height: 1.9;
-      margin-bottom: 0.65rem;
-    }
-
-    .how-it-starts p:last-child {
-      margin-bottom: 0;
-    }
-
-    .welcome-highlight {
-      position: relative;
-      margin: 1.1rem auto 1.5rem;
-      padding: 0.85rem 1.1rem;
-      max-width: 720px;
-      text-align: center;
-      border-radius: 16px;
-      background: linear-gradient(135deg, rgba(156, 39, 176, 0.42), rgba(230, 184, 255, 0.22));
-      border: 1px solid rgba(230, 184, 255, 0.55);
-      box-shadow: 0 0 28px rgba(156, 39, 176, 0.35);
-      overflow: hidden;
-    }
-
-    .welcome-highlight .welcome-text {
-      margin: 0;
-      font-family: 'Rubik', sans-serif;
-      font-size: clamp(1.35rem, 2.7vw, 1.8rem);
-      font-weight: 600;
-      color: #f3deff;
-      letter-spacing: 0.03em;
-      text-shadow: 0 0 12px rgba(230, 184, 255, 0.5);
-      position: relative;
-      z-index: 2;
-    }
-
-    .welcome-highlight .float {
-      position: absolute;
-      color: rgba(243, 222, 255, 0.8);
-      font-size: 1rem;
-      z-index: 1;
-      animation: floatSpark 4.2s ease-in-out infinite;
-    }
-
-    .welcome-highlight .float-1 {
-      top: 20%;
-      right: 10%;
-      animation-delay: 0s;
-    }
-
-    .welcome-highlight .float-2 {
-      top: 58%;
-      left: 12%;
-      animation-delay: 0.7s;
-    }
-
-    .welcome-highlight .float-3 {
-      top: 35%;
-      left: 48%;
-      animation-delay: 1.4s;
-    }
-
-    @keyframes floatSpark {
-      0%, 100% { transform: translateY(0px) scale(1); opacity: 0.5; }
-      50% { transform: translateY(-8px) scale(1.15); opacity: 1; }
-    }
+    .channel-intro .page-sparkle:nth-child(1) { top: 10%; left: 8%; animation-delay: 0s; }
+    .channel-intro .page-sparkle:nth-child(2) { top: 25%; right: 5%; animation-delay: 0.5s; }
+    .channel-intro .page-sparkle:nth-child(3) { top: 50%; left: 5%; animation-delay: 0.2s; }
+    .channel-intro .page-sparkle:nth-child(4) { top: 75%; right: 10%; animation-delay: 0.7s; }
+    .channel-intro .page-sparkle:nth-child(5) { bottom: 25%; left: 12%; top: auto; animation-delay: 0.3s; }
+    .channel-intro .page-sparkle:nth-child(6) { bottom: 15%; right: 8%; top: auto; animation-delay: 0.4s; }
 
     .channel-intro-form {
       max-width: 320px;
@@ -677,85 +434,7 @@
       border-color: #d4b87a;
     }
 
-    .elements-showcase {
-      padding: 0.5rem 0 1.75rem;
-      text-align: center;
-    }
-
-    .elements-showcase img {
-      width: min(100%, 462px);
-      height: auto;
-      display: block;
-      margin: 0 auto;
-      border-radius: 12px;
-      border: 1px solid var(--border);
-    }
-
-    .channel-intro .intro-divider {
-      margin: 1.75rem 0;
-      text-align: center;
-      color: var(--text-muted);
-      font-size: 0.9rem;
-      letter-spacing: 0.3em;
-    }
-
-    .channel-intro .intro-subtitle {
-      font-weight: 500;
-      color: var(--accent);
-      margin-bottom: 0.75rem;
-    }
-
-    .content-block .highlight {
-      color: var(--accent);
-      font-weight: 500;
-    }
-
-    .content-block .quote {
-      font-style: italic;
-      padding: 0 0.5rem;
-      border-right: 3px solid var(--accent);
-      margin: 1rem 0;
-      color: var(--text-muted);
-    }
-
-    .content-block.with-img {
-      overflow: hidden;
-    }
-
-    .content-block .section-img-wrap {
-      width: 100%;
-      margin-bottom: 1.25rem;
-      border-radius: 12px;
-      overflow: hidden;
-    }
-
-    .content-block .section-img-wrap img {
-      width: 100%;
-      height: auto;
-      display: block;
-      max-height: 320px;
-      object-fit: contain;
-      object-position: center;
-    }
-
-    .content-block .services-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.75rem;
-      margin-top: 1rem;
-      justify-content: center;
-    }
-
-    .content-block .service-pill {
-      background: var(--bg-deep);
-      color: var(--accent);
-      padding: 0.5rem 1rem;
-      border-radius: 999px;
-      font-size: 0.9rem;
-      border: 1px solid var(--border);
-    }
-
-    /* מחירון – ללא מסגרת */
+    /* מחירון */
     .pricing-section {
       padding: 1.5rem 0;
       margin-bottom: 2rem;
@@ -887,9 +566,26 @@
       text-align: center;
     }
 
-    .booking-section .booking-secondary a {
+    .booking-section .booking-secondary a,
+    .booking-calendar-links a {
       color: var(--accent);
       font-size: 0.9rem;
+    }
+
+    .booking-calendar-links {
+      margin-top: 0.65rem;
+      text-align: center;
+      font-size: 0.88rem;
+      line-height: 1.45;
+    }
+
+    .booking-calendar-links a.booking-google-cal-link {
+      display: inline-block;
+      font-weight: 600;
+      padding: 0.35rem 0.5rem;
+      border-radius: 6px;
+      background: rgba(66, 133, 244, 0.12);
+      color: #1565c0;
     }
 
     .booking-msg {
@@ -1060,24 +756,6 @@
       font-weight: 700;
     }
 
-    /* טופס – נשאר במרובע */
-    .form-section {
-      max-width: 480px;
-      margin: 0 auto;
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 2rem;
-    }
-
-    .form-section h2 {
-      font-family: 'Rubik', sans-serif;
-      font-weight: 500;
-      font-size: 1.25rem;
-      margin-bottom: 1.25rem;
-      color: var(--accent);
-    }
-
     .form-group {
       margin-bottom: 1.25rem;
     }
@@ -1137,43 +815,6 @@
       background: #d4b87a;
       color: #2d2438;
       transform: translateY(-1px);
-    }
-
-    .form-message {
-      margin-top: 1rem;
-      padding: 0.75rem;
-      border-radius: 8px;
-      font-size: 0.9rem;
-      text-align: center;
-      display: none;
-    }
-
-    .form-message.success {
-      background: rgba(76, 175, 80, 0.2);
-      color: #a5d6a7;
-      display: block;
-    }
-
-    .form-message.error {
-      background: rgba(244, 67, 54, 0.2);
-      color: #ef9a9a;
-      display: block;
-    }
-
-    footer {
-      text-align: center;
-      padding: 2rem 0;
-      font-size: 0.85rem;
-      color: var(--text-muted);
-    }
-
-    footer a {
-      color: var(--accent);
-      text-decoration: none;
-    }
-
-    footer a:hover {
-      text-decoration: underline;
     }
 
     /* גישה לדף – קוד כניסה (הגדרה בסקריפט בתחתית) */
@@ -1377,7 +1018,7 @@
 
     <section class="booking-section" id="booking-meeting" aria-label="קביעת פגישה">
       <h2>קביעת פגישת זום</h2>
-      <p class="booking-note">הלוח מציג <strong>ימים בשבוע פתוחים</strong> ו<strong>תאריכים חסומים</strong> לפי <strong>naomi-availability.json</strong> (שדות <code>daysOpen</code> ו־<code>blockedDates</code>). אם שינית בניהול ולא רואים עדכון: רענון קשיח (Ctrl+F5) וודאי שגם ההטמעה ב־index עודכנה אם האתר נופל לגיבוי. בחרו תאריך ושעה. אחרי האישור יורד קובץ ליומן – <strong>שעה לפני הפגישה</strong> היומן יציג את ההודעה המלאה (כולל קישור זום).</p>
+      <p class="booking-note">הלוח מציג <strong>ימים בשבוע פתוחים</strong> ו<strong>תאריכים חסומים</strong> לפי <strong>naomi-availability.json</strong> (שדות <code>daysOpen</code> ו־<code>blockedDates</code>). אם שינית בניהול ולא רואים עדכון: רענון קשיח (Ctrl+F5) וודאי שגם ההטמעה ב־index עודכנה אם האתר נופל לגיבוי. בחרו תאריך ושעה. <strong>אישור</strong> פותח <strong>Google Calendar</strong> להוספת האירוע (אם הוגדר אימייל נעמי בקוד – היא נוספת כאורחת); מומלץ תזכורת <strong>שעה לפני</strong>. ללא Google: אפשר <strong>הורדת קובץ .ics</strong> מהקישור למטה (תזכורת שעה לפני במכשיר).</p>
       <p class="booking-note" id="booking-availability-hint" style="margin-top:-0.75rem;font-size:0.78rem;opacity:0.95;"></p>
       <form id="booking-form" novalidate>
         <p class="booking-questionnaire-title">שאלון</p>
@@ -1392,6 +1033,10 @@
         <div class="form-group">
           <label for="booking-phone">טלפון (לוואטסאפ) <span aria-hidden="true">*</span></label>
           <input type="tel" id="booking-phone" name="bookingPhone" placeholder="050-1234567" required autocomplete="tel">
+        </div>
+        <div class="form-group">
+          <label for="booking-email">אימייל (ליומן ותזכורות Google) <span aria-hidden="true">*</span></label>
+          <input type="email" id="booking-email" name="bookingEmail" placeholder="yourname@gmail.com" required autocomplete="email" inputmode="email">
         </div>
         <div class="form-row">
           <div class="form-group" style="margin-bottom: 0.75rem;">
@@ -1409,32 +1054,19 @@
             <p class="booking-cal-legend">שעות באפור: מחוץ לחלון, לא לפי מרווח הסלוטים, או כבר עברו (היום).</p>
           </div>
         </div>
-        <button type="submit">אישור – הורדה ליומן + פתיחת וואטסאפ</button>
+        <button type="submit" id="booking-submit-main">אישור והוספה ל־Google Calendar</button>
         <p class="booking-msg" id="booking-msg" role="status"></p>
-        <p class="booking-secondary"><a href="#" id="booking-ics-only">רק הורדת קובץ יומן (בלי וואטסאפ)</a></p>
+        <p class="booking-calendar-links" id="booking-calendar-links" hidden>
+          <a href="#" id="booking-google-cal" class="booking-google-cal-link" target="_blank" rel="noopener noreferrer">פתיחה מחדש ב־Google Calendar</a>
+        </p>
+        <p class="booking-secondary"><a href="#" id="booking-ics-only">הורדת .ics (אפל / אחר)</a></p>
       </form>
     </section>
-
-    <main class="page-content" aria-hidden="true">
-      <span class="page-sparkle" aria-hidden="true">✦</span>
-      <span class="page-sparkle" aria-hidden="true">✧</span>
-      <span class="page-sparkle" aria-hidden="true">⋆</span>
-      <span class="page-sparkle" aria-hidden="true">✦</span>
-      <span class="page-sparkle" aria-hidden="true">✧</span>
-      <span class="page-sparkle" aria-hidden="true">⋆</span>
-      <span class="page-sparkle" aria-hidden="true">✦</span>
-      <span class="page-sparkle" aria-hidden="true">✧</span>
-    </main>
   </div>
   </div>
 
   <script>
-    /**
-     * הגדרת גישה לדף:
-     * PAGE_ACCESS_CODE – ריק ('') = הדף פתוח לכולם.
-     * מחרוזת (למשל 'הקודשלי') = חובה להזין את הקוד כדי לראות את הדף.
-     * ACCESS_REMEMBER_DAYS – כמה ימים לזכור גישה בדפדפן (אחרי כניסה מוצלחת).
-     */
+    /** PAGE_ACCESS_CODE ריק = דף פתוח. אחרת קוד כניסה; ACCESS_REMEMBER_DAYS = זכירה ב-localStorage */
     (function() {
       var PAGE_ACCESS_CODE = '';
       var ACCESS_REMEMBER_DAYS = 14;
@@ -1516,30 +1148,16 @@
     })();
   </script>
 
-  <!--
-    קביעת פגישה: טוענת קודם את naomi-availability.json מאותה תיקייה כמו הדף (או כתובת מלאה).
-    אופציונלי – כתובת קבועה (למשל אם ה-JSON במקום אחר):
-    <script>window.NAOMI_AVAILABILITY_URL = 'https://rahellyg.github.io/NAOMI/naomi-availability.json';</script>
-  -->
-  <!-- גיבוי: אם ה-fetch נכשל, נטען JSON מהשורה למטה – שמרו זהה ל-naomi-availability.json -->
-  <script type="application/json" id="naomi-availability-embed">{"version":1,"daysOpen":[0,1,2,3,4,5,6],"startHour":9,"startMinute":0,"endHour":18,"endMinute":0,"slotMinutes":30,"meetingDurationMinutes":45,"blockedDates":[],"onlyOpenDates":[]}</script>
+  <!-- גיבוי אם fetch נכשל – שמרו כמו naomi-availability.json; אופציונלי: window.NAOMI_AVAILABILITY_URL -->
+  <script type="application/json" id="naomi-availability-embed">{"version":1,"daysOpen":[0,1,2,3,4],"startHour":11,"startMinute":30,"endHour":13,"endMinute":0,"slotMinutes":30,"meetingDurationMinutes":45,"blockedDates":[],"onlyOpenDates":[]}</script>
 
   <script>
-    /**
-     * קביעת פגישה – מקור לוח זמנים:
-     * 1) fetch ל-naomi-availability.json (נתיב חכם ל-GitHub Pages) או window.NAOMI_AVAILABILITY_URL אם הוגדר.
-     * 2) אם נכשל: גיבוי מתוך #naomi-availability-embed (אותו תוכן כמו הקובץ).
-     * BOOKING_WHATSAPP_OWNER – מספר וואטסאפ של נעמי בפורמט בינלאומי ללא + (למשל 972501234567).
-     * ריק = לא ייפתח קישור וואטסאפ, רק הורדת קובץ יומן.
-     * BOOKING_ZOOM_LINK – קישור קבוע לפגישת זום (יופיע באירוע ובתזכורת שעה לפני).
-     * תזכורת שעה לפני: טקסט מלא + קישור זום דרך קובץ ה-.ics (יומן בטלפון).
-     * BOOKING_ALARM_DEBUG_MINUTES – לבדיקה מקומית בלבד: מספר דקות לפני הפגישה (למשל 2).
-     *   השאירי null בפרודקשן. דוגמה: debug=2 ופגישה בעוד 5 דקות → תזכורת בעוד ~3 דקות.
-     * NAOMI_AVAILABILITY_URL (אופציונלי על window) – כתובת מלאה ל-JSON אם לא נטען מהנתיב האוטומטי.
-     */
+    /** לוח: fetch ל-naomi-availability.json או גיבוי #naomi-availability-embed; אופציונלי window.NAOMI_AVAILABILITY_URL.
+        BOOKING_WHATSAPP_OWNER, BOOKING_ZOOM_LINK, BOOKING_OWNER_EMAIL (אורחת ב-Google), BOOKING_ALARM_DEBUG_MINUTES (null בפרוד). */
     (function() {
       var BOOKING_WHATSAPP_OWNER = '';
       var BOOKING_ZOOM_LINK = '';
+      var BOOKING_OWNER_EMAIL = '';
       /** לבדיקה: null = שעה אחת לפני. מספר = דקות לפני (אל תשכחי להחזיר null לפני פרסום). */
       var BOOKING_ALARM_DEBUG_MINUTES = null;
 
@@ -1571,12 +1189,13 @@
       var meetingAvailability = null;
       var availabilityLoadSource = 'none';
       var AVAILABILITY_JSON = 'naomi-availability.json';
-      var DAYS_OPEN_DEFAULT = [0, 1, 2, 3, 4, 5, 6];
+      var DAYS_OPEN_DEFAULT = [0, 1, 2, 3, 4];
+      var BOOKING_FALLBACK_SH = 11;
+      var BOOKING_FALLBACK_SM = 30;
+      var BOOKING_FALLBACK_EH = 13;
+      var BOOKING_FALLBACK_EM = 0;
 
-      /**
-       * GitHub Pages: כתובת user.github.io/RepoName בלי סלאש בסוף גורמת ל-fetch('naomi-availability.json')
-       * לפנות ל-user.github.io/naomi-availability.json (שגוי) → 404 → גיבוי ריק בלי חסימות.
-       */
+      /** נתיב ל-JSON: תיקיית הדף (לא שורש האתר כשהדף בתת-נתיב). אופציונלי NAOMI_AVAILABILITY_URL */
       function getAvailabilityFetchUrl() {
         if (typeof window.NAOMI_AVAILABILITY_URL === 'string' && window.NAOMI_AVAILABILITY_URL.trim()) {
           return window.NAOMI_AVAILABILITY_URL.trim();
@@ -1657,10 +1276,10 @@
         var mi = parseInt(parts[1] || '0', 10);
         if (isNaN(h) || isNaN(mi)) return false;
         var startMin = h * 60 + mi;
-        var sh = cfg.startHour != null ? cfg.startHour : 9;
-        var sm = cfg.startMinute != null ? cfg.startMinute : 0;
-        var eh = cfg.endHour != null ? cfg.endHour : 18;
-        var em = cfg.endMinute != null ? cfg.endMinute : 0;
+        var sh = cfg.startHour != null ? cfg.startHour : BOOKING_FALLBACK_SH;
+        var sm = cfg.startMinute != null ? cfg.startMinute : BOOKING_FALLBACK_SM;
+        var eh = cfg.endHour != null ? cfg.endHour : BOOKING_FALLBACK_EH;
+        var em = cfg.endMinute != null ? cfg.endMinute : BOOKING_FALLBACK_EM;
         var slot = cfg.slotMinutes || 30;
         var meetLen = cfg.meetingDurationMinutes || 60;
         var openStart = sh * 60 + sm;
@@ -1676,6 +1295,10 @@
 
       function escapeIcs(s) {
         return String(s || '').replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\n/g, '\\n');
+      }
+
+      function isProbablyBookingEmail(s) {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(s || '').trim());
       }
 
       function pad2(n) {
@@ -1877,10 +1500,10 @@
         var meetLen;
 
         if (cfg && cfg.version != null) {
-          var sh = cfg.startHour != null ? cfg.startHour : 9;
-          var sm = cfg.startMinute != null ? cfg.startMinute : 0;
-          var eh = cfg.endHour != null ? cfg.endHour : 18;
-          var em = cfg.endMinute != null ? cfg.endMinute : 0;
+          var sh = cfg.startHour != null ? cfg.startHour : BOOKING_FALLBACK_SH;
+          var sm = cfg.startMinute != null ? cfg.startMinute : BOOKING_FALLBACK_SM;
+          var eh = cfg.endHour != null ? cfg.endHour : BOOKING_FALLBACK_EH;
+          var em = cfg.endMinute != null ? cfg.endMinute : BOOKING_FALLBACK_EM;
           openStart = sh * 60 + sm;
           openEnd = eh * 60 + em;
           if (eh === 24 && (em === 0 || cfg.endMinute == null)) {
@@ -1889,8 +1512,8 @@
           slot = cfg.slotMinutes || 30;
           meetLen = cfg.meetingDurationMinutes || 60;
         } else {
-          openStart = 8 * 60;
-          openEnd = 21 * 60;
+          openStart = BOOKING_FALLBACK_SH * 60 + BOOKING_FALLBACK_SM;
+          openEnd = BOOKING_FALLBACK_EH * 60 + BOOKING_FALLBACK_EM;
           slot = 30;
           meetLen = 60;
         }
@@ -1969,7 +1592,7 @@
         return d;
       }
 
-      function buildIcs(start, end, fullName, birthDateStr, phone) {
+      function buildIcs(start, end, fullName, birthDateStr, phone, clientEmail) {
         var stamp = new Date();
         var uid = 'booking-' + stamp.getTime() + '-' + Math.random().toString(36).slice(2, 9) + '@naomi-landing';
         var stampStr = stamp.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z');
@@ -1988,6 +1611,8 @@
         var summary = escapeIcs('פגישת זום – נעמי');
         var birthHuman = birthDateStr ? birthDateStr.split('-').reverse().join('/') : '';
         var zoomLink = String(BOOKING_ZOOM_LINK || '').trim();
+        var ownerEmail = String(BOOKING_OWNER_EMAIL || '').trim().toLowerCase();
+        var guestEmail = String(clientEmail || '').trim().toLowerCase();
         var reminderForClient = PRE_MEETING_REMINDER_HE;
         if (zoomLink) {
           reminderForClient += '\n\nקישור לזום:\n' + zoomLink;
@@ -1996,6 +1621,10 @@
         if (fullName) descLines.push('שם מלא: ' + fullName);
         if (birthHuman) descLines.push('תאריך לידה: ' + birthHuman);
         descLines.push('טלפון: ' + (phone || ''));
+        if (guestEmail) descLines.push('אימייל מזמינה: ' + guestEmail);
+        if (isProbablyBookingEmail(ownerEmail)) {
+          descLines.push('מארגנת (נעמי): ' + ownerEmail);
+        }
         descLines.push('');
         var alarmLabel = 'שעה לפני';
         if (BOOKING_ALARM_DEBUG_MINUTES != null && BOOKING_ALARM_DEBUG_MINUTES > 0) {
@@ -2005,12 +1634,17 @@
         descLines.push(reminderForClient);
         var desc = escapeIcs(descLines.join('\n'));
         var alarmDesc = escapeIcs(reminderForClient);
+        var useRequest =
+          isProbablyBookingEmail(ownerEmail) &&
+          isProbablyBookingEmail(guestEmail) &&
+          ownerEmail !== guestEmail;
+        var icalMethod = useRequest ? 'REQUEST' : 'PUBLISH';
         var lines = [
           'BEGIN:VCALENDAR',
           'VERSION:2.0',
           'PRODID:-//Naomi//Booking//HE',
           'CALSCALE:GREGORIAN',
-          'METHOD:PUBLISH',
+          'METHOD:' + icalMethod,
           'BEGIN:VEVENT',
           'UID:' + uid,
           'DTSTAMP:' + stampStr,
@@ -2019,6 +1653,16 @@
           'SUMMARY:' + summary,
           'DESCRIPTION:' + desc
         ];
+        if (useRequest) {
+          lines.push('SEQUENCE:0');
+          lines.push('ORGANIZER;CN=' + escapeIcs('נעמי') + ':mailto:' + ownerEmail);
+          lines.push(
+            'ATTENDEE;CUTYPE=INDIVIDUAL;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=TRUE;CN=' +
+              escapeIcs(fullName || 'מזמינה') +
+              ':mailto:' +
+              guestEmail
+          );
+        }
         if (zoomLink) {
           lines.push('URL:' + String(zoomLink).replace(/[\r\n]/g, ''));
         }
@@ -2031,10 +1675,9 @@
           alarmTrigger,
           'ACTION:DISPLAY',
           'DESCRIPTION:' + alarmDesc,
-          'END:VALARM',
-          'END:VEVENT',
-          'END:VCALENDAR'
+          'END:VALARM'
         );
+        lines.push('END:VEVENT', 'END:VCALENDAR');
         return lines.join('\r\n');
       }
 
@@ -2047,24 +1690,92 @@
         URL.revokeObjectURL(a.href);
       }
 
+      function buildGoogleCalendarUrl(start, end, fullName, birthDateStr, phone, clientEmail) {
+        var zoomLink = String(BOOKING_ZOOM_LINK || '').trim();
+        var ownerEmail = String(BOOKING_OWNER_EMAIL || '').trim();
+        var birthHuman = birthDateStr ? birthDateStr.split('-').reverse().join('/') : '';
+        var guestMail = String(clientEmail || '').trim();
+        var descLines = ['פגישה דרך זום.'];
+        if (fullName) descLines.push('שם מלא: ' + fullName);
+        if (birthHuman) descLines.push('תאריך לידה: ' + birthHuman);
+        descLines.push('טלפון: ' + (phone || ''));
+        if (guestMail) descLines.push('אימייל מזמינה: ' + guestMail);
+        if (isProbablyBookingEmail(ownerEmail)) {
+          descLines.push('נעמי נוספה כאורחת – אחרי שמירה תקבלו שתיכן תזכורות לפי הגדרות Google (מומלץ „שעה לפני”).');
+        }
+        descLines.push('');
+        descLines.push('— מומלץ להגדיר תזכורת שעה לפני באירוע (או להשתמש בקובץ ה-.ics שהורד) —');
+        descLines.push(PRE_MEETING_REMINDER_HE);
+        if (zoomLink) {
+          descLines.push('');
+          descLines.push('קישור לזום:');
+          descLines.push(zoomLink);
+        }
+        var details = descLines.join('\n');
+        var GCAL_DETAILS_MAX = 1600;
+        if (details.length > GCAL_DETAILS_MAX) {
+          details = details.slice(0, GCAL_DETAILS_MAX).trim() + '\n\n───\nהמשך בקובץ ה-.ics.';
+        }
+        function ymdhm(d) {
+          return d.getFullYear() + pad2(d.getMonth() + 1) + pad2(d.getDate()) + 'T' + pad2(d.getHours()) + pad2(d.getMinutes()) + '00';
+        }
+        var dates = ymdhm(start) + '/' + ymdhm(end);
+        var q = [
+          'action=TEMPLATE',
+          'text=' + encodeURIComponent('פגישת זום – נעמי'),
+          'dates=' + dates,
+          'details=' + encodeURIComponent(details)
+        ];
+        if (zoomLink) {
+          q.push('location=' + encodeURIComponent(zoomLink));
+        }
+        if (isProbablyBookingEmail(ownerEmail)) {
+          if (!guestMail || ownerEmail.toLowerCase() !== guestMail.toLowerCase()) {
+            q.push('add=' + encodeURIComponent(ownerEmail));
+          }
+        }
+        return 'https://calendar.google.com/calendar/render?' + q.join('&');
+      }
+
+      function setBookingGcalLink(url) {
+        var wrap = document.getElementById('booking-calendar-links');
+        var a = document.getElementById('booking-google-cal');
+        if (!wrap || !a) return;
+        if (!url) {
+          wrap.hidden = true;
+          a.href = '#';
+          return;
+        }
+        a.href = url;
+        wrap.hidden = false;
+      }
+
+      function bookingWaConfigured() {
+        return !!(BOOKING_WHATSAPP_OWNER && String(BOOKING_WHATSAPP_OWNER).replace(/\D/g, '').length >= 9);
+      }
+
       function showMsg(el, text, ok) {
         if (!el) return;
         el.textContent = text;
         el.className = 'booking-msg ' + (ok ? 'ok' : 'err');
       }
 
-      function runBooking(openWa) {
+      function runBooking(mode) {
+        var isFull = mode === 'full';
         var form = document.getElementById('booking-form');
         var msg = document.getElementById('booking-msg');
         if (!form) return;
+        clearBookingGoogleCalendarLink();
         var name = (document.getElementById('booking-name') || {}).value || '';
         var birthStr = (document.getElementById('booking-birthdate') || {}).value || '';
         var phone = (document.getElementById('booking-phone') || {}).value || '';
+        var emailStr = (document.getElementById('booking-email') || {}).value || '';
         var dateStr = (document.getElementById('booking-date') || {}).value || '';
         var timeStr = (document.getElementById('booking-time') || {}).value || '';
         name = name.trim();
         birthStr = birthStr.trim();
         phone = phone.trim();
+        emailStr = emailStr.trim();
         if (!name) {
           showMsg(msg, 'נא למלא שם מלא', false);
           return;
@@ -2080,6 +1791,14 @@
         }
         if (!phone) {
           showMsg(msg, 'נא למלא מספר טלפון', false);
+          return;
+        }
+        if (!emailStr) {
+          showMsg(msg, 'נא למלא אימייל (לתזכורות ביומן)', false);
+          return;
+        }
+        if (!isProbablyBookingEmail(emailStr)) {
+          showMsg(msg, 'נא להזין כתובת אימייל תקינה', false);
           return;
         }
         if (!dateStr || !timeStr) {
@@ -2108,20 +1827,39 @@
           ? meetingAvailability.meetingDurationMinutes * 60 * 1000
           : 60 * 60 * 1000;
         var end = new Date(start.getTime() + meetMs);
-        var ics = buildIcs(start, end, name, birthStr, phone);
-        downloadIcs(ics);
-        var okText = 'הקובץ ירד – הוסיפו ליומן. שעה לפני תופיע התזכורת עם ההודעה המלאה';
-        if (!String(BOOKING_ZOOM_LINK || '').trim()) {
-          okText += ' (הוסיפי BOOKING_ZOOM_LINK בקוד כדי שיופיע קישור הזום בתזכורת).';
+        var gcalUrl = buildGoogleCalendarUrl(start, end, name, birthStr, phone, emailStr);
+        var ownerLow = String(BOOKING_OWNER_EMAIL || '').trim().toLowerCase();
+        var guestLow = emailStr.toLowerCase();
+        var inviteOwner = isProbablyBookingEmail(ownerLow) && ownerLow !== guestLow;
+        var zoomHint = String(BOOKING_ZOOM_LINK || '').trim() ? ' כולל זום באירוע.' : ' (הוסיפי BOOKING_ZOOM_LINK.)';
+        var ownerHint = inviteOwner
+          ? ' נעמי כאורחת – נשלחת הזמנה; מומלץ תזכורת שעה לפני.'
+          : isProbablyBookingEmail(ownerLow)
+            ? ' (אימייל כמו נעמי – תזכורת ידנית.)'
+            : ' (נעמי: BOOKING_OWNER_EMAIL.)';
+        var debugHint =
+          BOOKING_ALARM_DEBUG_MINUTES != null && BOOKING_ALARM_DEBUG_MINUTES > 0
+            ? ' [בדיקה: תזכורת ' + BOOKING_ALARM_DEBUG_MINUTES + ' דק׳ ב-.ics בלבד.]'
+            : '';
+        var okText;
+
+        if (isFull) {
+          var popupOk = false;
+          try {
+            var w = window.open(gcalUrl, '_blank', 'noopener,noreferrer');
+            popupOk = !!(w && !w.closed);
+          } catch (e0) {}
+          if (!popupOk) setBookingGcalLink(gcalUrl);
+          okText = (popupOk ? 'נפתח Google Calendar – שמרו; מומלץ תזכורת שעה לפני.' : 'לחצי על הקישור למטה – שמרו; מומלץ תזכורת שעה לפני.') + ownerHint + zoomHint + debugHint;
         } else {
-          okText += ' וקישור הזום.';
+          downloadIcs(buildIcs(start, end, name, birthStr, phone, emailStr));
+          setBookingGcalLink(gcalUrl);
+          okText = 'הקובץ ירד (.ics, תזכורת שעה לפני).' + (inviteOwner ? ' ב-Google אפשר גם להזמין את נעמי.' : '') + zoomHint + debugHint;
         }
-        if (BOOKING_ALARM_DEBUG_MINUTES != null && BOOKING_ALARM_DEBUG_MINUTES > 0) {
-          okText += ' [מצב בדיקה: תזכורת ' + BOOKING_ALARM_DEBUG_MINUTES + ' דק׳ לפני – החזירי BOOKING_ALARM_DEBUG_MINUTES ל-null לפני פרסום.]';
-        }
+
         showMsg(msg, okText, true);
 
-        if (openWa && BOOKING_WHATSAPP_OWNER && String(BOOKING_WHATSAPP_OWNER).replace(/\D/g, '').length >= 9) {
+        if (isFull && bookingWaConfigured()) {
           var owner = String(BOOKING_WHATSAPP_OWNER).replace(/\D/g, '');
           var humanDate = dateStr.split('-').reverse().join('/');
           var birthHuman = birthStr.split('-').reverse().join('/');
@@ -2131,12 +1869,13 @@
             'תאריך לידה: ' + birthHuman,
             'תאריך פגישה: ' + humanDate,
             'שעת פגישה: ' + timeStr,
-            'טלפון: ' + phone
+            'טלפון: ' + phone,
+            'אימייל: ' + emailStr
           ];
           var url = 'https://wa.me/' + owner + '?text=' + encodeURIComponent(lines.join('\n'));
           window.open(url, '_blank', 'noopener,noreferrer');
-        } else if (openWa && !BOOKING_WHATSAPP_OWNER) {
-          showMsg(msg, 'הקובץ ירד ליומן. הגדירו BOOKING_WHATSAPP_OWNER בסקריפט לשליחה אוטומטית לוואטסאפ שלכם.', true);
+        } else if (isFull && !bookingWaConfigured()) {
+          showMsg(msg, okText + ' (וואטסאפ: BOOKING_WHATSAPP_OWNER.)', true);
         }
       }
 
@@ -2187,14 +1926,19 @@
         if (form) {
           form.addEventListener('submit', function(e) {
             e.preventDefault();
-            runBooking(true);
+            runBooking('full');
           });
         }
         if (icsOnly) {
           icsOnly.addEventListener('click', function(e) {
             e.preventDefault();
-            runBooking(false);
+            runBooking('ics-only');
           });
+        }
+
+        var submitMain = document.getElementById('booking-submit-main');
+        if (submitMain && bookingWaConfigured()) {
+          submitMain.textContent = 'אישור – הוספה ל־Google Calendar + פתיחת וואטסאפ';
         }
 
         renderBookingCalendar();
@@ -2242,6 +1986,3 @@
   </script>
 </body>
 </html>
-
-
-

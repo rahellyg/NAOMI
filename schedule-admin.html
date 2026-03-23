@@ -208,11 +208,7 @@
 
     <div id="admin-panel" hidden>
       <div class="warn">
-        <strong>סנכרון עם דף „קביעת פגישה”:</strong> הדף הציבורי קורא את <code>naomi-availability.json</code> מהאתר. אם ה-<code>fetch</code> נכשל, נטען <strong>גיבוי</strong> מתוך <code>index.html</code> (תג <code>naomi-availability-embed</code>) – חייב להיות <strong>זהה</strong> לקובץ.<br><br>
-        <strong>טוקן (<code>UPDATE_JSON_KEY</code>):</strong> ב-GitHub, סודות (Secrets) <strong>מוגנים</strong> — מוצפנים, לא מופיעים בלוגים, ולא נחשפים לדפדפן של מבקרים. זה בכוונה: דף כמו זה <strong>לא יכול</strong> למשוך את <code>UPDATE_JSON_KEY</code> מהריפו (אחרת כל אחד היה רואה אותו). הסוד זמין רק בתוך <strong>GitHub Actions</strong> כשמעבירים אותו לצעד בעבודה.<br><br>
-        <strong>בדפדפן (שמור ל-GitHub מהדף):</strong> הדביקי את ה-PAT ב<strong>שדה „טוקן GitHub”</strong> בכרטיס למטה (מועדף). אפשר לסמן „זכור בדפדפן” כדי לשמור ב־<code>localStorage</code>. חלופה: קונסול (F12) <code style="user-select:all;">localStorage.setItem('UPDATE_JSON_KEY', '…')</code> או <code>window.UPDATE_JSON_KEY</code> — לא ב-commit. אל תשתפי קישור לדף הניהול.<br><br>
-        <strong>אחרי שינוי בלוח:</strong> לחצי <strong>שמור</strong> – עדכון ל־<code>naomi-availability.json</code> בריפו (אם הדפדפן מאפשר). אם נכשל (CORS): יועתק JSON ללוח או <code>node tools/push-availability.mjs</code>. עדכני <code>naomi-availability-embed</code> ב־<code>index.html</code> אם משתמשים בגיבוי.<br><br>
-        <span style="font-size:0.8rem;">מדריך מפורט: <code>github-schedule-sync.md</code> בתיקיית הפרויקט.</span>
+        <strong>סנכרון:</strong> <code>index.html</code> טוען <code>naomi-availability.json</code>; אם <code>fetch</code> נכשל – גיבוי <code>naomi-availability-embed</code> (שמרו זהה לקובץ). <strong>טוקן:</strong> Secrets ב-GitHub לא נגישים לדפדפן – הדביקי PAT בשדה למטה או <code>localStorage</code>/<code>window.UPDATE_JSON_KEY</code> (לא ב-commit). <strong>שמור</strong> דוחף לריפו; אם CORS – העתק ללוח או <code>node tools/push-availability.mjs</code>. פירוט: <code>github-schedule-sync.md</code>.
       </div>
 
       <div class="card">
@@ -239,11 +235,11 @@
         <div class="row2">
           <div>
             <label for="start-time">שעת התחלה</label>
-            <input type="time" id="start-time" value="09:00" step="60">
+            <input type="time" id="start-time" value="11:30" step="60">
           </div>
           <div>
             <label for="end-time">שעת סיום (סוף חלון)</label>
-            <input type="time" id="end-time" value="18:00" step="60">
+            <input type="time" id="end-time" value="13:00" step="60">
           </div>
         </div>
         <label for="slot-min">מרווח בין תחילות פגישות (דקות)</label>
@@ -275,21 +271,30 @@
   </div>
 
   <script>
-    /**
-     * שינוי כאן – סיסמה לדף הניהול בלבד (אל תשתפי).
-     */
     var ADMIN_PASSWORD = '123456';
 
-    /** יעד דחיפת naomi-availability.json בשמירה (GitHub Contents API) */
     var GITHUB_PUSH_OWNER = 'rahellyg';
     var GITHUB_PUSH_REPO = 'NAOMI';
     var GITHUB_PUSH_BRANCH = 'main';
     var GITHUB_PUSH_PATH = 'naomi-availability.json';
-    /** אותו שם כמו סוד/משתנה סביבה – נקרא מ-localStorage או מ-window (לא מ-GitHub Actions ישירות). */
     var UPDATE_JSON_STORAGE_KEY = 'UPDATE_JSON_KEY';
+    var DAYS_OPEN_DEFAULT = [0, 1, 2, 3, 4];
+    var scheduleDaysOpen = DAYS_OPEN_DEFAULT.slice();
 
-    /** ביצוא תמיד כל ימי השבוע פתוחים; חסימות רק דרך לוח השנה (blockedDates). */
-    var DAYS_OPEN_ALL = [0, 1, 2, 3, 4, 5, 6];
+    function normalizeDaysOpen(arr) {
+      if (!arr || !Array.isArray(arr) || !arr.length) return DAYS_OPEN_DEFAULT.slice();
+      var seen = {};
+      for (var i = 0; i < arr.length; i++) {
+        var d = arr[i];
+        if (typeof d === 'number' && d === (d | 0) && d >= 0 && d <= 6) seen[d] = true;
+      }
+      var keys = Object.keys(seen)
+        .map(Number)
+        .sort(function(a, b) {
+          return a - b;
+        });
+      return keys.length ? keys : DAYS_OPEN_DEFAULT.slice();
+    }
     var MONTH_NAMES_HE = [
       'ינואר', 'פברואר', 'מרץ', 'אפריל', 'מאי', 'יוני',
       'יולי', 'אוגוסט', 'ספטמבר', 'אוקטובר', 'נובמבר', 'דצמבר'
@@ -432,10 +437,10 @@
     function defaultConfig() {
       return {
         version: 1,
-        daysOpen: DAYS_OPEN_ALL.slice(),
-        startHour: 9,
-        startMinute: 0,
-        endHour: 18,
+        daysOpen: DAYS_OPEN_DEFAULT.slice(),
+        startHour: 11,
+        startMinute: 30,
+        endHour: 13,
         endMinute: 0,
         slotMinutes: 30,
         meetingDurationMinutes: 45,
@@ -453,11 +458,11 @@
 
     function formToConfig() {
       var blocked = parseDateLinesTextarea('blocked');
-      var st = parseTimeField('start-time', 9, 0);
-      var et = parseTimeField('end-time', 18, 0);
+      var st = parseTimeField('start-time', 11, 30);
+      var et = parseTimeField('end-time', 13, 0);
       return {
         version: 1,
-        daysOpen: DAYS_OPEN_ALL.slice(),
+        daysOpen: scheduleDaysOpen.slice(),
         startHour: st.h,
         startMinute: st.min,
         endHour: et.h,
@@ -471,9 +476,10 @@
 
     function configToForm(cfg) {
       cfg = cfg || defaultConfig();
-      var sh = cfg.startHour != null ? cfg.startHour : 9;
-      var sm = cfg.startMinute != null ? cfg.startMinute : 0;
-      var eh = cfg.endHour != null ? cfg.endHour : 18;
+      scheduleDaysOpen = normalizeDaysOpen(cfg.daysOpen);
+      var sh = cfg.startHour != null ? cfg.startHour : 11;
+      var sm = cfg.startMinute != null ? cfg.startMinute : 30;
+      var eh = cfg.endHour != null ? cfg.endHour : 13;
       var em = cfg.endMinute != null ? cfg.endMinute : 0;
       if (eh === 24 && (cfg.endMinute == null || cfg.endMinute === 0)) {
         eh = 23;
@@ -502,9 +508,6 @@
       return 'https://api.github.com/repos/' + encodeURIComponent(owner) + '/' + encodeURIComponent(repo) + '/contents/' + parts;
     }
 
-    /**
-     * דוחף את cfg ל-GitHub. token = PAT עם Contents: read+write.
-     */
     function pushAvailabilityToGithub(cfg, token) {
       var owner = GITHUB_PUSH_OWNER;
       var repo = GITHUB_PUSH_REPO;
@@ -552,11 +555,6 @@
         });
     }
 
-    /**
-     * Same key as Node: const token = process.env.UPDATE_JSON_KEY;
-     * Order: #gh-push-token (paste) → process.env → window → localStorage.
-     * Plain GitHub Pages: input / window / localStorage; repo Secrets are not visible in the browser.
-     */
     function getUpdateJsonKeyToken() {
       try {
         var inputEl = document.getElementById('gh-push-token');
@@ -727,7 +725,7 @@
       reader.onload = function() {
         try {
           var cfg = JSON.parse(reader.result);
-          cfg.daysOpen = DAYS_OPEN_ALL.slice();
+          cfg.daysOpen = normalizeDaysOpen(cfg.daysOpen);
           if (cfg.onlyOpenDates && cfg.onlyOpenDates.length) {
             cfg.onlyOpenDates = [];
             showSaveMsg('ייבוא בוצע. רשימת onlyOpenDates הוסרה – הניהול הוא דרך הלוח בלבד. לחצי שמור לעדכון.', true);
