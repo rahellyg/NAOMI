@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Update test.json</title>
+  <style>
+    :root {
+      font-family: system-ui, -apple-system, Segoe UI, sans-serif;
+      background: #0f1419;
+      color: #e7e9ea;
+    }
+    body {
+      max-width: 26rem;
+      margin: 2rem auto;
+      padding: 0 1rem 2rem;
+    }
+    h1 {
+      font-size: 1.35rem;
+      font-weight: 600;
+      margin: 0 0 0.25rem;
+    }
+    .sub {
+      font-size: 0.85rem;
+      color: #8b98a5;
+      margin: 0 0 1.5rem;
+    }
+    .sub code {
+      background: #15202b;
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      font-size: 0.9em;
+    }
+    label {
+      display: block;
+      margin-top: 1rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #8b98a5;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+    input {
+      width: 100%;
+      box-sizing: border-box;
+      margin-top: 0.4rem;
+      padding: 0.65rem 0.8rem;
+      border: 1px solid #38444d;
+      border-radius: 8px;
+      background: #15202b;
+      color: inherit;
+      font-size: 1rem;
+    }
+    input:focus {
+      outline: 2px solid #1d9bf0;
+      outline-offset: 0;
+      border-color: #1d9bf0;
+    }
+    button {
+      margin-top: 1.5rem;
+      width: 100%;
+      padding: 0.7rem;
+      font-size: 1rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      background: #1d9bf0;
+      color: #fff;
+      cursor: pointer;
+    }
+    button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+    button:hover:not(:disabled) {
+      background: #1a8cd8;
+    }
+    #msg {
+      margin-top: 1.1rem;
+      font-size: 0.9rem;
+      white-space: pre-wrap;
+      line-height: 1.45;
+    }
+    #msg.ok {
+      color: #00ba7c;
+    }
+    #msg.err {
+      color: #f4212e;
+    }
+    .hint {
+      font-size: 0.78rem;
+      color: #71767b;
+      margin-top: 1.25rem;
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+  <h1>Update <code>{{FILE_PATH}}</code></h1>
+  <p class="sub">GitHub: <code>{{OWNER}}</code> / <code>{{REPO}}</code> · branch <code>{{BRANCH}}</code></p>
+
+  <form id="f">
+    <label for="key">Key</label>
+    <input id="key" name="key" required autocomplete="off" placeholder="e.g. ccc" />
+
+    <label for="value">Value</label>
+    <input id="value" name="value" required autocomplete="off" placeholder="e.g. aaa" />
+
+    <button type="submit" id="go">Save to GitHub</button>
+  </form>
+
+  <div id="msg" role="status" aria-live="polite"></div>
+
+  <p class="hint">
+    Plain text is stored as a string. For numbers, booleans, or nested JSON, type valid JSON
+    (e.g. <code>42</code>, <code>true</code>, <code>{"a":1}</code>).
+  </p>
+
+  <script>
+    (function () {
+      const f = document.getElementById('f');
+      const msg = document.getElementById('msg');
+      const go = document.getElementById('go');
+
+      f.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        msg.textContent = '';
+        msg.className = '';
+        go.disabled = true;
+        try {
+          var key = document.getElementById('key').value.trim();
+          var valueRaw = document.getElementById('value').value;
+          var res = await fetch('/api/update', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ key: key, value: valueRaw }),
+          });
+          var data = await res.json().catch(function () {
+            return {};
+          });
+          if (!res.ok) throw new Error(data.error || res.statusText);
+          msg.className = 'ok';
+          msg.textContent =
+            'Saved ' + JSON.stringify(data.added) + ' to ' + '{{FILE_PATH}}' + ' on GitHub.';
+        } catch (err) {
+          msg.className = 'err';
+          msg.textContent = err.message || String(err);
+        } finally {
+          go.disabled = false;
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
