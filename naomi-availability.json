@@ -1,29 +1,12 @@
 {
   "version": 1,
-  "daysOpen": [
-    0,
-    1,
-    2,
-    3,
-    4,
-    5,
-    6
-  ],
+  "daysOpen": [0, 1, 2, 3, 4, 5, 6],
   "startHour": 9,
   "startMinute": 0,
   "endHour": 18,
   "endMinute": 0,
   "slotMinutes": 30,
   "meetingDurationMinutes": 45,
-  "blockedDates": [
-    "2026-03-24",
-    "2026-03-25",
-    "2026-03-26",
-    "2026-03-27",
-    "2026-03-28",
-    "2026-03-29",
-    "2026-03-30",
-    "2026-03-31"
-  ],
+  "blockedDates": [],
   "onlyOpenDates": []
 }

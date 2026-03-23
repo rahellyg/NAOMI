@@ -2,20 +2,20 @@
 
 ## Update JSON from the manage calendar page
 
-1. **שמור** – In `schedule-admin.html`, fill GitHub owner/repo/token under **„הגדרות סנכרון GitHub (מתקדם)”**, then click **שמור**. That **pushes** `naomi-availability.json` to the repo (may fail in-browser due to **CORS**). Without full GitHub fields, **שמור** copies one-line JSON to the clipboard for pasting into `index.html` / GitHub.
+1. **`schedule-admin.html` → שמור** – Copies formatted JSON to the clipboard. Paste into **`naomi-availability.json`** at the project root (and optionally the same JSON into **`naomi-availability-embed`** in `index.html` if you rely on the embed fallback).
 
-2. **`schedule-admin.html` → „דחיפה ידנית ל-GitHub”**  
-   Same API push as above, on demand. May fail in the browser with **CORS** (GitHub’s API often blocks direct calls from web pages).
-
-3. **„פתיחת עריכת הקובץ ב-GitHub”**  
-   Opens the GitHub web editor; paste JSON (e.g. after **שמור** copied to clipboard).
-
-4. **Reliable: Node script** (from project folder; you need a local `naomi-availability.json` or paste into the file first):
-   ```bash
-   set GITHUB_TOKEN=your_fine_grained_token
-   node tools/push-availability.mjs YOUR_USER YOUR_REPO main naomi-availability.json
+2. **Push to GitHub – Node script** (from project folder; file must contain the JSON you want live):
+   - Set **`UPDATE_JSON_KEY`** (preferred) or **`GITHUB_TOKEN`** to your fine-grained PAT (Contents: read+write on the repo).
+   ```powershell
+   $env:UPDATE_JSON_KEY = "github_pat_..."
+   node tools/push-availability.mjs rahellyg NAOMI main naomi-availability.json
    ```
-   Uses the file `naomi-availability.json` in the project root.
+   ```bash
+   export UPDATE_JSON_KEY=github_pat_...
+   node tools/push-availability.mjs rahellyg NAOMI main naomi-availability.json
+   ```
+   Uses the file `naomi-availability.json` in the project root.  
+   For **GitHub Actions**, add repository secret `UPDATE_JSON_KEY` and pass it as `env: UPDATE_JSON_KEY: ${{ secrets.UPDATE_JSON_KEY }}` in the workflow step that runs the script.
 
 ---
 
@@ -35,13 +35,11 @@ If the fetch fails (wrong path, file missing, etc.) and the embed still has **`b
 
 ## After you change the calendar in `schedule-admin.html`
 
-1. Click **שמור** – pushes to GitHub if configured, or copies JSON to the clipboard.
-2. In your repo (if you pasted manually):
-   - Update **`naomi-availability.json`** and/or the embed in **`index.html`** with the same JSON.
-3. `git add naomi-availability.json index.html`
-4. `git commit -m "Update availability"`
-5. `git push`
-6. Wait ~1 minute for GitHub Pages, then hard refresh (**Ctrl+F5**).
+1. Click **שמור** in `schedule-admin.html` – copies JSON to the clipboard; paste into **`naomi-availability.json`**, then run **`node tools/push-availability.mjs`** with **`UPDATE_JSON_KEY`** set (or commit + push the file).
+2. Update the embed in **`index.html`** if you rely on the fallback (same data as the file).
+3. `git add naomi-availability.json index.html` (as needed)
+4. `git commit` → `git push`
+5. Wait ~1 minute for GitHub Pages, then hard refresh (**Ctrl+F5**).
 
 ---
 

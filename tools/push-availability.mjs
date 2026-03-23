@@ -5,12 +5,21 @@
  * Token: GitHub → Settings → Developer settings → Fine-grained token
  *   with Contents: Read and write on the target repository.
  *
- * Usage (from project root):
- *   set GITHUB_TOKEN=ghp_xxxx
+ * Token env (first match wins):
+ *   UPDATE_JSON_KEY  (preferred)
+ *   GITHUB_TOKEN     (legacy alias)
+ *
+ * Usage (from project root, Windows PowerShell):
+ *   $env:UPDATE_JSON_KEY = "github_pat_..."
  *   node tools/push-availability.mjs OWNER REPO [branch] [filepath]
  *
+ * Or cmd: set UPDATE_JSON_KEY=... && node tools/push-availability.mjs ...
+ *
+ * Node 20.6+: put UPDATE_JSON_KEY in a local .env file (not committed) and run:
+ *   node --env-file=.env tools/push-availability.mjs OWNER REPO
+ *
  * Example:
- *   node tools/push-availability.mjs myuser NaomilandingPage main naomi-availability.json
+ *   node tools/push-availability.mjs rahellyg NAOMI main naomi-availability.json
  */
 
 import { readFileSync } from 'fs';
@@ -20,18 +29,20 @@ import { dirname, join } from 'path';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = join(__dirname, '..');
 
-const token = process.env.GITHUB_TOKEN;
+const token = process.env.UPDATE_JSON_KEY || process.env.GITHUB_TOKEN;
 const owner = process.argv[2] || process.env.GITHUB_OWNER;
 const repo = process.argv[3] || process.env.GITHUB_REPO;
 const branch = process.argv[4] || process.env.GITHUB_BRANCH || 'main';
 const filepath = process.argv[5] || process.env.GITHUB_FILE || 'naomi-availability.json';
 
 if (!token) {
-  console.error('Missing GITHUB_TOKEN in environment.');
+  console.error('Missing token: set UPDATE_JSON_KEY or GITHUB_TOKEN in the environment.');
   process.exit(1);
 }
 if (!owner || !repo) {
-  console.error('Usage: GITHUB_TOKEN=xxx node tools/push-availability.mjs <owner> <repo> [branch] [path]');
+  console.error(
+    'Usage: UPDATE_JSON_KEY=xxx node tools/push-availability.mjs <owner> <repo> [branch] [path]'
+  );
   process.exit(1);
 }
 
