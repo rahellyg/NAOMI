@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>תקשור והעברת מסרים | נעמי</title>
+  <title>עולם של קסם | נעמי</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700&family=Rubik:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -156,6 +156,18 @@
       color: #000;
       text-shadow: none;
       font-size: 0.9em;
+    }
+
+    h1 .title-body {
+      display: block;
+      font-weight: 400;
+      font-size: 0.88em;
+      line-height: 1.5;
+      max-width: 28em;
+      margin: 0 auto;
+      text-shadow:
+        0 0 6px rgba(240, 235, 248, 0.85),
+        0 0 16px rgba(240, 235, 248, 0.55);
     }
 
     h1 .title-link .title-star:hover {
@@ -961,7 +973,7 @@
       <span class="sparkle" aria-hidden="true">✧</span>
       <span class="sparkle" aria-hidden="true">⋆</span>
       <span class="sparkle" aria-hidden="true">✦</span>
-      <h1><br><a href="#registration-form" class="title-link first-sentence">אני לא הולכת להשתמש בטריקים פסיכולוגיים כדי לגרום לך לקנות</a><br><br><a href="#registration-form" class="title-link">★ אלוהים רוצה לדבר איתך ★</a><br><br><a href="#registration-form" class="title-link">הנשמה שלך צורחת שזה אמת?</a><br><a href="#registration-form" class="title-link">בוא/י</a><br><a href="#registration-form" class="title-link"><span class="title-star">★</span></a><br><a href="#registration-form" class="title-link">יש בך התנגדות?</a><br><a href="#registration-form" class="title-link">זה עוד לא הזמן שלך</a><br><a href="#registration-form" class="title-link">כזה פשוט</a></h1>
+      <h1><br><a href="#registration-form" class="title-link first-sentence">עולם של קסם — זה המוטו שלי</a><br><br><span class="title-body">כי כל תובנה שהגעתי אליה עשתה לי אורגזמות במוח וגרמה לי להבין כל פעם מחדש שהכל פה הרבה יותר יפה, פשוט, מורכב, מדויק, קסום ופאקינג גאוני.</span><br><br><a href="#registration-form" class="title-link">★ ברוך הבא למוח שלי ★</a></h1>
     </header>
 
     <div class="channel-intro-youtube">
@@ -1166,6 +1178,12 @@
 
   <!-- גיבוי אם fetch נכשל – שמרו כמו naomi-availability.json; אופציונלי: window.NAOMI_AVAILABILITY_URL -->
   <script type="application/json" id="naomi-availability-embed">{"version":1,"daysOpen":[0,1,2,3,4],"startHour":11,"startMinute":30,"endHour":13,"endMinute":0,"slotMinutes":30,"meetingDurationMinutes":45,"blockedDates":[],"onlyOpenDates":[]}</script>
+
+  <!-- Supabase: Dashboard → Project Settings → API → Project URL + anon public key. BOOKING-SYNC-SUPABASE.md -->
+  <script>
+    window.NAOMI_SUPABASE_URL = 'https://bwxwgplcnhzqjaiodthf.supabase.co';
+    window.NAOMI_SUPABASE_ANON_KEY = 'sb_publishable_aUDhNC9rZubTq6Yajrb1iA_l0fVUHgt';
+  </script>
 
   <script>
     /**
