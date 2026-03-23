@@ -1377,7 +1377,7 @@
 
     <section class="booking-section" id="booking-meeting" aria-label="קביעת פגישה">
       <h2>קביעת פגישת זום</h2>
-      <p class="booking-note">בחרו תאריך פגישה ושעת פגישה. אחרי האישור יורד קובץ ליומן – <strong>שעה לפני הפגישה</strong> היומן יציג את ההודעה המלאה (כולל קישור זום) בתזכורת. שליחת וואטסאפ אוטומטית בזמן אמת דורשת שירות נפרד.</p>
+      <p class="booking-note">הלוח והשעות מסתנכרנים עם קובץ <strong>naomi-availability.json</strong> שבאתר (אותו קובץ שמעדכנים בניהול / ב-GitHub). בחרו תאריך ושעה. אחרי האישור יורד קובץ ליומן – <strong>שעה לפני הפגישה</strong> היומן יציג את ההודעה המלאה (כולל קישור זום). שליחת וואטסאפ אוטומטית בזמן אמת דורשת שירות נפרד.</p>
       <p class="booking-note" id="booking-availability-hint" style="margin-top:-0.75rem;font-size:0.78rem;opacity:0.95;"></p>
       <form id="booking-form" novalidate>
         <p class="booking-questionnaire-title">שאלון</p>
@@ -1516,12 +1516,19 @@
     })();
   </script>
 
-  <!-- גיבוי לוח זמנים: אם הדף לא מצליח לטעון naomi-availability.json (למשל פתיחה כקובץ מהמחשב), הדביקי כאן את אותו תוכן כמו בקובץ. -->
+  <!--
+    קביעת פגישה: טוענת קודם את naomi-availability.json מאותה תיקייה כמו הדף (או כתובת מלאה).
+    אופציונלי – כתובת קבועה (למשל אם ה-JSON במקום אחר):
+    <script>window.NAOMI_AVAILABILITY_URL = 'https://USER.github.io/REPO/naomi-availability.json';</script>
+  -->
+  <!-- גיבוי: אם ה-fetch נכשל, נטען JSON מהשורה למטה – שמרו זהה ל-naomi-availability.json -->
   <script type="application/json" id="naomi-availability-embed">{"version":1,"daysOpen":[0,1,2,3,4,5,6],"startHour":9,"startMinute":0,"endHour":18,"endMinute":0,"slotMinutes":30,"meetingDurationMinutes":45,"blockedDates":[],"onlyOpenDates":[]}</script>
 
   <script>
     /**
-     * קביעת פגישה:
+     * קביעת פגישה – מקור לוח זמנים:
+     * 1) fetch ל-naomi-availability.json (נתיב חכם ל-GitHub Pages) או window.NAOMI_AVAILABILITY_URL אם הוגדר.
+     * 2) אם נכשל: גיבוי מתוך #naomi-availability-embed (אותו תוכן כמו הקובץ).
      * BOOKING_WHATSAPP_OWNER – מספר וואטסאפ של נעמי בפורמט בינלאומי ללא + (למשל 972501234567).
      * ריק = לא ייפתח קישור וואטסאפ, רק הורדת קובץ יומן.
      * BOOKING_ZOOM_LINK – קישור קבוע לפגישת זום (יופיע באירוע ובתזכורת שעה לפני).
@@ -2156,14 +2163,22 @@
         if (hint) {
           if (!meetingAvailability) {
             hint.innerHTML = '<strong style="color:#b71c1c">לא נטען לוח זמנים</strong> – כל התאריכים ייראו אפשריים אבל אין סנכרון. פתחי את האתר דרך שרת (לא קובץ ישירות), או הדביקי את תוכן <code>naomi-availability.json</code> לתג <code>&lt;script id="naomi-availability-embed"&gt;</code> ב־index.html.';
+          } else if (availabilityLoadSource === 'fetch') {
+            if (meetingAvailability.onlyOpenDates && meetingAvailability.onlyOpenDates.length) {
+              hint.innerHTML = '<strong>naomi-availability.json</strong> נטען מהאתר. ניתן לקבוע רק בתאריכים מהרשימה בקובץ + שעות לפי המרווח.';
+            } else if (meetingAvailability.daysOpen && meetingAvailability.daysOpen.length) {
+              hint.innerHTML = '<strong>naomi-availability.json</strong> נטען מהשרת – הלוח והשעות לפי הקובץ (תאריכים חסומים, חלון שעות, מרווח סלוטים).';
+            } else {
+              hint.innerHTML = '<strong>naomi-availability.json</strong> נטען מהאתר.';
+            }
           } else if (availabilityLoadSource === 'embed') {
-            hint.innerHTML = 'לוח זמנים נטען מ<strong>הטמעה בדף</strong> (גיבוי) – כנראה <code>naomi-availability.json</code> לא נמצא בכתובת הנכונה ב-GitHub Pages. ודאי שהקובץ ב-commit, או הגדירי <code>window.NAOMI_AVAILABILITY_URL</code> לכתובת המלאה. עדכנו גם את תג <code>naomi-availability-embed</code> ב־index.';
+            hint.innerHTML = 'לוח זמנים מ<strong>גיבוי בדף</strong> (לא מהקובץ ברשת) – כנראה <code>naomi-availability.json</code> לא נטען. ודאי שהקובץ ב-commit ליד <code>index.html</code>, או הגדירי <code>window.NAOMI_AVAILABILITY_URL</code>. עדכנו גם את <code>naomi-availability-embed</code> כדי שיתאים.';
           } else if (meetingAvailability.onlyOpenDates && meetingAvailability.onlyOpenDates.length) {
-            hint.innerHTML = 'ניתן לקבוע רק בתאריכים הספציפיים שמופיעים בלוח (קובץ <code>naomi-availability.json</code>) + שעות לפי המרווח.';
+            hint.innerHTML = 'ניתן לקבוע רק בתאריכים מהקובץ <code>naomi-availability.json</code> + שעות לפי המרווח.';
           } else if (meetingAvailability.daysOpen && meetingAvailability.daysOpen.length) {
-            hint.innerHTML = 'הזמנות לפי <strong>לוח זמנים שפורסם</strong> (<code>naomi-availability.json</code>). תאריכים אדומים בניהול = חסומים כאן.';
+            hint.innerHTML = 'לוח זמנים לפי <code>naomi-availability.json</code> (תאריכים חסומים בניהול = לא זמינים כאן).';
           } else {
-            hint.innerHTML = 'לוח זמנים נטען; בדקי הגדרות ימים בקובץ.';
+            hint.innerHTML = 'לוח זמנים נטען; בדקי את <code>naomi-availability.json</code>.';
           }
         }
 
@@ -2205,7 +2220,10 @@
 
       var fetchBase = getAvailabilityFetchUrl();
       var fetchUrl = fetchBase + (fetchBase.indexOf('?') >= 0 ? '&' : '?') + '_=' + Date.now();
-      fetch(fetchUrl, { cache: 'no-store' })
+      fetch(fetchUrl, {
+        cache: 'no-store',
+        headers: { Accept: 'application/json' }
+      })
         .then(function(r) {
           if (!r.ok) throw new Error('no');
           return r.json();
