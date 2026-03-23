@@ -719,6 +719,8 @@
         }
       }
       if (!path.endsWith('/')) path += '/';
+      /* naomi-bookings.json בדרך כלל ליד index.html בשורש האתר, לא בתוך schedule-admin/ */
+      path = path.replace(/\/schedule-admin\/+$/i, '/');
       return window.location.origin + path + GITHUB_BOOKINGS_PATH;
     }
 
