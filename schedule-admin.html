@@ -317,12 +317,12 @@
       <div class="card" id="bookings-card">
         <h2>פגישות שנקבעו</h2>
         <p style="font-size:0.82rem;color:var(--muted);margin-bottom:0.65rem;line-height:1.5;">
-          הרשימה נטענת מ־<code>naomi-bookings.json</code> (אותו אתר / GitHub Pages) ומ־<code>localStorage</code> של דף ההזמנה באותו דפדפן.
-          אחרי אישור מהדף הציבורי: חברי <strong>BOOKING_LEDGER_WEBHOOK</strong> (Make) שמעדכן את הקובץ ב-GitHub. עדכון: <strong>רענון מהאתר</strong>, <strong>ייבוא JSON</strong> או <strong>שמור פגישות ל-GitHub</strong>.
-          <strong>וואטסאפ ללקוחה:</strong> בכל פגישה – כפתור ירוק לפתיחת צ׳אט עם הטקסט המוכן (מהמחשב שלך; הלקוחה תראה רק אחרי השליחה).
+          <strong>דפדפן אחר / טלפון:</strong> רשימת הפגישות מגיעה מ־<strong>GitHub</strong> (קובץ <code>naomi-bookings.json</code> בענף <code>main</code>) – לא מ־localStorage של הלקוחות. אחרי כל הזמנה מהדף הציבורי חייב להתעדכן הקובץ ב־repo: <strong>BOOKING_LEDGER_WEBHOOK</strong> (Make → commit) או עדכון ידני + <strong>שמור פגישות ל-GitHub</strong>.
+          <strong>רענון</strong> מושך מחדש מ־GitHub (זהה בכל מכשיר). <strong>localStorage</strong> רק במחשב שבו נפתח דף ההזמנה – לא מחליף את הקובץ בשרת.
+          <strong>וואטסאפ ללקוחה:</strong> כפתור ירוק בכל פגישה.
         </p>
         <div class="bookings-toolbar">
-          <button type="button" class="btn-secondary" id="btn-bookings-refresh">רענון מהאתר</button>
+          <button type="button" class="btn-secondary" id="btn-bookings-refresh">רענון מהקובץ ב-GitHub</button>
           <label class="btn-secondary btn-file" style="display:flex;align-items:center;justify-content:center;padding:0.85rem;cursor:pointer;">
             ייבוא JSON
             <input type="file" id="bookings-import-file" accept=".json,application/json" style="display:none;">
@@ -705,10 +705,18 @@
       );
     }
 
-    function getBookingsFetchUrl() {
-      if (typeof window.NAOMI_BOOKINGS_JSON_URL === 'string' && window.NAOMI_BOOKINGS_JSON_URL.trim()) {
-        return window.NAOMI_BOOKINGS_JSON_URL.trim();
-      }
+    /** מקור אחיד לכל דפדפן – תוכן הענף main מהריפו (ציבורי) */
+    function getGithubRawBookingsUrl() {
+      var o = String(GITHUB_PUSH_OWNER || '').trim();
+      var r = String(GITHUB_PUSH_REPO || '').trim();
+      var br = String(GITHUB_PUSH_BRANCH || 'main').trim();
+      var p = String(GITHUB_BOOKINGS_PATH || 'naomi-bookings.json').trim();
+      if (!o || !r) return '';
+      var parts = p.split('/').filter(Boolean).map(encodeURIComponent).join('/');
+      return 'https://raw.githubusercontent.com/' + encodeURIComponent(o) + '/' + encodeURIComponent(r) + '/' + encodeURIComponent(br) + '/' + parts;
+    }
+
+    function getBookingsFetchUrlPages() {
       var path = window.location.pathname || '/';
       if (!path.endsWith('/')) {
         var lastSeg = path.split('/').pop() || '';
@@ -719,9 +727,17 @@
         }
       }
       if (!path.endsWith('/')) path += '/';
-      /* naomi-bookings.json בדרך כלל ליד index.html בשורש האתר, לא בתוך schedule-admin/ */
       path = path.replace(/\/schedule-admin\/+$/i, '/');
       return window.location.origin + path + GITHUB_BOOKINGS_PATH;
+    }
+
+    function getBookingsFetchUrl() {
+      if (typeof window.NAOMI_BOOKINGS_JSON_URL === 'string' && window.NAOMI_BOOKINGS_JSON_URL.trim()) {
+        return window.NAOMI_BOOKINGS_JSON_URL.trim();
+      }
+      var raw = getGithubRawBookingsUrl();
+      if (raw) return raw;
+      return getBookingsFetchUrlPages();
     }
 
     function normalizeBookingsArray(arr) {
@@ -811,9 +827,8 @@
       return n;
     }
 
-    function fetchBookingsFromRemote() {
-      var base = getBookingsFetchUrl();
-      var url = base + (base.indexOf('?') >= 0 ? '&' : '?') + '_=' + Date.now();
+    function fetchBookingsJsonFromUrl(baseUrl) {
+      var url = baseUrl + (baseUrl.indexOf('?') >= 0 ? '&' : '?') + '_=' + Date.now();
       return fetch(url, { cache: 'no-store', headers: { Accept: 'application/json' } }).then(function(r) {
         if (!r.ok) throw new Error('HTTP ' + r.status);
         return r.json();
@@ -821,6 +836,19 @@
         var arr = j && Array.isArray(j.bookings) ? j.bookings : Array.isArray(j) ? j : [];
         return normalizeBookingsArray(arr);
       });
+    }
+
+    function fetchBookingsFromRemote() {
+      if (typeof window.NAOMI_BOOKINGS_JSON_URL === 'string' && window.NAOMI_BOOKINGS_JSON_URL.trim()) {
+        return fetchBookingsJsonFromUrl(window.NAOMI_BOOKINGS_JSON_URL.trim());
+      }
+      var raw = getGithubRawBookingsUrl();
+      if (raw) {
+        return fetchBookingsJsonFromUrl(raw).catch(function() {
+          return fetchBookingsJsonFromUrl(getBookingsFetchUrlPages());
+        });
+      }
+      return fetchBookingsJsonFromUrl(getBookingsFetchUrlPages());
     }
 
     function showBookingsMsg(text, ok) {
@@ -896,7 +924,8 @@
       if (!sorted.length) {
         var empty = document.createElement('li');
         empty.style.opacity = '0.88';
-        empty.textContent = 'אין פגישות ברשימה. לחצי „רענון מהאתר” או ייבוא JSON.';
+        empty.textContent =
+          'אין פגישות בקובץ GitHub (או ריק). ודאי ש־naomi-bookings.json מתעדכן אחרי הזמנות (Webhook/Make), או ייבוא JSON. רענון מהקובץ ב-GitHub.';
         ul.appendChild(empty);
         return;
       }
