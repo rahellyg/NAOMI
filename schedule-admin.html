@@ -81,8 +81,8 @@
     .btn-secondary { background: rgba(255,255,255,0.5); color: var(--accent); margin-top: 0.5rem; }
     .btn-file { margin-top: 0.5rem; }
     .msg { margin-top: 0.75rem; padding: 0.6rem; border-radius: 8px; font-size: 0.88rem; text-align: center; display: none; }
-    .msg.ok { display: block; background: rgba(76, 175, 80, 0.2); color: #1b5e20; }
-    .msg.err { display: block; background: rgba(244, 67, 54, 0.15); color: #b71c1c; }
+    .msg.ok { display: block; background: rgba(255, 250, 240, 0.97); color: #1e1530; border: 1px solid rgba(212, 184, 122, 0.65); }
+    .msg.err { display: block; background: rgba(255, 245, 245, 0.95); color: #8b1532; border: 1px solid rgba(198, 40, 40, 0.35); }
     #login-gate { margin-top: 2rem; }
     #admin-panel[hidden] { display: none !important; }
     .warn {
@@ -191,6 +191,92 @@
       margin-top: 0.65rem;
       line-height: 1.45;
     }
+    .cal-cell.has-booking {
+      box-shadow: inset 0 0 0 2px rgba(212, 184, 122, 0.95);
+      font-weight: 700;
+    }
+    .cal-cell.has-booking::after {
+      content: '';
+      position: absolute;
+      bottom: 3px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: #d4b87a;
+    }
+    .cal-cell {
+      position: relative;
+    }
+    .bookings-list {
+      list-style: none;
+      margin: 0.75rem 0 0;
+      padding: 0;
+      max-height: 420px;
+      overflow-y: auto;
+      font-size: 0.82rem;
+      line-height: 1.45;
+    }
+    .bookings-list li {
+      background: rgba(255,255,255,0.45);
+      border: 1px solid rgba(92, 45, 122, 0.2);
+      border-radius: 8px;
+      padding: 0.55rem 0.65rem;
+      margin-bottom: 0.45rem;
+    }
+    .bookings-list li strong { color: var(--accent); }
+    .booking-item-title {
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 0.4rem;
+      font-size: 0.9rem;
+    }
+    .booking-item-rows {
+      display: grid;
+      gap: 0.25rem 0.5rem;
+      font-size: 0.8rem;
+      line-height: 1.4;
+    }
+    .booking-item-rows span.lbl {
+      color: var(--muted);
+      font-weight: 600;
+      min-width: 5.5rem;
+      display: inline-block;
+    }
+    .booking-item-foot {
+      margin-top: 0.45rem;
+      font-size: 0.72rem;
+      color: var(--muted);
+      opacity: 0.9;
+    }
+    .bookings-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+    .bookings-toolbar button { width: auto; flex: 1; min-width: 8rem; margin-top: 0; }
+    .btn-wa-client {
+      margin-top: 0.55rem;
+      width: 100%;
+      padding: 0.55rem 0.75rem;
+      font-size: 0.82rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: inherit;
+      background: #25d366;
+      color: #fff;
+    }
+    .btn-wa-client:hover:not(:disabled) { filter: brightness(1.06); }
+    .btn-wa-client:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      background: rgba(0,0,0,0.2);
+      color: var(--text);
+    }
   </style>
 </head>
 <body>
@@ -217,6 +303,7 @@
         <div class="cal-legend">
           <span><i style="background:rgba(129,199,132,0.45);"></i> פתוח לקביעה</span>
           <span><i style="background:rgba(239,154,154,0.55);"></i> חסום</span>
+          <span><i style="box-shadow:inset 0 0 0 2px rgba(212,184,122,0.95);background:rgba(255,255,255,0.35);"></i> יש פגישה</span>
         </div>
         <div class="cal-nav">
           <button type="button" class="btn-cal-prev" aria-label="חודש קודם">›</button>
@@ -224,7 +311,26 @@
           <button type="button" class="btn-cal-next" aria-label="חודש הבא">‹</button>
         </div>
         <div class="cal-grid" id="cal-grid"></div>
-        <p class="cal-hint">חודשים שעברו באפור. בסוף: <strong>שמור</strong> (טוקן מהשדה למטה, או <code>localStorage</code> / <code>window</code>).</p>
+        <p class="cal-hint">חודשים שעברו באפור. <strong>מסגרת זהובה</strong> = יום עם פגישה מהרשימה למטה. בסוף: <strong>שמור</strong> (טוקן מהשדה למטה, או <code>localStorage</code> / <code>window</code>).</p>
+      </div>
+
+      <div class="card" id="bookings-card">
+        <h2>פגישות שנקבעו</h2>
+        <p style="font-size:0.82rem;color:var(--muted);margin-bottom:0.65rem;line-height:1.5;">
+          הרשימה נטענת מ־<code>naomi-bookings.json</code> (אותו אתר / GitHub Pages) ומ־<code>localStorage</code> של דף ההזמנה באותו דפדפן.
+          אחרי אישור מהדף הציבורי: חברי <strong>BOOKING_LEDGER_WEBHOOK</strong> (Make) שמעדכן את הקובץ ב-GitHub. עדכון: <strong>רענון מהאתר</strong>, <strong>ייבוא JSON</strong> או <strong>שמור פגישות ל-GitHub</strong>.
+          <strong>וואטסאפ ללקוחה:</strong> בכל פגישה – כפתור ירוק לפתיחת צ׳אט עם הטקסט המוכן (מהמחשב שלך; הלקוחה תראה רק אחרי השליחה).
+        </p>
+        <div class="bookings-toolbar">
+          <button type="button" class="btn-secondary" id="btn-bookings-refresh">רענון מהאתר</button>
+          <label class="btn-secondary btn-file" style="display:flex;align-items:center;justify-content:center;padding:0.85rem;cursor:pointer;">
+            ייבוא JSON
+            <input type="file" id="bookings-import-file" accept=".json,application/json" style="display:none;">
+          </label>
+        </div>
+        <ul class="bookings-list" id="bookings-list" aria-live="polite"></ul>
+        <button type="button" class="btn-primary" id="btn-bookings-push" style="margin-top:0.75rem;">שמור פגישות ל-GitHub</button>
+        <p class="msg" id="bookings-msg"></p>
       </div>
 
       <textarea id="blocked" hidden aria-hidden="true"></textarea>
@@ -277,7 +383,38 @@
     var GITHUB_PUSH_REPO = 'NAOMI';
     var GITHUB_PUSH_BRANCH = 'main';
     var GITHUB_PUSH_PATH = 'naomi-availability.json';
+    var GITHUB_BOOKINGS_PATH = 'naomi-bookings.json';
+    var BOOKINGS_STORAGE_KEY = 'naomi_bookings_v1';
     var UPDATE_JSON_STORAGE_KEY = 'UPDATE_JSON_KEY';
+
+    var meetingsBookings = [];
+
+    /** טקסט זהה לדף ההזמנה – נשלח ללקוחה בוואטסאפ מהניהול */
+    var CLIENT_PREP_WHATSAPP_MESSAGE_HE =
+      'היי אהובה\n' +
+      'ממש בקרוב אנחנו נפגשות 🤍\n' +
+      '\n' +
+      'חשוב לי לשתף בכמה דברים קטנים מראש, כדי שהפגישה תהיה הכי מדויקת ואפקטיבית עבורך:\n' +
+      '\n' +
+      'משך הפגישה הוא 45 דקות.\n' +
+      'במידה ותרצי להמשיך מעבר לכך – כל רבע שעה נוספת היא בעלות של 50₪,\n' +
+      'עד מקסימום תוספת של 45 דקות.\n' +
+      '(כלומר פגישה של שעה וחצי = תוספת של 150₪).\n' +
+      '\n' +
+      'אם תרצי לשאול גם על אנשים נוספים\n' +
+      '(ילדים / בני זוג / שותפים וכו\') –\n' +
+      'אשמח שתשלחי לי מראש את הפרטים שלהם, כדי שאוכל להכין את החישובים לפני הפגישה.\n' +
+      '\n' +
+      '🦋ממליצה בחום להכין מראש נושאים או שאלות שחשוב לך לגעת בהם\n' +
+      '🌸ממליצה גם להגיע עם מחברת ועט –\n' +
+      'האנרגיה בפגישה גבוהה וכדאי לקרקע את הדברים שמהדהדים\n' +
+      '\n' +
+      '🪐בונוס לרציניות : כמה דק לפני הפגישה- נטילת ידיים לסירוגין בלי ברכה,לקרוא 3 פרקי תהילים/כל דבר אחר שאת מתחברת אליו, גם במילים שלך\n' +
+      'תעצמי עיניים, תדמייני כדור אור /מגן דוד עוטף אותך ותגידי ״מימיני מיכאל משמאלי גבריאל מלפני אוריאל מאחורי רפאל ועל ראשי שכינת אל ״\n' +
+      'תבקשי, במילים שלך, מבורא עולם, מההדרכה שלך\n' +
+      'שיהיו איתך, שיראו לך מה שאת צריכה לראות , ושתשמעי מה שאת צריכה לשמוע\n' +
+      'לטובתך הגבוהה ביותר\n' +
+      'מחכה לך 🤍✨';
     var DAYS_OPEN_DEFAULT = [0, 1, 2, 3, 4];
     var scheduleDaysOpen = DAYS_OPEN_DEFAULT.slice();
 
@@ -379,6 +516,11 @@
           cell.classList.add('available');
           cell.title = 'לחצי לסגירת היום לקביעות';
           cell.addEventListener('click', onCalCellClick);
+        }
+        var bc = countBookingsOnDate(key);
+        if (bc > 0) {
+          cell.classList.add('has-booking');
+          cell.title = (cell.title || '') + ' · ' + bc + ' פגישות ברשימה';
         }
         grid.appendChild(cell);
       }
@@ -508,15 +650,14 @@
       return 'https://api.github.com/repos/' + encodeURIComponent(owner) + '/' + encodeURIComponent(repo) + '/contents/' + parts;
     }
 
-    function pushAvailabilityToGithub(cfg, token) {
+    function pushJsonFileToGithub(filepath, jsonObj, token, commitMessage) {
       var owner = GITHUB_PUSH_OWNER;
       var repo = GITHUB_PUSH_REPO;
       var branch = GITHUB_PUSH_BRANCH;
-      var path = GITHUB_PUSH_PATH;
       if (!token) return Promise.reject(new Error('חסר טוקן'));
-      var jsonStr = JSON.stringify(cfg, null, 2);
+      var jsonStr = JSON.stringify(jsonObj, null, 2);
       var contentB64 = utf8ToBase64(jsonStr);
-      var apiUrl = githubContentsApiUrl(owner, repo, path);
+      var apiUrl = githubContentsApiUrl(owner, repo, filepath);
       var headers = {
         Authorization: 'Bearer ' + token,
         Accept: 'application/vnd.github+json',
@@ -534,7 +675,7 @@
         })
         .then(function(fileData) {
           var body = {
-            message: 'Update naomi-availability.json (schedule-admin)',
+            message: commitMessage || 'Update ' + filepath,
             content: contentB64,
             branch: branch
           };
@@ -552,6 +693,275 @@
             });
           }
           return r.json();
+        });
+    }
+
+    function pushAvailabilityToGithub(cfg, token) {
+      return pushJsonFileToGithub(
+        GITHUB_PUSH_PATH,
+        cfg,
+        token,
+        'Update naomi-availability.json (schedule-admin)'
+      );
+    }
+
+    function getBookingsFetchUrl() {
+      if (typeof window.NAOMI_BOOKINGS_JSON_URL === 'string' && window.NAOMI_BOOKINGS_JSON_URL.trim()) {
+        return window.NAOMI_BOOKINGS_JSON_URL.trim();
+      }
+      var path = window.location.pathname || '/';
+      if (!path.endsWith('/')) {
+        var lastSeg = path.split('/').pop() || '';
+        if (/\.[a-z0-9]{1,10}$/i.test(lastSeg)) {
+          path = path.replace(/[^/]+$/, '');
+        } else {
+          path = path + '/';
+        }
+      }
+      if (!path.endsWith('/')) path += '/';
+      return window.location.origin + path + GITHUB_BOOKINGS_PATH;
+    }
+
+    function normalizeBookingsArray(arr) {
+      if (!arr || !Array.isArray(arr)) return [];
+      return arr
+        .map(function(b) {
+          if (!b || typeof b !== 'object') return null;
+          if (!b.dateStr || !/^\d{4}-\d{2}-\d{2}$/.test(String(b.dateStr))) return null;
+          var ts = b.timeStr != null ? String(b.timeStr).trim() : '00:00';
+          var tm = ts.match(/^(\d{1,2}):(\d{2})/);
+          if (tm) ts = pad2(parseInt(tm[1], 10) || 0) + ':' + pad2(parseInt(tm[2], 10) || 0);
+          else ts = '09:00';
+          return {
+            id: b.id || 'm-' + Math.random().toString(36).slice(2, 10),
+            createdAt: b.createdAt || new Date().toISOString(),
+            dateStr: String(b.dateStr),
+            timeStr: ts,
+            fullName: b.fullName || b.name || '',
+            phone: b.phone || '',
+            email: b.email || b.clientEmail || '',
+            birthDate: b.birthDate || '',
+            durationMinutes:
+              b.durationMinutes != null && !isNaN(Number(b.durationMinutes))
+                ? Math.max(15, Math.min(300, parseInt(b.durationMinutes, 10)))
+                : null
+          };
+        })
+        .filter(Boolean);
+    }
+
+    function bookingMergeKey(b) {
+      if (b.id) return 'id:' + b.id;
+      return (
+        'k:' +
+        b.dateStr +
+        '|' +
+        b.timeStr +
+        '|' +
+        (b.email || '') +
+        '|' +
+        (b.fullName || '') +
+        '|' +
+        (b.phone || '')
+      );
+    }
+
+    function mergeBookingsArrays(a, b) {
+      var map = {};
+      function take(arr) {
+        arr.forEach(function(x) {
+          if (!x) return;
+          var k = bookingMergeKey(x);
+          var prev = map[k];
+          if (!prev || (x.createdAt && prev.createdAt && String(x.createdAt) > String(prev.createdAt))) {
+            map[k] = x;
+          }
+        });
+      }
+      take(a || []);
+      take(b || []);
+      return Object.keys(map)
+        .map(function(k) {
+          return map[k];
+        })
+        .sort(function(x, y) {
+          var dx = (x.dateStr || '') + 'T' + (x.timeStr || '00:00');
+          var dy = (y.dateStr || '') + 'T' + (y.timeStr || '00:00');
+          return dx.localeCompare(dy);
+        });
+    }
+
+    function loadBookingsFromLocalStorage() {
+      try {
+        var raw = localStorage.getItem(BOOKINGS_STORAGE_KEY);
+        if (!raw) return [];
+        return normalizeBookingsArray(JSON.parse(raw));
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function countBookingsOnDate(dateKey) {
+      var n = 0;
+      meetingsBookings.forEach(function(b) {
+        if (b && b.dateStr === dateKey) n++;
+      });
+      return n;
+    }
+
+    function fetchBookingsFromRemote() {
+      var base = getBookingsFetchUrl();
+      var url = base + (base.indexOf('?') >= 0 ? '&' : '?') + '_=' + Date.now();
+      return fetch(url, { cache: 'no-store', headers: { Accept: 'application/json' } }).then(function(r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+      }).then(function(j) {
+        var arr = j && Array.isArray(j.bookings) ? j.bookings : Array.isArray(j) ? j : [];
+        return normalizeBookingsArray(arr);
+      });
+    }
+
+    function showBookingsMsg(text, ok) {
+      var el = document.getElementById('bookings-msg');
+      if (!el) return;
+      el.textContent = text;
+      el.className = 'msg ' + (ok ? 'ok' : 'err');
+    }
+
+    function escapeHtml(s) {
+      if (s == null || s === '') return '';
+      return String(s)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    /** YYYY-MM-DD → DD/MM/YYYY */
+    function formatDateIlYmd(ymd) {
+      if (!ymd || !/^\d{4}-\d{2}-\d{2}$/.test(String(ymd))) return '—';
+      var p = String(ymd).split('-');
+      return p[2] + '/' + p[1] + '/' + p[0];
+    }
+
+    function formatDateTimeRegistered(iso) {
+      if (!iso) return '';
+      try {
+        var d = new Date(iso);
+        if (isNaN(d.getTime())) return '';
+        return (
+          pad2(d.getDate()) +
+          '/' +
+          pad2(d.getMonth() + 1) +
+          '/' +
+          d.getFullYear() +
+          ' ' +
+          pad2(d.getHours()) +
+          ':' +
+          pad2(d.getMinutes())
+        );
+      } catch (e) {
+        return '';
+      }
+    }
+
+    function toWaPhoneForClient(raw) {
+      var d = String(raw || '').replace(/\D/g, '');
+      if (!d) return '';
+      if (d.indexOf('972') === 0) return d;
+      if (d.charAt(0) === '0') return '972' + d.slice(1);
+      if (d.length === 9) return '972' + d;
+      return d;
+    }
+
+    function findBookingById(id) {
+      if (!id) return null;
+      for (var i = 0; i < meetingsBookings.length; i++) {
+        if (meetingsBookings[i] && meetingsBookings[i].id === id) return meetingsBookings[i];
+      }
+      return null;
+    }
+
+    function renderBookingsList() {
+      var ul = document.getElementById('bookings-list');
+      if (!ul) return;
+      ul.innerHTML = '';
+      var sorted = meetingsBookings.slice().sort(function(a, b) {
+        var da = (a.dateStr || '') + 'T' + (a.timeStr || '00:00');
+        var db = (b.dateStr || '') + 'T' + (b.timeStr || '00:00');
+        return da.localeCompare(db);
+      });
+      if (!sorted.length) {
+        var empty = document.createElement('li');
+        empty.style.opacity = '0.88';
+        empty.textContent = 'אין פגישות ברשימה. לחצי „רענון מהאתר” או ייבוא JSON.';
+        ul.appendChild(empty);
+        return;
+      }
+      sorted.forEach(function(b) {
+        var li = document.createElement('li');
+        var meetD = formatDateIlYmd(b.dateStr);
+        var birthD;
+        if (!b.birthDate) {
+          birthD = '—';
+        } else if (/^\d{4}-\d{2}-\d{2}$/.test(String(b.birthDate))) {
+          birthD = formatDateIlYmd(b.birthDate);
+        } else {
+          birthD = escapeHtml(String(b.birthDate));
+        }
+        var dur =
+          b.durationMinutes != null && b.durationMinutes > 0
+            ? String(b.durationMinutes) + ' דק׳'
+            : '—';
+        var reg = formatDateTimeRegistered(b.createdAt);
+        var waNum = toWaPhoneForClient(b.phone);
+        var waOk = waNum && waNum.replace(/\D/g, '').length >= 9;
+        var bid = escapeHtml(b.id || '');
+        li.innerHTML =
+          '<div class="booking-item-title">פגישה: ' +
+          escapeHtml(meetD) +
+          ' · שעה ' +
+          escapeHtml(b.timeStr || '—') +
+          (dur !== '—' ? ' · משך ' + escapeHtml(dur) : '') +
+          '</div>' +
+          '<div class="booking-item-rows">' +
+          '<div><span class="lbl">שם מלא:</span> ' +
+          escapeHtml(b.fullName || '—') +
+          '</div>' +
+          '<div><span class="lbl">תאריך לידה:</span> ' +
+          birthD +
+          '</div>' +
+          '<div><span class="lbl">טלפון:</span> ' +
+          escapeHtml(b.phone || '—') +
+          '</div>' +
+          '<div><span class="lbl">אימייל:</span> ' +
+          escapeHtml(b.email || '—') +
+          '</div>' +
+          '</div>' +
+          (reg
+            ? '<div class="booking-item-foot">נרשם במערכת: ' + escapeHtml(reg) + '</div>'
+            : '') +
+          '<button type="button" class="btn-wa-client" data-booking-wa="' +
+          bid +
+          '"' +
+          (waOk ? '' : ' disabled title="אין מספר טלפון תקין"') +
+          '>שלחי וואטסאפ – הודעת הכנה לפני הפגישה</button>';
+        ul.appendChild(li);
+      });
+    }
+
+    function loadAllBookings() {
+      var local = loadBookingsFromLocalStorage();
+      return fetchBookingsFromRemote()
+        .then(function(remote) {
+          meetingsBookings = mergeBookingsArrays(remote, local);
+        })
+        .catch(function() {
+          meetingsBookings = local.slice();
+        })
+        .then(function() {
+          renderMonthCalendar();
+          renderBookingsList();
         });
     }
 
@@ -638,6 +1048,7 @@
       calInitNav();
       renderMonthCalendar();
       loadSavedTokenIntoField();
+      loadAllBookings();
     });
 
     function copyConfigToClipboard(cfg, onOk) {
@@ -740,6 +1151,85 @@
       };
       reader.readAsText(f);
       e.target.value = '';
+    });
+
+    document.getElementById('btn-bookings-refresh').addEventListener('click', function() {
+      showBookingsMsg('טוען…', true);
+      loadAllBookings()
+        .then(function() {
+          showBookingsMsg('רענון הושלם.', true);
+        })
+        .catch(function() {
+          showBookingsMsg('לא ניתן לטעון מהרשת (למשל קובץ חסר או file://).', false);
+        });
+    });
+
+    document.getElementById('btn-bookings-push').addEventListener('click', function() {
+      var token = getUpdateJsonKeyToken();
+      if (!token) {
+        showBookingsMsg('הדביקי טוקן GitHub בכרטיס „טוקן GitHub”.', false);
+        return;
+      }
+      var btn = document.getElementById('btn-bookings-push');
+      btn.disabled = true;
+      showBookingsMsg('שולחת ל-GitHub…', true);
+      var doc = { version: 1, bookings: meetingsBookings };
+      pushJsonFileToGithub(GITHUB_BOOKINGS_PATH, doc, token, 'Update naomi-bookings.json (schedule-admin)')
+        .then(function() {
+          maybePersistTokenAfterSave(token);
+          showBookingsMsg('naomi-bookings.json עודכן ב-GitHub. המתיני ל-Pages ורענון בדף ההזמנה.', true);
+        })
+        .catch(function(err) {
+          var m = err && err.message ? String(err.message) : String(err);
+          showBookingsMsg('שגיאה: ' + m, false);
+        })
+        .finally(function() {
+          btn.disabled = false;
+        });
+    });
+
+    document.getElementById('bookings-import-file').addEventListener('change', function(e) {
+      var f = e.target.files && e.target.files[0];
+      if (!f) return;
+      var reader = new FileReader();
+      reader.onload = function() {
+        try {
+          var j = JSON.parse(reader.result);
+          var arr = j && Array.isArray(j.bookings) ? j.bookings : Array.isArray(j) ? j : [];
+          var norm = normalizeBookingsArray(arr);
+          meetingsBookings = mergeBookingsArrays(meetingsBookings, norm);
+          renderMonthCalendar();
+          renderBookingsList();
+          showBookingsMsg('ייבוא הוזן למיזוג. לחצי „שמור פגישות ל-GitHub” לפרסום.', true);
+        } catch (err2) {
+          showBookingsMsg('קובץ פגישות לא תקין', false);
+        }
+      };
+      reader.readAsText(f);
+      e.target.value = '';
+    });
+
+    document.getElementById('bookings-list').addEventListener('click', function(e) {
+      var btn = e.target.closest('.btn-wa-client');
+      if (!btn || btn.disabled) return;
+      var id = btn.getAttribute('data-booking-wa');
+      var rec = findBookingById(id);
+      if (!rec) {
+        showBookingsMsg('לא נמצאה רשומת פגישה.', false);
+        return;
+      }
+      var num = toWaPhoneForClient(rec.phone);
+      if (!num || String(num).replace(/\D/g, '').length < 9) {
+        showBookingsMsg('אין מספר טלפון תקין ללקוחה.', false);
+        return;
+      }
+      var text = CLIENT_PREP_WHATSAPP_MESSAGE_HE;
+      var url = 'https://wa.me/' + String(num).replace(/\D/g, '') + '?text=' + encodeURIComponent(text);
+      try {
+        window.open(url, '_blank', 'noopener,noreferrer');
+      } catch (errWa) {
+        showBookingsMsg('לא ניתן לפתוח חלון. נסי שוב או העתיקי את המספר.', false);
+      }
     });
   </script>
 </body>

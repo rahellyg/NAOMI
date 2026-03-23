@@ -561,12 +561,24 @@
       filter: brightness(1.08);
     }
 
-    .booking-section .booking-secondary {
-      margin-top: 0.75rem;
-      text-align: center;
+    .booking-section button.booking-btn-gcal {
+      width: 100%;
+      margin-top: 0.5rem;
+      padding: 0.85rem 1rem;
+      background: #fff;
+      color: #1565c0;
+      border: 2px solid rgba(66, 133, 244, 0.45);
+      border-radius: 8px;
+      font-family: inherit;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
     }
 
-    .booking-section .booking-secondary a,
+    .booking-section button.booking-btn-gcal:hover {
+      background: rgba(66, 133, 244, 0.08);
+    }
+
     .booking-calendar-links a {
       color: var(--accent);
       font-size: 0.9rem;
@@ -599,14 +611,16 @@
 
     .booking-msg.ok {
       display: block;
-      background: rgba(76, 175, 80, 0.15);
-      color: #2e7d32;
+      background: rgba(255, 250, 240, 0.97);
+      color: #1e1530;
+      border: 1px solid rgba(212, 184, 122, 0.65);
     }
 
     .booking-msg.err {
       display: block;
-      background: rgba(244, 67, 54, 0.12);
-      color: #c62828;
+      background: rgba(255, 245, 245, 0.95);
+      color: #8b1532;
+      border: 1px solid rgba(198, 40, 40, 0.35);
     }
 
     .booking-cal-root {
@@ -1020,7 +1034,7 @@
 
     <section class="booking-section" id="booking-meeting" aria-label="קביעת פגישה">
       <h2>קביעת פגישת זום</h2>
-      <p class="booking-note">הלוח מציג <strong>ימים בשבוע פתוחים</strong> ו<strong>תאריכים חסומים</strong> לפי <strong>naomi-availability.json</strong> (שדות <code>daysOpen</code> ו־<code>blockedDates</code>). אם שינית בניהול ולא רואים עדכון: רענון קשיח (Ctrl+F5) וודאי שגם ההטמעה ב־index עודכנה אם האתר נופל לגיבוי. בחרו תאריך ושעה. <strong>אישור</strong> פותח <strong>Google Calendar</strong> להוספת האירוע (אם הוגדר אימייל נעמי בקוד – היא נוספת כאורחת); מומלץ תזכורת <strong>שעה לפני</strong>. ללא Google: אפשר <strong>הורדת קובץ .ics</strong> מהקישור למטה (תזכורת שעה לפני במכשיר).</p>
+      <p class="booking-note">הלוח לפי <strong>naomi-availability.json</strong>. <strong>ניתן לקבוע רק מ־48 שעות מראש</strong> לפחות. <strong>אישור</strong> – שמירת הפרטים בדף. <strong>שמירה ב־Google Calendar</strong> – מעבירה ליומן גוגל עם האירוע המוכן לשמירה. מומלץ תזכורת <strong>שעה לפני</strong> לפני השמירה בגוגל. אם החלון נחסם – קישור גיבוי למטה.</p>
       <p class="booking-note" id="booking-availability-hint" style="margin-top:-0.75rem;font-size:0.78rem;opacity:0.95;"></p>
       <form id="booking-form" novalidate>
         <p class="booking-questionnaire-title">שאלון</p>
@@ -1033,11 +1047,11 @@
           <input type="date" id="booking-birthdate" name="bookingBirthdate" required autocomplete="bday" aria-label="תאריך לידה">
         </div>
         <div class="form-group">
-          <label for="booking-phone">טלפון (לוואטסאפ) <span aria-hidden="true">*</span></label>
+          <label for="booking-phone">טלפון <span aria-hidden="true">*</span></label>
           <input type="tel" id="booking-phone" name="bookingPhone" placeholder="050-1234567" required autocomplete="tel">
         </div>
         <div class="form-group">
-          <label for="booking-email">אימייל (ליומן ותזכורות Google) <span aria-hidden="true">*</span></label>
+          <label for="booking-email">אימייל (פרטי האירוע ב-Google) <span aria-hidden="true">*</span></label>
           <input type="email" id="booking-email" name="bookingEmail" placeholder="yourname@gmail.com" required autocomplete="email" inputmode="email">
         </div>
         <div class="form-row">
@@ -1056,12 +1070,12 @@
             <p class="booking-cal-legend">שעות באפור: מחוץ לחלון, לא לפי מרווח הסלוטים, או כבר עברו (היום).</p>
           </div>
         </div>
-        <button type="submit" id="booking-submit-main">אישור והוספה ל־Google Calendar</button>
+        <button type="submit" id="booking-submit-main">אישור</button>
+        <button type="button" id="booking-open-gcal" class="booking-btn-gcal">שמירה ב־Google Calendar</button>
         <p class="booking-msg" id="booking-msg" role="status"></p>
         <p class="booking-calendar-links" id="booking-calendar-links" hidden>
-          <a href="#" id="booking-google-cal" class="booking-google-cal-link" target="_blank" rel="noopener noreferrer">פתיחה מחדש ב־Google Calendar</a>
+          <a href="#" id="booking-google-cal" class="booking-google-cal-link" target="_blank" rel="noopener noreferrer">שמירה מחדש ב־Google Calendar</a>
         </p>
-        <p class="booking-secondary"><a href="#" id="booking-ics-only">הורדת .ics (אפל / אחר)</a></p>
       </form>
     </section>
   </div>
@@ -1154,14 +1168,31 @@
   <script type="application/json" id="naomi-availability-embed">{"version":1,"daysOpen":[0,1,2,3,4],"startHour":11,"startMinute":30,"endHour":13,"endMinute":0,"slotMinutes":30,"meetingDurationMinutes":45,"blockedDates":[],"onlyOpenDates":[]}</script>
 
   <script>
-    /** לוח: fetch ל-naomi-availability.json או גיבוי #naomi-availability-embed; אופציונלי window.NAOMI_AVAILABILITY_URL.
-        BOOKING_WHATSAPP_OWNER, BOOKING_ZOOM_LINK, BOOKING_OWNER_EMAIL (אורחת ב-Google), BOOKING_ALARM_DEBUG_MINUTES (null בפרוד). */
+    /**
+     * לוח: fetch / embed. אישור = שליחה שקטה ברקע (אם הוגדר) + קישור Google.
+     * BOOKING_OWNER_EMAIL = נעמי כאורחת ב-Google.
+     * עדכון שקט למזמינה:
+     *   • BOOKING_WEB3FORMS_ACCESS_KEY – מייל מ־web3forms.com (חינם, בלי חלון אצל הלקוחה).
+     *   • BOOKING_NOTIFY_WEBHOOK – JSON ל־Make/Zapier/n8n → וואטסאפ (אם השירות מאפשר CORS מהדפדפן).
+     * אפשר גם לפני הסקריפט: window.NAOMI_BOOKING_WEB3FORMS_KEY / window.NAOMI_BOOKING_NOTIFY_WEBHOOK
+     * BOOKING_LEDGER_WEBHOOK – אופציונלי: POST עם { booking } לעדכון naomi-bookings.json דרך Make/GitHub.
+     */
     (function() {
-      var BOOKING_WHATSAPP_OWNER = '';
+      /** מינימום שעות מראש לתחילת הפגישה */
+      var BOOKING_MIN_LEAD_HOURS = 48;
+      var BOOKING_MIN_LEAD_MS = BOOKING_MIN_LEAD_HOURS * 60 * 60 * 1000;
+      var BOOKINGS_LOCAL_STORAGE_KEY = 'naomi_bookings_v1';
+
       var BOOKING_ZOOM_LINK = '';
-      var BOOKING_OWNER_EMAIL = '';
-      /** לבדיקה: null = שעה אחת לפני. מספר = דקות לפני (אל תשכחי להחזיר null לפני פרסום). */
-      var BOOKING_ALARM_DEBUG_MINUTES = null;
+      var BOOKING_OWNER_EMAIL = 'naomi.amsalem@gmail.com';
+      /** מפתח מ־https://web3forms.com – מגיע מייל עם פרטי ההזמנה (שקט, ברקע). */
+      var BOOKING_WEB3FORMS_ACCESS_KEY = '';
+      /** כתובת Webhook (למשל Make: Webhooks → Custom webhook) – גוף JSON. */
+      var BOOKING_NOTIFY_WEBHOOK = '';
+      /** אופציונלי: נשלח בכותרת X-Booking-Secret לבדיקה בסנריו. */
+      var BOOKING_NOTIFY_SECRET = '';
+      /** Webhook נפרד לרישום פגישה (למשל Make → עדכון naomi-bookings.json ב-GitHub). */
+      var BOOKING_LEDGER_WEBHOOK = '';
 
       var PRE_MEETING_REMINDER_HE =
         'היי אהובה\n' +
@@ -1293,10 +1324,6 @@
         if (startMin + meetLen > openEnd) return false;
         if ((startMin - openStart) % slot !== 0) return false;
         return true;
-      }
-
-      function escapeIcs(s) {
-        return String(s || '').replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\n/g, '\\n');
       }
 
       function isProbablyBookingEmail(s) {
@@ -1475,6 +1502,35 @@
         return start.getTime() < Date.now() - 60000;
       }
 
+      function isBookingSlotTooSoon(dateStr, timeStr) {
+        var start = new Date(dateStr + 'T' + timeStr + ':00');
+        if (isNaN(start.getTime())) return true;
+        return start.getTime() < Date.now() + BOOKING_MIN_LEAD_MS;
+      }
+
+      function appendBookingToLocalLedger(entry) {
+        try {
+          var raw = localStorage.getItem(BOOKINGS_LOCAL_STORAGE_KEY);
+          var arr = raw ? JSON.parse(raw) : [];
+          if (!Array.isArray(arr)) arr = [];
+          arr.push(entry);
+          localStorage.setItem(BOOKINGS_LOCAL_STORAGE_KEY, JSON.stringify(arr));
+        } catch (e1) {}
+      }
+
+      function postBookingLedgerWebhook(booking) {
+        var w = typeof window !== 'undefined' ? window : {};
+        var url = String(w.NAOMI_BOOKING_LEDGER_WEBHOOK || BOOKING_LEDGER_WEBHOOK || '').trim();
+        if (!url) return;
+        fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ source: 'naomi-landing', type: 'booking_append', booking: booking }),
+          mode: 'cors',
+          keepalive: true
+        }).catch(function() {});
+      }
+
       function renderBookingTimeSlots() {
         var root = document.getElementById('booking-time-slots-root');
         var hidden = document.getElementById('booking-time');
@@ -1527,7 +1583,8 @@
             ? isSlotAllowed(dateStr, selected, cfg)
             : true;
           var pastOk = !isBookingTimeInPast(dateStr, selected);
-          if (!slotOk || !pastOk) {
+          var leadOk = !isBookingSlotTooSoon(dateStr, selected);
+          if (!slotOk || !pastOk || !leadOk) {
             hidden.value = '';
             selected = '';
             if (display) display.textContent = 'בחרו שעה מחדש.';
@@ -1541,9 +1598,12 @@
           var timeStr = minutesToHHMM(t);
           var allowed;
           if (cfg && cfg.version != null) {
-            allowed = isSlotAllowed(dateStr, timeStr, cfg) && !isBookingTimeInPast(dateStr, timeStr);
+            allowed =
+              isSlotAllowed(dateStr, timeStr, cfg) &&
+              !isBookingTimeInPast(dateStr, timeStr) &&
+              !isBookingSlotTooSoon(dateStr, timeStr);
           } else {
-            allowed = !isBookingTimeInPast(dateStr, timeStr);
+            allowed = !isBookingTimeInPast(dateStr, timeStr) && !isBookingSlotTooSoon(dateStr, timeStr);
           }
 
           var btn = document.createElement('button');
@@ -1586,112 +1646,6 @@
         root.appendChild(wrap);
       }
 
-      function toWaPhone(raw) {
-        var d = String(raw || '').replace(/\D/g, '');
-        if (d.indexOf('972') === 0) return d;
-        if (d.charAt(0) === '0') return '972' + d.slice(1);
-        if (d.length === 9) return '972' + d;
-        return d;
-      }
-
-      function buildIcs(start, end, fullName, birthDateStr, phone, clientEmail) {
-        var stamp = new Date();
-        var uid = 'booking-' + stamp.getTime() + '-' + Math.random().toString(36).slice(2, 9) + '@naomi-landing';
-        var stampStr = stamp.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z');
-        var y = start.getFullYear();
-        var m = pad2(start.getMonth() + 1);
-        var day = pad2(start.getDate());
-        var hh = pad2(start.getHours());
-        var mm = pad2(start.getMinutes());
-        var dtStart = '' + y + m + day + 'T' + hh + mm + '00';
-        var ey = end.getFullYear();
-        var em = pad2(end.getMonth() + 1);
-        var ed = pad2(end.getDate());
-        var ehh = pad2(end.getHours());
-        var emm = pad2(end.getMinutes());
-        var dtEnd = '' + ey + em + ed + 'T' + ehh + emm + '00';
-        var summary = escapeIcs('פגישת זום – נעמי');
-        var birthHuman = birthDateStr ? birthDateStr.split('-').reverse().join('/') : '';
-        var zoomLink = String(BOOKING_ZOOM_LINK || '').trim();
-        var ownerEmail = String(BOOKING_OWNER_EMAIL || '').trim().toLowerCase();
-        var guestEmail = String(clientEmail || '').trim().toLowerCase();
-        var reminderForClient = PRE_MEETING_REMINDER_HE;
-        if (zoomLink) {
-          reminderForClient += '\n\nקישור לזום:\n' + zoomLink;
-        }
-        var descLines = ['פגישה דרך זום.'];
-        if (fullName) descLines.push('שם מלא: ' + fullName);
-        if (birthHuman) descLines.push('תאריך לידה: ' + birthHuman);
-        descLines.push('טלפון: ' + (phone || ''));
-        if (guestEmail) descLines.push('אימייל מזמינה: ' + guestEmail);
-        if (isProbablyBookingEmail(ownerEmail)) {
-          descLines.push('מארגנת (נעמי): ' + ownerEmail);
-        }
-        descLines.push('');
-        var alarmLabel = 'שעה לפני';
-        if (BOOKING_ALARM_DEBUG_MINUTES != null && BOOKING_ALARM_DEBUG_MINUTES > 0) {
-          alarmLabel = BOOKING_ALARM_DEBUG_MINUTES + ' דק׳ לפני (בדיקה)';
-        }
-        descLines.push('— הודעה שתופיע בתזכורת (' + alarmLabel + ') —');
-        descLines.push(reminderForClient);
-        var desc = escapeIcs(descLines.join('\n'));
-        var alarmDesc = escapeIcs(reminderForClient);
-        var useRequest =
-          isProbablyBookingEmail(ownerEmail) &&
-          isProbablyBookingEmail(guestEmail) &&
-          ownerEmail !== guestEmail;
-        var icalMethod = useRequest ? 'REQUEST' : 'PUBLISH';
-        var lines = [
-          'BEGIN:VCALENDAR',
-          'VERSION:2.0',
-          'PRODID:-//Naomi//Booking//HE',
-          'CALSCALE:GREGORIAN',
-          'METHOD:' + icalMethod,
-          'BEGIN:VEVENT',
-          'UID:' + uid,
-          'DTSTAMP:' + stampStr,
-          'DTSTART:' + dtStart,
-          'DTEND:' + dtEnd,
-          'SUMMARY:' + summary,
-          'DESCRIPTION:' + desc
-        ];
-        if (useRequest) {
-          lines.push('SEQUENCE:0');
-          lines.push('ORGANIZER;CN=' + escapeIcs('נעמי') + ':mailto:' + ownerEmail);
-          lines.push(
-            'ATTENDEE;CUTYPE=INDIVIDUAL;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=TRUE;CN=' +
-              escapeIcs(fullName || 'מזמינה') +
-              ':mailto:' +
-              guestEmail
-          );
-        }
-        if (zoomLink) {
-          lines.push('URL:' + String(zoomLink).replace(/[\r\n]/g, ''));
-        }
-        var alarmTrigger = 'TRIGGER:-PT1H';
-        if (BOOKING_ALARM_DEBUG_MINUTES != null && BOOKING_ALARM_DEBUG_MINUTES > 0 && BOOKING_ALARM_DEBUG_MINUTES <= 1440) {
-          alarmTrigger = 'TRIGGER:-PT' + Math.floor(BOOKING_ALARM_DEBUG_MINUTES) + 'M';
-        }
-        lines.push(
-          'BEGIN:VALARM',
-          alarmTrigger,
-          'ACTION:DISPLAY',
-          'DESCRIPTION:' + alarmDesc,
-          'END:VALARM'
-        );
-        lines.push('END:VEVENT', 'END:VCALENDAR');
-        return lines.join('\r\n');
-      }
-
-      function downloadIcs(icsText) {
-        var blob = new Blob([icsText], { type: 'text/calendar;charset=utf-8' });
-        var a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = 'meeting-zoom.ics';
-        a.click();
-        URL.revokeObjectURL(a.href);
-      }
-
       function buildGoogleCalendarUrl(start, end, fullName, birthDateStr, phone, clientEmail) {
         var zoomLink = String(BOOKING_ZOOM_LINK || '').trim();
         var ownerEmail = String(BOOKING_OWNER_EMAIL || '').trim();
@@ -1703,10 +1657,10 @@
         descLines.push('טלפון: ' + (phone || ''));
         if (guestMail) descLines.push('אימייל מזמינה: ' + guestMail);
         if (isProbablyBookingEmail(ownerEmail)) {
-          descLines.push('נעמי נוספה כאורחת – אחרי שמירה תקבלו שתיכן תזכורות לפי הגדרות Google (מומלץ „שעה לפני”).');
+          descLines.push('נעמי נוספת כאורחת – אחרי שמירה תישלח אליה הזמנה; מומלץ תזכורת שעה לפני ב-Google.');
         }
         descLines.push('');
-        descLines.push('— מומלץ להגדיר תזכורת שעה לפני באירוע (או להשתמש בקובץ ה-.ics שהורד) —');
+        descLines.push('— לפני שמירה ב-Google: בחרי תזכורת „שעה לפני”.');
         descLines.push(PRE_MEETING_REMINDER_HE);
         if (zoomLink) {
           descLines.push('');
@@ -1716,7 +1670,7 @@
         var details = descLines.join('\n');
         var GCAL_DETAILS_MAX = 1600;
         if (details.length > GCAL_DETAILS_MAX) {
-          details = details.slice(0, GCAL_DETAILS_MAX).trim() + '\n\n───\nהמשך בקובץ ה-.ics.';
+          details = details.slice(0, GCAL_DETAILS_MAX).trim() + '\n\n───\n(הטקסט קוצר בגלל מגבלת Google.)';
         }
         function ymdhm(d) {
           return d.getFullYear() + pad2(d.getMonth() + 1) + pad2(d.getDate()) + 'T' + pad2(d.getHours()) + pad2(d.getMinutes()) + '00';
@@ -1752,22 +1706,80 @@
         wrap.hidden = false;
       }
 
-      function bookingWaConfigured() {
-        return !!(BOOKING_WHATSAPP_OWNER && String(BOOKING_WHATSAPP_OWNER).replace(/\D/g, '').length >= 9);
-      }
-
       function showMsg(el, text, ok) {
         if (!el) return;
         el.textContent = text;
         el.className = 'booking-msg ' + (ok ? 'ok' : 'err');
       }
 
+      function getBookingNotifyConfig() {
+        var w = typeof window !== 'undefined' ? window : {};
+        return {
+          web3: String(w.NAOMI_BOOKING_WEB3FORMS_KEY || BOOKING_WEB3FORMS_ACCESS_KEY || '').trim(),
+          webhook: String(w.NAOMI_BOOKING_NOTIFY_WEBHOOK || BOOKING_NOTIFY_WEBHOOK || '').trim(),
+          secret: String(w.NAOMI_BOOKING_NOTIFY_SECRET || BOOKING_NOTIFY_SECRET || '').trim()
+        };
+      }
+
+      /** שליחה ברקע בלי חלונות – כשלים לא מוצגים למזמינה. */
+      function sendBookingNotificationBackground(payload) {
+        var cfg = getBookingNotifyConfig();
+        var textBody = [
+          'הזמנת פגישת זום מהדף',
+          'שם מלא: ' + payload.fullName,
+          'תאריך לידה: ' + payload.birthDateDisplay,
+          'תאריך פגישה: ' + payload.meetingDateDisplay,
+          'שעת פגישה: ' + payload.meetingTime,
+          'משך (דק׳): ' + payload.durationMinutes,
+          'טלפון: ' + payload.phone,
+          'אימייל מזמינה: ' + payload.clientEmail,
+          'אימייל נעמי ביומן: ' + payload.ownerCalendarEmail,
+          payload.zoomLink ? 'קישור זום:\n' + payload.zoomLink : '',
+          '',
+          'קישור להוספה ל-Google Calendar:',
+          payload.googleCalendarUrl
+        ]
+          .filter(Boolean)
+          .join('\n');
+
+        if (cfg.web3) {
+          fetch('https://api.web3forms.com/submit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+            body: JSON.stringify({
+              access_key: cfg.web3,
+              subject: 'הזמנת פגישה – ' + payload.fullName,
+              from_name: 'דף נחיתה נעמי',
+              name: payload.fullName,
+              email: payload.clientEmail,
+              phone: payload.phone,
+              message: textBody
+            })
+          }).catch(function() {});
+        }
+
+        if (cfg.webhook) {
+          var headers = { 'Content-Type': 'application/json' };
+          if (cfg.secret) headers['X-Booking-Secret'] = cfg.secret;
+          fetch(cfg.webhook, {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify(payload),
+            mode: 'cors',
+            keepalive: true
+          }).catch(function() {});
+        }
+      }
+
       function runBooking(mode) {
-        var isFull = mode === 'full';
+        var isConfirm = mode === 'confirm';
+        var isGoogle = mode === 'google';
         var form = document.getElementById('booking-form');
         var msg = document.getElementById('booking-msg');
         if (!form) return;
-        setBookingGcalLink(null);
+        if (isGoogle) {
+          setBookingGcalLink(null);
+        }
         var name = (document.getElementById('booking-name') || {}).value || '';
         var birthStr = (document.getElementById('booking-birthdate') || {}).value || '';
         var phone = (document.getElementById('booking-phone') || {}).value || '';
@@ -1816,6 +1828,14 @@
           showMsg(msg, 'בחרו תאריך פגישה ושעת פגישה עתידיים', false);
           return;
         }
+        if (isBookingSlotTooSoon(dateStr, timeStr)) {
+          showMsg(
+            msg,
+            'ניתן לקבוע פגישה רק לפחות ' + BOOKING_MIN_LEAD_HOURS + ' שעות מראש מהשעה הנוכחית.',
+            false
+          );
+          return;
+        }
         if (meetingAvailability && isBlockedDateStr(dateStr, meetingAvailability)) {
           showMsg(msg, 'תאריך זה חסום לפי לוח הזמנים. בחרו תאריך אחר או עדכנו את naomi-availability.json (והטמעה בדף אם יש).', false);
           return;
@@ -1835,49 +1855,75 @@
         var inviteOwner = isProbablyBookingEmail(ownerLow) && ownerLow !== guestLow;
         var zoomHint = String(BOOKING_ZOOM_LINK || '').trim() ? ' כולל זום באירוע.' : ' (הוסיפי BOOKING_ZOOM_LINK.)';
         var ownerHint = inviteOwner
-          ? ' נעמי כאורחת – נשלחת הזמנה; מומלץ תזכורת שעה לפני.'
+          ? ' נעמי כאורחת – אחרי שמירה תישלח הזמנה.'
           : isProbablyBookingEmail(ownerLow)
-            ? ' (אימייל כמו נעמי – תזכורת ידנית.)'
-            : ' (נעמי: BOOKING_OWNER_EMAIL.)';
-        var debugHint =
-          BOOKING_ALARM_DEBUG_MINUTES != null && BOOKING_ALARM_DEBUG_MINUTES > 0
-            ? ' [בדיקה: תזכורת ' + BOOKING_ALARM_DEBUG_MINUTES + ' דק׳ ב-.ics בלבד.]'
-            : '';
+            ? ''
+            : ' (BOOKING_OWNER_EMAIL – להזמנת נעמי.)';
         var okText;
 
-        if (isFull) {
+        if (isGoogle) {
           var popupOk = false;
           try {
             var w = window.open(gcalUrl, '_blank', 'noopener,noreferrer');
             popupOk = !!(w && !w.closed);
           } catch (e0) {}
-          if (!popupOk) setBookingGcalLink(gcalUrl);
-          okText = (popupOk ? 'נפתח Google Calendar – שמרו; מומלץ תזכורת שעה לפני.' : 'לחצי על הקישור למטה – שמרו; מומלץ תזכורת שעה לפני.') + ownerHint + zoomHint + debugHint;
-        } else {
-          downloadIcs(buildIcs(start, end, name, birthStr, phone, emailStr));
+          if (popupOk) {
+            setBookingGcalLink(null);
+            okText =
+              'נפתח דף לשמירה ב-Google Calendar – לחצי „שמירה” בגוגל כדי להוסיף ליומן. מומלץ תזכורת שעה לפני.' +
+              ownerHint +
+              zoomHint;
+          } else {
+            setBookingGcalLink(gcalUrl);
+            okText =
+              'הדפדפן חסם חלון – לחצי על הקישור למטה לשמירה ב-Google Calendar; מומלץ תזכורת שעה לפני.' +
+              ownerHint +
+              zoomHint;
+          }
+          showMsg(msg, okText, true);
+        } else if (isConfirm) {
           setBookingGcalLink(gcalUrl);
-          okText = 'הקובץ ירד (.ics, תזכורת שעה לפני).' + (inviteOwner ? ' ב-Google אפשר גם להזמין את נעמי.' : '') + zoomHint + debugHint;
-        }
-
-        showMsg(msg, okText, true);
-
-        if (isFull && bookingWaConfigured()) {
-          var owner = String(BOOKING_WHATSAPP_OWNER).replace(/\D/g, '');
+          okText =
+            'הפרטים נקלטו. לחצי „שמירה ב־Google Calendar” כדי להוסיף את האירוע ליומן. אם החלון נחסם – השתמשי בקישור הגיבוי למטה.' +
+            ownerHint +
+            zoomHint;
+          showMsg(msg, okText, true);
+          var durMin =
+            meetingAvailability && meetingAvailability.meetingDurationMinutes != null
+              ? meetingAvailability.meetingDurationMinutes
+              : 60;
           var humanDate = dateStr.split('-').reverse().join('/');
           var birthHuman = birthStr.split('-').reverse().join('/');
-          var lines = [
-            'הזמנת פגישת זום מהדף',
-            'שם מלא: ' + name,
-            'תאריך לידה: ' + birthHuman,
-            'תאריך פגישה: ' + humanDate,
-            'שעת פגישה: ' + timeStr,
-            'טלפון: ' + phone,
-            'אימייל: ' + emailStr
-          ];
-          var url = 'https://wa.me/' + owner + '?text=' + encodeURIComponent(lines.join('\n'));
-          window.open(url, '_blank', 'noopener,noreferrer');
-        } else if (isFull && !bookingWaConfigured()) {
-          showMsg(msg, okText + ' (וואטסאפ: BOOKING_WHATSAPP_OWNER.)', true);
+          sendBookingNotificationBackground({
+            source: 'naomi-landing',
+            type: 'booking_confirm',
+            fullName: name,
+            birthDate: birthStr,
+            birthDateDisplay: birthHuman,
+            meetingDate: dateStr,
+            meetingDateDisplay: humanDate,
+            meetingTime: timeStr,
+            durationMinutes: durMin,
+            phone: phone,
+            clientEmail: emailStr,
+            ownerCalendarEmail: String(BOOKING_OWNER_EMAIL || '').trim(),
+            zoomLink: String(BOOKING_ZOOM_LINK || '').trim() || null,
+            googleCalendarUrl: gcalUrl,
+            submittedAt: new Date().toISOString()
+          });
+          var ledgerEntry = {
+            id: 'b-' + Date.now() + '-' + Math.random().toString(36).slice(2, 9),
+            createdAt: new Date().toISOString(),
+            dateStr: dateStr,
+            timeStr: timeStr,
+            durationMinutes: durMin,
+            fullName: name,
+            phone: phone,
+            email: emailStr,
+            birthDate: birthStr
+          };
+          appendBookingToLocalLedger(ledgerEntry);
+          postBookingLedgerWebhook(ledgerEntry);
         }
       }
 
@@ -1885,7 +1931,20 @@
         var msg = document.getElementById('booking-msg');
         var dateStr = (document.getElementById('booking-date') || {}).value || '';
         var timeStr = (document.getElementById('booking-time') || {}).value || '';
-        if (!msg || !meetingAvailability || !dateStr || !timeStr) return;
+        if (!msg || !dateStr || !timeStr) return;
+        if (isBookingSlotTooSoon(dateStr, timeStr)) {
+          showMsg(
+            msg,
+            'יש לבחור מועד לפחות ' + BOOKING_MIN_LEAD_HOURS + ' שעות מעכשיו.',
+            false
+          );
+          return;
+        }
+        if (!meetingAvailability) {
+          msg.textContent = '';
+          msg.className = 'booking-msg';
+          return;
+        }
         if (isBlockedDateStr(dateStr, meetingAvailability)) {
           showMsg(msg, 'תאריך זה חסום לפי לוח הזמנים.', false);
           return;
@@ -1924,23 +1983,17 @@
         }
 
         var form = document.getElementById('booking-form');
-        var icsOnly = document.getElementById('booking-ics-only');
         if (form) {
           form.addEventListener('submit', function(e) {
             e.preventDefault();
-            runBooking('full');
+            runBooking('confirm');
           });
         }
-        if (icsOnly) {
-          icsOnly.addEventListener('click', function(e) {
-            e.preventDefault();
-            runBooking('ics-only');
+        var openGcal = document.getElementById('booking-open-gcal');
+        if (openGcal) {
+          openGcal.addEventListener('click', function() {
+            runBooking('google');
           });
-        }
-
-        var submitMain = document.getElementById('booking-submit-main');
-        if (submitMain && bookingWaConfigured()) {
-          submitMain.textContent = 'אישור – הוספה ל־Google Calendar + פתיחת וואטסאפ';
         }
 
         renderBookingCalendar();
