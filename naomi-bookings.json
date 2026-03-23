@@ -1,38 +1,4 @@
 {
   "version": 1,
-  "bookings": [
-    {
-      "id": "b-1774288003383-7lsvhc6",
-      "createdAt": "2026-03-23T17:46:43.383Z",
-      "dateStr": "2026-03-25",
-      "timeStr": "20:00",
-      "fullName": "ראיסה יעיש",
-      "phone": "+972549329225",
-      "email": "rahelly23@gmail.com",
-      "birthDate": "2000-11-11",
-      "durationMinutes": 45
-    },
-    {
-      "id": "b-1774289143195-oox6fka",
-      "createdAt": "2026-03-23T18:05:43.195Z",
-      "dateStr": "2026-03-25",
-      "timeStr": "21:00",
-      "fullName": "ראיסה יעיש",
-      "phone": "+972549329225",
-      "email": "rahelly23@gmail.com",
-      "birthDate": "1999-11-11",
-      "durationMinutes": 45
-    },
-    {
-      "id": "b-1774288637046-i1ec5d9",
-      "createdAt": "2026-03-23T17:57:17.046Z",
-      "dateStr": "2026-03-26",
-      "timeStr": "12:00",
-      "fullName": "ראיסה יעיש",
-      "phone": "+972549329225",
-      "email": "rahelly23@gmail.com",
-      "birthDate": "2000-11-11",
-      "durationMinutes": 45
-    }
-  ]
+  "bookings": []
 }
