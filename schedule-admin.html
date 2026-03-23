@@ -66,6 +66,36 @@
       gap: 0.75rem;
     }
     @media (max-width: 400px) { .row2 { grid-template-columns: 1fr; } }
+    .day-hours-row {
+      display: grid;
+      grid-template-columns: 2.5rem 1fr 1fr auto;
+      gap: 0.45rem;
+      align-items: end;
+      margin-bottom: 0.55rem;
+    }
+    .day-hours-row .day-wd {
+      font-weight: 600;
+      font-size: 0.82rem;
+      color: var(--accent);
+      margin: 0;
+      padding-bottom: 0.35rem;
+    }
+    .day-hours-row input[type="time"] { margin-bottom: 0; }
+    .day-hours-row .wd-inner label { font-size: 0.78rem; margin-bottom: 0.2rem; }
+    .wd-closed-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      white-space: nowrap;
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin-bottom: 0.25rem;
+      cursor: pointer;
+    }
+    @media (max-width: 480px) {
+      .day-hours-row { grid-template-columns: 1fr; }
+      .wd-closed-wrap { justify-content: flex-start; }
+    }
     button {
       width: 100%;
       padding: 0.85rem;
@@ -343,21 +373,39 @@
 
       <div class="card">
         <h2>שעות</h2>
-        <p style="font-size:0.82rem;color:var(--muted);margin-bottom:0.75rem;">שעת התחלה ושעת סיום כוללות <strong>דקות</strong> (למשל 09:30–18:45). סוף החלון = המועד האחרון שבו פגישה יכולה <strong>להסתיים</strong>.</p>
+        <label class="wd-closed-wrap" style="margin-bottom:0.85rem;">
+          <input type="checkbox" id="bookings-suspended">
+          השבת לחלוטין קביעת פגישות בדף הנחיתה (הטופס ייעלם)
+        </label>
+        <p style="font-size:0.82rem;color:var(--muted);margin-bottom:0.75rem;">שעת התחלה ושעת סיום כוללות <strong>דקות</strong>. סוף החלון = המועד האחרון שבו פגישה יכולה <strong>להסתיים</strong>. ברירת מחדל: <strong>11:30–13:00</strong>, מרווח <strong>90</strong> דק׳ + פגישה <strong>45</strong> דק׳ = עד <strong>פגישה אחת</strong> בחלון.</p>
         <div class="row2">
           <div>
-            <label for="start-time">שעת התחלה</label>
-            <input type="time" id="start-time" value="11:30" step="60">
+            <label for="start-time">שעת התחלה (ברירת מחדל כללית)</label>
+            <input type="time" id="start-time" value="11:30" step="300">
           </div>
           <div>
             <label for="end-time">שעת סיום (סוף חלון)</label>
-            <input type="time" id="end-time" value="13:00" step="60">
+            <input type="time" id="end-time" value="13:00" step="300">
           </div>
         </div>
-        <label for="slot-min">מרווח בין תחילות פגישות (דקות)</label>
-        <input type="number" id="slot-min" min="5" max="120" step="5" value="30">
+        <label for="slot-min">מרווח בין תחילות פגישות (דקות) — 90 = מקסימום פגישה אחת בחלון של שעה וחצי</label>
+        <input type="number" id="slot-min" min="5" max="240" step="5" value="90">
         <label for="meet-len">אורך פגישה (דקות)</label>
         <input type="number" id="meet-len" min="30" max="180" step="15" value="45">
+      </div>
+
+      <div class="card" id="hours-by-day-card">
+        <h2>שעות לפי יום</h2>
+        <p style="font-size:0.82rem;color:var(--muted);margin-bottom:0.75rem;line-height:1.5;">לכל יום: סימון „סגור” = אין פגישות. שעות מותאמות ליום ספציפי; אם אין שדות ייעודיים בקובץ ישן — נלקחות מהשעות הכלליות למעלה.</p>
+        <div id="day-hours-rows">
+          <div class="day-hours-row" data-day="0"><span class="day-wd">א׳</span><div class="wd-inner"><label for="wd-start-0">התחלה</label><input type="time" id="wd-start-0" value="11:30" step="300"></div><div class="wd-inner"><label for="wd-end-0">סיום</label><input type="time" id="wd-end-0" value="13:00" step="300"></div><label class="wd-closed-wrap"><input type="checkbox" id="wd-closed-0"> סגור</label></div>
+          <div class="day-hours-row" data-day="1"><span class="day-wd">ב׳</span><div class="wd-inner"><label for="wd-start-1">התחלה</label><input type="time" id="wd-start-1" value="11:30" step="300"></div><div class="wd-inner"><label for="wd-end-1">סיום</label><input type="time" id="wd-end-1" value="13:00" step="300"></div><label class="wd-closed-wrap"><input type="checkbox" id="wd-closed-1"> סגור</label></div>
+          <div class="day-hours-row" data-day="2"><span class="day-wd">ג׳</span><div class="wd-inner"><label for="wd-start-2">התחלה</label><input type="time" id="wd-start-2" value="11:30" step="300"></div><div class="wd-inner"><label for="wd-end-2">סיום</label><input type="time" id="wd-end-2" value="13:00" step="300"></div><label class="wd-closed-wrap"><input type="checkbox" id="wd-closed-2"> סגור</label></div>
+          <div class="day-hours-row" data-day="3"><span class="day-wd">ד׳</span><div class="wd-inner"><label for="wd-start-3">התחלה</label><input type="time" id="wd-start-3" value="11:30" step="300"></div><div class="wd-inner"><label for="wd-end-3">סיום</label><input type="time" id="wd-end-3" value="13:00" step="300"></div><label class="wd-closed-wrap"><input type="checkbox" id="wd-closed-3"> סגור</label></div>
+          <div class="day-hours-row" data-day="4"><span class="day-wd">ה׳</span><div class="wd-inner"><label for="wd-start-4">התחלה</label><input type="time" id="wd-start-4" value="11:30" step="300"></div><div class="wd-inner"><label for="wd-end-4">סיום</label><input type="time" id="wd-end-4" value="13:00" step="300"></div><label class="wd-closed-wrap"><input type="checkbox" id="wd-closed-4"> סגור</label></div>
+          <div class="day-hours-row" data-day="5"><span class="day-wd">ו׳</span><div class="wd-inner"><label for="wd-start-5">התחלה</label><input type="time" id="wd-start-5" value="11:30" step="300"></div><div class="wd-inner"><label for="wd-end-5">סיום</label><input type="time" id="wd-end-5" value="13:00" step="300"></div><label class="wd-closed-wrap"><input type="checkbox" id="wd-closed-5" checked> סגור</label></div>
+          <div class="day-hours-row" data-day="6"><span class="day-wd">ש׳</span><div class="wd-inner"><label for="wd-start-6">התחלה</label><input type="time" id="wd-start-6" value="11:30" step="300"></div><div class="wd-inner"><label for="wd-end-6">סיום</label><input type="time" id="wd-end-6" value="13:00" step="300"></div><label class="wd-closed-wrap"><input type="checkbox" id="wd-closed-6" checked> סגור</label></div>
+        </div>
       </div>
 
       <div class="card">
@@ -432,6 +480,35 @@
       'מחכה לך 🤍✨';
     var DAYS_OPEN_DEFAULT = [0, 1, 2, 3, 4];
     var scheduleDaysOpen = DAYS_OPEN_DEFAULT.slice();
+    var DAY_NAMES_HE = ['א׳', 'ב׳', 'ג׳', 'ד׳', 'ה׳', 'ו׳', 'ש׳'];
+
+    function defaultHoursByDay() {
+      var w = { startHour: 11, startMinute: 30, endHour: 13, endMinute: 0 };
+      var o = {};
+      var d;
+      for (d = 0; d <= 4; d++) {
+        o[String(d)] = {
+          startHour: w.startHour,
+          startMinute: w.startMinute,
+          endHour: w.endHour,
+          endMinute: w.endMinute
+        };
+      }
+      o['5'] = { closed: true };
+      o['6'] = { closed: true };
+      return o;
+    }
+
+    function applyAllWdClosedStates() {
+      for (var d = 0; d <= 6; d++) {
+        var t = document.getElementById('wd-closed-' + d);
+        var st = document.getElementById('wd-start-' + d);
+        var en = document.getElementById('wd-end-' + d);
+        if (t && st && en) {
+          st.disabled = en.disabled = !!t.checked;
+        }
+      }
+    }
 
     function normalizeDaysOpen(arr) {
       if (!arr || !Array.isArray(arr) || !arr.length) return DAYS_OPEN_DEFAULT.slice();
@@ -642,17 +719,100 @@
       return { h: h, min: min };
     }
 
+    function collectHoursByDay() {
+      var defSt = parseTimeField('start-time', 11, 30);
+      var defEt = parseTimeField('end-time', 13, 0);
+      var out = {};
+      for (var d = 0; d <= 6; d++) {
+        var closedEl = document.getElementById('wd-closed-' + d);
+        if (closedEl && closedEl.checked) {
+          out[String(d)] = { closed: true };
+          continue;
+        }
+        var st = parseTimeField('wd-start-' + d, defSt.h, defSt.min);
+        var et = parseTimeField('wd-end-' + d, defEt.h, defEt.min);
+        out[String(d)] = {
+          startHour: st.h,
+          startMinute: st.min,
+          endHour: et.h,
+          endMinute: et.min
+        };
+      }
+      return out;
+    }
+
+    function fillDayHoursFromConfig(cfg) {
+      var sh = cfg.startHour != null ? cfg.startHour : 11;
+      var sm = cfg.startMinute != null ? cfg.startMinute : 30;
+      var eh = cfg.endHour != null ? cfg.endHour : 13;
+      var em = cfg.endMinute != null ? cfg.endMinute : 0;
+      if (eh === 24 && (cfg.endMinute == null || cfg.endMinute === 0)) {
+        eh = 23;
+        em = 59;
+      }
+      var hb = cfg.hoursByDay || {};
+      for (var d = 0; d <= 6; d++) {
+        var closedEl = document.getElementById('wd-closed-' + d);
+        var startEl = document.getElementById('wd-start-' + d);
+        var endEl = document.getElementById('wd-end-' + d);
+        if (!closedEl || !startEl || !endEl) continue;
+        var e = hb[String(d)] != null ? hb[String(d)] : hb[d];
+        if (e && e.closed === true) {
+          closedEl.checked = true;
+          startEl.value = pad2(sh) + ':' + pad2(sm);
+          endEl.value = pad2(eh) + ':' + pad2(em);
+          startEl.disabled = true;
+          endEl.disabled = true;
+        } else {
+          closedEl.checked = false;
+          startEl.disabled = false;
+          endEl.disabled = false;
+          var dh = e && e.startHour != null ? e.startHour : sh;
+          var dm = e && e.startMinute != null ? e.startMinute : sm;
+          var deh = e && e.endHour != null ? e.endHour : eh;
+          var dem = e && e.endMinute != null ? e.endMinute : em;
+          if (deh === 24 && (e == null || e.endMinute == null || e.endMinute === 0)) {
+            deh = 23;
+            dem = 59;
+          }
+          startEl.value = pad2(dh) + ':' + pad2(dm);
+          endEl.value = pad2(deh) + ':' + pad2(dem);
+        }
+      }
+    }
+
+    function validateHoursByDayAgainstConfig(cfg) {
+      var hb = cfg.hoursByDay || {};
+      var meet = cfg.meetingDurationMinutes != null ? cfg.meetingDurationMinutes : 45;
+      for (var d = 0; d <= 6; d++) {
+        var e = hb[String(d)];
+        if (!e || e.closed) continue;
+        var os = e.startHour * 60 + (e.startMinute || 0);
+        var oe = e.endHour * 60 + (e.endMinute || 0);
+        if (e.endHour === 24 && (e.endMinute == null || e.endMinute === 0)) oe = 24 * 60;
+        if (os >= oe) {
+          return 'יום ' + DAY_NAMES_HE[d] + ': שעת התחלה חייבת להיות לפני שעת הסיום';
+        }
+        if (os + meet > oe) {
+          return 'יום ' + DAY_NAMES_HE[d] + ': חלון השעות קצר מדי לאורך הפגישה (' + meet + ' דק׳)';
+        }
+      }
+      return '';
+    }
+
     function defaultConfig() {
       return {
         version: 1,
         availabilityBySelectedDatesOnly: false,
+        bookingsSuspended: false,
         daysOpen: DAYS_OPEN_DEFAULT.slice(),
         startHour: 11,
         startMinute: 30,
         endHour: 13,
         endMinute: 0,
-        slotMinutes: 30,
+        slotMinutes: 90,
         meetingDurationMinutes: 45,
+        hoursByDay: defaultHoursByDay(),
         blockedDates: [],
         onlyOpenDates: []
       };
@@ -669,15 +829,18 @@
       var selectedOnly = isScheduleBySelectedOnly();
       var st = parseTimeField('start-time', 11, 30);
       var et = parseTimeField('end-time', 13, 0);
+      var bsEl = document.getElementById('bookings-suspended');
       var base = {
         version: 1,
         availabilityBySelectedDatesOnly: selectedOnly,
+        bookingsSuspended: !!(bsEl && bsEl.checked),
         startHour: st.h,
         startMinute: st.min,
         endHour: et.h,
         endMinute: et.min,
-        slotMinutes: Math.max(5, parseInt(document.getElementById('slot-min').value, 10) || 30),
-        meetingDurationMinutes: Math.max(15, parseInt(document.getElementById('meet-len').value, 10) || 45)
+        slotMinutes: Math.max(5, parseInt(document.getElementById('slot-min').value, 10) || 90),
+        meetingDurationMinutes: Math.max(15, parseInt(document.getElementById('meet-len').value, 10) || 45),
+        hoursByDay: collectHoursByDay()
       };
       if (selectedOnly) {
         var openDates = parseDateLinesTextarea('only-open-dates');
@@ -718,8 +881,16 @@
       }
       document.getElementById('start-time').value = pad2(sh) + ':' + pad2(sm);
       document.getElementById('end-time').value = pad2(eh) + ':' + pad2(em);
-      document.getElementById('slot-min').value = cfg.slotMinutes || 30;
-        document.getElementById('meet-len').value = cfg.meetingDurationMinutes || 45;
+      document.getElementById('slot-min').value = cfg.slotMinutes != null ? cfg.slotMinutes : 90;
+      document.getElementById('meet-len').value = cfg.meetingDurationMinutes != null ? cfg.meetingDurationMinutes : 45;
+      var susp = document.getElementById('bookings-suspended');
+      if (susp) susp.checked = !!cfg.bookingsSuspended;
+      var fillCfg = cfg;
+      if (!cfg.hoursByDay || typeof cfg.hoursByDay !== 'object') {
+        fillCfg = Object.assign({}, cfg, { hoursByDay: defaultHoursByDay() });
+      }
+      fillDayHoursFromConfig(fillCfg);
+      applyAllWdClosedStates();
       updateCalendarModeHints();
       if (typeof calViewYear === 'number') renderMonthCalendar();
     }
@@ -1199,6 +1370,19 @@
       } catch (e) {}
     }
 
+    document.getElementById('day-hours-rows').addEventListener('change', function(ev) {
+      var t = ev.target;
+      if (t && t.id && t.id.indexOf('wd-closed-') === 0) {
+        var d = t.id.replace('wd-closed-', '');
+        var st = document.getElementById('wd-start-' + d);
+        var en = document.getElementById('wd-end-' + d);
+        if (st && en) {
+          st.disabled = en.disabled = !!t.checked;
+        }
+      }
+    });
+    applyAllWdClosedStates();
+
     document.getElementById('blocked').addEventListener('input', function() {
       if (typeof calViewYear === 'number') renderMonthCalendar();
     });
@@ -1270,6 +1454,12 @@
         return;
       }
 
+      var dayErr = validateHoursByDayAgainstConfig(cfg);
+      if (dayErr) {
+        showSaveMsg(dayErr, false);
+        return;
+      }
+
       var token = getUpdateJsonKeyToken();
       var tokenSource = getUpdateJsonKeyTokenSource();
       var btn = document.getElementById('btn-save');
@@ -1321,6 +1511,7 @@
           var cfg = JSON.parse(reader.result);
           cfg.daysOpen = normalizeDaysOpen(cfg.daysOpen);
           if (cfg.availabilityBySelectedDatesOnly == null) cfg.availabilityBySelectedDatesOnly = false;
+          if (cfg.bookingsSuspended == null) cfg.bookingsSuspended = false;
           if (!cfg.blockedDates) cfg.blockedDates = [];
           if (!cfg.onlyOpenDates) cfg.onlyOpenDates = [];
           showSaveMsg('ייבוא הצליח.', true);

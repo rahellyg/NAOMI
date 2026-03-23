@@ -1,16 +1,4 @@
 {
   "version": 1,
-  "bookings": [
-    {
-      "id": "b-1774291950831-pvdtuo9",
-      "createdAt": "2026-03-23T18:52:30.831+00:00",
-      "dateStr": "2026-03-31",
-      "timeStr": "20:30",
-      "durationMinutes": 45,
-      "fullName": "ראיסה יעיש",
-      "phone": "+972549329225",
-      "email": "rahelly23@gmail.com",
-      "birthDate": "2000-11-11"
-    }
-  ]
+  "bookings": []
 }

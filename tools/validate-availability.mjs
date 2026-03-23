@@ -39,6 +39,8 @@ if (errors.length) {
 if (typeof j.version !== 'number') errors.push('version must be a number');
 if (j.availabilityBySelectedDatesOnly != null && typeof j.availabilityBySelectedDatesOnly !== 'boolean')
   errors.push('availabilityBySelectedDatesOnly must be boolean if present');
+if (j.bookingsSuspended != null && typeof j.bookingsSuspended !== 'boolean')
+  errors.push('bookingsSuspended must be boolean if present');
 if (!Array.isArray(j.daysOpen)) errors.push('daysOpen must be an array');
 else if (j.daysOpen.length && !j.daysOpen.every((d) => d >= 0 && d <= 6 && Number.isInteger(d)))
   errors.push('daysOpen entries must be integers 0–6');
@@ -54,6 +56,30 @@ else {
 }
 
 if (!Array.isArray(j.onlyOpenDates)) errors.push('onlyOpenDates must be an array (can be empty)');
+
+if (j.hoursByDay != null) {
+  if (typeof j.hoursByDay !== 'object' || Array.isArray(j.hoursByDay)) {
+    errors.push('hoursByDay must be an object (day index string -> window or { closed: true })');
+  } else {
+    for (const [dk, ent] of Object.entries(j.hoursByDay)) {
+      if (!/^[0-6]$/.test(String(dk))) {
+        errors.push(`hoursByDay: invalid day key "${dk}" (use "0"–"6", 0=Sunday)`);
+        break;
+      }
+      if (ent == null || typeof ent !== 'object') {
+        errors.push(`hoursByDay[${dk}] must be an object`);
+        break;
+      }
+      if (ent.closed === true) continue;
+      for (const k of ['startHour', 'startMinute', 'endHour', 'endMinute']) {
+        if (ent[k] != null && typeof ent[k] !== 'number') {
+          errors.push(`hoursByDay[${dk}].${k} must be a number if present`);
+          break;
+        }
+      }
+    }
+  }
+}
 
 const nums = [
   ['startHour', j.startHour],
@@ -81,6 +107,8 @@ console.log('OK:', filepath);
 console.log(
   '  selectedOnly:',
   !!j.availabilityBySelectedDatesOnly,
+  'bookingsSuspended:',
+  !!j.bookingsSuspended,
   'daysOpen:',
   j.daysOpen?.length ?? 0,
   'blocked:',
@@ -90,5 +118,7 @@ console.log(
   'slot:',
   j.slotMinutes,
   'meet:',
-  j.meetingDurationMinutes
+  j.meetingDurationMinutes,
+  'hoursByDay keys:',
+  j.hoursByDay && typeof j.hoursByDay === 'object' ? Object.keys(j.hoursByDay).length : 0
 );

@@ -633,6 +633,22 @@
       text-align: center;
     }
 
+    .booking-unavailable-notice {
+      margin: 0.75rem 0 0;
+      padding: 1rem 1.1rem;
+      border-radius: 12px;
+      text-align: center;
+      font-size: 0.95rem;
+      line-height: 1.5;
+      color: #1e1530;
+      background: rgba(255, 250, 240, 0.97);
+      border: 1px solid rgba(212, 184, 122, 0.55);
+    }
+
+    .booking-unavailable-notice p {
+      margin: 0;
+    }
+
     .booking-section .booking-questionnaire-title {
       font-family: 'Rubik', sans-serif;
       font-weight: 600;
@@ -1160,6 +1176,9 @@
 
     <section class="booking-section" id="booking-meeting" aria-label="קביעת פגישה">
       <h2>קביעת פגישת זום</h2>
+      <div id="booking-unavailable-notice" class="booking-unavailable-notice" hidden role="status">
+        <p><strong>פגישות אינן זמינות לקביעה כרגע.</strong><br>נעדכן כאן כשיהיה אפשר לקבוע שוב.</p>
+      </div>
       <form id="booking-form" novalidate>
         <p class="booking-questionnaire-title">שאלון</p>
         <div class="form-group">
@@ -1296,7 +1315,7 @@
   </script>
 
   <!-- גיבוי אם fetch נכשל – שמרו כמו naomi-availability.json; אופציונלי: window.NAOMI_AVAILABILITY_URL -->
-  <script type="application/json" id="naomi-availability-embed">{"version":1,"availabilityBySelectedDatesOnly":false,"daysOpen":[0,1,2,3,4],"startHour":11,"startMinute":30,"endHour":13,"endMinute":0,"slotMinutes":30,"meetingDurationMinutes":45,"blockedDates":[],"onlyOpenDates":[]}</script>
+  <script type="application/json" id="naomi-availability-embed">{"version":1,"availabilityBySelectedDatesOnly":false,"bookingsSuspended":false,"daysOpen":[0,1,2,3,4],"startHour":11,"startMinute":30,"endHour":13,"endMinute":0,"slotMinutes":90,"meetingDurationMinutes":45,"hoursByDay":{"0":{"startHour":11,"startMinute":30,"endHour":13,"endMinute":0},"1":{"startHour":11,"startMinute":30,"endHour":13,"endMinute":0},"2":{"startHour":11,"startMinute":30,"endHour":13,"endMinute":0},"3":{"startHour":11,"startMinute":30,"endHour":13,"endMinute":0},"4":{"startHour":11,"startMinute":30,"endHour":13,"endMinute":0},"5":{"closed":true},"6":{"closed":true}},"blockedDates":[],"onlyOpenDates":[]}</script>
 
   <!-- Supabase: Dashboard → Project Settings → API → Project URL + anon public key. BOOKING-SYNC-SUPABASE.md -->
   <script>
@@ -1314,8 +1333,16 @@
      * אפשר גם לפני הסקריפט: window.NAOMI_BOOKING_WEB3FORMS_KEY / window.NAOMI_BOOKING_NOTIFY_WEBHOOK
      * BOOKING_LEDGER_WEBHOOK – אופציונלי: POST עם { booking } לעדכון naomi-bookings.json דרך Make/GitHub.
      * Supabase (מומלץ לראות פגישות מכל דפדפן): NAOMI_SUPABASE_URL + NAOMI_SUPABASE_ANON_KEY – ראי BOOKING-SYNC-SUPABASE.md
+     * השבתת טופס: NAOMI_BOOKING_DISABLED = true תמיד מסתירה; = false תמיד מציגה; בלי הגדרה — לפי bookingsSuspended ב־JSON (ניהול).
      */
     (function() {
+      var wBook = typeof window !== 'undefined' ? window : {};
+      function isBookingUiDisabled() {
+        if (wBook.NAOMI_BOOKING_DISABLED === true) return true;
+        if (wBook.NAOMI_BOOKING_DISABLED === false) return false;
+        return !!(meetingAvailability && meetingAvailability.bookingsSuspended);
+      }
+
       /** מינימום שעות מראש לתחילת הפגישה */
       var BOOKING_MIN_LEAD_HOURS = 48;
       var BOOKING_MIN_LEAD_MS = BOOKING_MIN_LEAD_HOURS * 60 * 60 * 1000;
@@ -1422,7 +1449,68 @@
             cfg.daysOpen = DAYS_OPEN_DEFAULT.slice();
           }
         }
+        cfg.bookingsSuspended = !!cfg.bookingsSuspended;
+        cfg.hoursByDay = normalizeHoursByDay(cfg.hoursByDay);
+        if (cfg.slotMinutes == null) cfg.slotMinutes = 90;
+        if (cfg.meetingDurationMinutes == null) cfg.meetingDurationMinutes = 45;
         return cfg;
+      }
+
+      function normalizeHoursByDay(raw) {
+        if (!raw || typeof raw !== 'object') return null;
+        var out = {};
+        for (var i = 0; i <= 6; i++) {
+          var key = String(i);
+          var e = raw[key] != null ? raw[key] : raw[i];
+          if (!e || typeof e !== 'object') continue;
+          if (e.closed === true) {
+            out[key] = { closed: true };
+            continue;
+          }
+          var sh = parseInt(e.startHour, 10);
+          var sm = parseInt(e.startMinute, 10);
+          var eh = parseInt(e.endHour, 10);
+          var em = parseInt(e.endMinute, 10);
+          if (isNaN(sh) || isNaN(eh)) continue;
+          out[key] = {
+            startHour: Math.max(0, Math.min(23, sh)),
+            startMinute: Math.max(0, Math.min(59, isNaN(sm) ? 0 : sm)),
+            endHour: Math.max(0, Math.min(24, eh)),
+            endMinute: Math.max(0, Math.min(59, isNaN(em) ? 0 : em))
+          };
+        }
+        return Object.keys(out).length ? out : null;
+      }
+
+      function getDayWindow(cfg, weekday) {
+        if (!cfg || cfg.version == null) {
+          return {
+            closed: false,
+            startHour: BOOKING_FALLBACK_SH,
+            startMinute: BOOKING_FALLBACK_SM,
+            endHour: BOOKING_FALLBACK_EH,
+            endMinute: BOOKING_FALLBACK_EM
+          };
+        }
+        var hb = cfg.hoursByDay;
+        var entry = hb && (hb[String(weekday)] != null ? hb[String(weekday)] : hb[weekday]);
+        if (entry && entry.closed === true) return { closed: true };
+        if (entry && entry.startHour != null && entry.endHour != null) {
+          return {
+            closed: false,
+            startHour: entry.startHour,
+            startMinute: entry.startMinute != null ? entry.startMinute : 0,
+            endHour: entry.endHour,
+            endMinute: entry.endMinute != null ? entry.endMinute : 0
+          };
+        }
+        return {
+          closed: false,
+          startHour: cfg.startHour != null ? cfg.startHour : BOOKING_FALLBACK_SH,
+          startMinute: cfg.startMinute != null ? cfg.startMinute : BOOKING_FALLBACK_SM,
+          endHour: cfg.endHour != null ? cfg.endHour : BOOKING_FALLBACK_EH,
+          endMinute: cfg.endMinute != null ? cfg.endMinute : BOOKING_FALLBACK_EM
+        };
       }
 
       function isBlockedDateStr(dateStr, cfg) {
@@ -1454,20 +1542,22 @@
           }
         }
         if (isBlockedDateStr(dateStr, cfg)) return false;
+        var dw = getDayWindow(cfg, w);
+        if (dw.closed) return false;
         var parts = (timeStr || '').split(':');
         var h = parseInt(parts[0], 10);
         var mi = parseInt(parts[1] || '0', 10);
         if (isNaN(h) || isNaN(mi)) return false;
         var startMin = h * 60 + mi;
-        var sh = cfg.startHour != null ? cfg.startHour : BOOKING_FALLBACK_SH;
-        var sm = cfg.startMinute != null ? cfg.startMinute : BOOKING_FALLBACK_SM;
-        var eh = cfg.endHour != null ? cfg.endHour : BOOKING_FALLBACK_EH;
-        var em = cfg.endMinute != null ? cfg.endMinute : BOOKING_FALLBACK_EM;
-        var slot = cfg.slotMinutes || 30;
-        var meetLen = cfg.meetingDurationMinutes || 60;
+        var sh = dw.startHour;
+        var sm = dw.startMinute;
+        var eh = dw.endHour;
+        var em = dw.endMinute;
+        var slot = cfg.slotMinutes != null ? cfg.slotMinutes : 90;
+        var meetLen = cfg.meetingDurationMinutes != null ? cfg.meetingDurationMinutes : 45;
         var openStart = sh * 60 + sm;
         var openEnd = eh * 60 + em;
-        if (eh === 24 && (em === 0 || cfg.endMinute == null)) {
+        if (eh === 24 && (em === 0 || dw.endMinute == null)) {
           openEnd = 24 * 60;
         }
         if (startMin < openStart) return false;
@@ -1522,6 +1612,20 @@
           }
         }
         if (isBlockedDateStr(dateStr, meetingAvailability)) return false;
+        var dw = getDayWindow(meetingAvailability, w);
+        if (dw.closed) return false;
+        var meetLen =
+          meetingAvailability.meetingDurationMinutes != null
+            ? meetingAvailability.meetingDurationMinutes
+            : 45;
+        var sh = dw.startHour;
+        var sm = dw.startMinute;
+        var eh = dw.endHour;
+        var em = dw.endMinute;
+        var openStart = sh * 60 + sm;
+        var openEnd = eh * 60 + em;
+        if (eh === 24 && em === 0) openEnd = 24 * 60;
+        if (openStart + meetLen > openEnd) return false;
         return true;
       }
 
@@ -1745,24 +1849,47 @@
         var openEnd;
         var slot;
         var meetLen;
+        var dayClosed = false;
 
         if (cfg && cfg.version != null) {
-          var sh = cfg.startHour != null ? cfg.startHour : BOOKING_FALLBACK_SH;
-          var sm = cfg.startMinute != null ? cfg.startMinute : BOOKING_FALLBACK_SM;
-          var eh = cfg.endHour != null ? cfg.endHour : BOOKING_FALLBACK_EH;
-          var em = cfg.endMinute != null ? cfg.endMinute : BOOKING_FALLBACK_EM;
-          openStart = sh * 60 + sm;
-          openEnd = eh * 60 + em;
-          if (eh === 24 && (em === 0 || cfg.endMinute == null)) {
-            openEnd = 24 * 60;
+          var dPick = new Date(dateStr + 'T12:00:00');
+          var wPick = isNaN(dPick.getTime()) ? 0 : dPick.getDay();
+          var dw = getDayWindow(cfg, wPick);
+          if (dw.closed) {
+            dayClosed = true;
+            openStart = 0;
+            openEnd = 0;
+            slot = cfg.slotMinutes != null ? cfg.slotMinutes : 90;
+            meetLen = cfg.meetingDurationMinutes != null ? cfg.meetingDurationMinutes : 45;
+          } else {
+            var sh = dw.startHour;
+            var sm = dw.startMinute;
+            var eh = dw.endHour;
+            var em = dw.endMinute;
+            openStart = sh * 60 + sm;
+            openEnd = eh * 60 + em;
+            if (eh === 24 && (em === 0 || dw.endMinute == null)) {
+              openEnd = 24 * 60;
+            }
+            slot = cfg.slotMinutes != null ? cfg.slotMinutes : 90;
+            meetLen = cfg.meetingDurationMinutes != null ? cfg.meetingDurationMinutes : 45;
           }
-          slot = cfg.slotMinutes || 30;
-          meetLen = cfg.meetingDurationMinutes || 60;
         } else {
           openStart = BOOKING_FALLBACK_SH * 60 + BOOKING_FALLBACK_SM;
           openEnd = BOOKING_FALLBACK_EH * 60 + BOOKING_FALLBACK_EM;
-          slot = 30;
-          meetLen = 60;
+          slot = 90;
+          meetLen = 45;
+        }
+
+        if (dayClosed) {
+          var phC = document.createElement('p');
+          phC.className = 'booking-cal-legend';
+          phC.style.margin = '0';
+          phC.textContent = 'ביום זה אין חלון פגישות (סגור בלוח). בחרי תאריך אחר.';
+          root.appendChild(phC);
+          if (hidden) hidden.value = '';
+          if (display) display.textContent = 'לא נבחרה שעה.';
+          return;
         }
 
         var selected = hidden && hidden.value ? hidden.value.trim() : '';
@@ -1964,6 +2091,7 @@
       }
 
       function runBooking(mode) {
+        if (isBookingUiDisabled()) return;
         var isConfirm = mode === 'confirm';
         var isGoogle = mode === 'google';
         var form = document.getElementById('booking-form');
@@ -2037,9 +2165,9 @@
           showMsg(msg, 'היום או השעה לא פתוחים לפי לוח הזמנים. בחרו יום פתוח ושעה במרווח של ' + slotM + ' דקות מתוך חלון השעות.', false);
           return;
         }
-        var meetMs = (meetingAvailability && meetingAvailability.meetingDurationMinutes)
+        var meetMs = (meetingAvailability && meetingAvailability.meetingDurationMinutes != null)
           ? meetingAvailability.meetingDurationMinutes * 60 * 1000
-          : 60 * 60 * 1000;
+          : 45 * 60 * 1000;
         var end = new Date(start.getTime() + meetMs);
         var gcalUrl = buildGoogleCalendarUrl(start, end, name, birthStr, phone, emailStr);
         var ownerLow = String(BOOKING_OWNER_EMAIL || '').trim().toLowerCase();
@@ -2083,7 +2211,7 @@
           var durMin =
             meetingAvailability && meetingAvailability.meetingDurationMinutes != null
               ? meetingAvailability.meetingDurationMinutes
-              : 60;
+              : 45;
           var humanDate = dateStr.split('-').reverse().join('/');
           var birthHuman = birthStr.split('-').reverse().join('/');
           sendBookingNotificationBackground({
@@ -2144,7 +2272,7 @@
           return;
         }
         if (!isSlotAllowed(dateStr, timeStr, meetingAvailability)) {
-          var slotM = meetingAvailability.slotMinutes || 30;
+          var slotM = meetingAvailability.slotMinutes != null ? meetingAvailability.slotMinutes : 90;
           showMsg(msg, 'השעה או התאריך לא מתאימים ללוח (חלון שעות / מרווח ' + slotM + ' דק׳).', false);
           return;
         }
@@ -2153,6 +2281,25 @@
       }
 
       function initBookingUI() {
+        if (isBookingUiDisabled()) {
+          var formOff = document.getElementById('booking-form');
+          var notice = document.getElementById('booking-unavailable-notice');
+          if (formOff) {
+            formOff.hidden = true;
+            formOff.setAttribute('aria-hidden', 'true');
+          }
+          if (notice) notice.hidden = false;
+          return;
+        }
+
+        var formUn = document.getElementById('booking-form');
+        var noticeOn = document.getElementById('booking-unavailable-notice');
+        if (formUn) {
+          formUn.hidden = false;
+          formUn.removeAttribute('aria-hidden');
+        }
+        if (noticeOn) noticeOn.hidden = true;
+
         var form = document.getElementById('booking-form');
         if (form) {
           form.addEventListener('submit', function(e) {
@@ -2188,24 +2335,29 @@
         if (timeEl) timeEl.addEventListener('change', refreshBookingSlotHint);
       }
 
-      var fetchBase = getAvailabilityFetchUrl();
-      var fetchUrl = fetchBase + (fetchBase.indexOf('?') >= 0 ? '&' : '?') + '_=' + Date.now();
-      fetch(fetchUrl, {
-        cache: 'no-store',
-        headers: { Accept: 'application/json' }
-      })
-        .then(function(r) {
-          if (!r.ok) throw new Error('no');
-          return r.json();
+      if (wBook.NAOMI_BOOKING_DISABLED === true) {
+        meetingAvailability = null;
+        initBookingUI();
+      } else {
+        var fetchBase = getAvailabilityFetchUrl();
+        var fetchUrl = fetchBase + (fetchBase.indexOf('?') >= 0 ? '&' : '?') + '_=' + Date.now();
+        fetch(fetchUrl, {
+          cache: 'no-store',
+          headers: { Accept: 'application/json' }
         })
-        .then(function(j) {
-          meetingAvailability = normalizeAvailability(j);
-        })
-        .catch(function() {
-          var emb = parseEmbeddedAvailability();
-          meetingAvailability = normalizeAvailability(emb);
-        })
-        .finally(initBookingUI);
+          .then(function(r) {
+            if (!r.ok) throw new Error('no');
+            return r.json();
+          })
+          .then(function(j) {
+            meetingAvailability = normalizeAvailability(j);
+          })
+          .catch(function() {
+            var emb = parseEmbeddedAvailability();
+            meetingAvailability = normalizeAvailability(emb);
+          })
+          .finally(initBookingUI);
+      }
     })();
   </script>
 </body>
