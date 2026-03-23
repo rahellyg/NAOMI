@@ -11,15 +11,10 @@
   ],
   "startHour": 9,
   "startMinute": 0,
-  "endHour": 20,
+  "endHour": 21,
   "endMinute": 0,
   "slotMinutes": 30,
   "meetingDurationMinutes": 45,
-  "blockedDates": [
-    "2026-03-24",
-    "2026-03-25",
-    "2026-03-26",
-    "2026-03-27"
-  ],
+  "blockedDates": [],
   "onlyOpenDates": []
 }
