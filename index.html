@@ -913,6 +913,153 @@
       color: #c62828;
     }
 
+    .booking-cal-root {
+      margin-top: 0.35rem;
+      padding: 0.5rem 0.4rem;
+      background: rgba(255, 255, 255, 0.65);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+    .booking-cal-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.45rem;
+      gap: 0.35rem;
+    }
+    .booking-cal-nav h4 {
+      margin: 0;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--accent);
+      flex: 1;
+      text-align: center;
+    }
+    .booking-cal-nav button {
+      width: auto;
+      min-width: 2.1rem;
+      padding: 0.35rem 0.45rem;
+      margin: 0;
+      font-size: 0.78rem;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      cursor: pointer;
+      color: var(--accent);
+      font-family: inherit;
+    }
+    .booking-cal-nav button:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+    .booking-cal-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 3px;
+      direction: rtl;
+      text-align: center;
+    }
+    .booking-cal-wd {
+      font-size: 0.62rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      padding: 0.15rem 0;
+    }
+    .booking-cal-day {
+      aspect-ratio: 1;
+      max-height: 2.1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.78rem;
+      border-radius: 6px;
+      border: 1px solid transparent;
+      box-sizing: border-box;
+      font-family: inherit;
+      padding: 0;
+      margin: 0;
+    }
+    .booking-cal-day.past,
+    .booking-cal-day.disabled {
+      opacity: 0.42;
+      background: #e4e6ec;
+      color: #888;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+    .booking-cal-day.selectable {
+      background: #fff;
+      border-color: var(--border);
+      cursor: pointer;
+    }
+    .booking-cal-day.selectable:hover {
+      background: rgba(92, 45, 122, 0.1);
+    }
+    .booking-cal-day.selected {
+      background: var(--accent);
+      color: var(--text-on-accent);
+      border-color: var(--accent);
+      font-weight: 700;
+    }
+    .booking-cal-day.empty {
+      visibility: hidden;
+      pointer-events: none;
+    }
+    .booking-cal-legend {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      margin-top: 0.45rem;
+      text-align: center;
+      line-height: 1.35;
+    }
+    .booking-cal-selected-label {
+      font-size: 0.8rem;
+      color: var(--text);
+      margin-top: 0.35rem;
+      min-height: 1.2em;
+    }
+
+    .booking-time-slots-root {
+      margin-top: 0.35rem;
+      min-height: 1.5rem;
+    }
+    .booking-time-slots {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+    }
+    .booking-time-slot {
+      min-width: 3.1rem;
+      padding: 0.42rem 0.55rem;
+      font-size: 0.78rem;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--text);
+      font-family: inherit;
+      cursor: pointer;
+      margin: 0;
+      box-sizing: border-box;
+    }
+    .booking-time-slot:hover:not(:disabled) {
+      background: rgba(92, 45, 122, 0.1);
+    }
+    .booking-time-slot:disabled,
+    .booking-time-slot.disabled {
+      opacity: 0.4;
+      background: #e4e6ec;
+      color: #888;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+    .booking-time-slot.selected {
+      background: var(--accent);
+      color: var(--text-on-accent);
+      border-color: var(--accent);
+      font-weight: 700;
+    }
+
     /* טופס – נשאר במרובע */
     .form-section {
       max-width: 480px;
@@ -1249,11 +1396,17 @@
         <div class="form-row">
           <div class="form-group" style="margin-bottom: 0.75rem;">
             <label for="booking-date">תאריך פגישה: <span aria-hidden="true">*</span></label>
-            <input type="date" id="booking-date" name="bookingDate" required>
+            <input type="hidden" id="booking-date" name="bookingDate" value="" required>
+            <div id="booking-date-cal-root" class="booking-cal-root"></div>
+            <p class="booking-cal-selected-label" id="booking-date-display">בחרו תאריך מהלוח (אפור = לא זמין).</p>
+            <p class="booking-cal-legend">ימים באפור: עבר, חסום בלוח, או לא יום פגישה לפי ההגדרות.</p>
           </div>
           <div class="form-group" style="margin-bottom: 0.75rem;">
             <label for="booking-time">שעת פגישה: <span aria-hidden="true">*</span></label>
-            <input type="time" id="booking-time" name="bookingTime" required>
+            <input type="hidden" id="booking-time" name="bookingTime" value="">
+            <div id="booking-time-slots-root" class="booking-time-slots-root"></div>
+            <p class="booking-cal-selected-label" id="booking-time-display">בחרו תאריך ואז שעה מהרשימה.</p>
+            <p class="booking-cal-legend">שעות באפור: מחוץ לחלון, לא לפי מרווח הסלוטים, או כבר עברו (היום).</p>
           </div>
         </div>
         <button type="submit">אישור – הורדה ליומן + פתיחת וואטסאפ</button>
@@ -1375,6 +1528,7 @@
      * תזכורת שעה לפני: טקסט מלא + קישור זום דרך קובץ ה-.ics (יומן בטלפון).
      * BOOKING_ALARM_DEBUG_MINUTES – לבדיקה מקומית בלבד: מספר דקות לפני הפגישה (למשל 2).
      *   השאירי null בפרודקשן. דוגמה: debug=2 ופגישה בעוד 5 דקות → תזכורת בעוד ~3 דקות.
+     * NAOMI_AVAILABILITY_URL (אופציונלי על window) – כתובת מלאה ל-JSON אם לא נטען מהנתיב האוטומטי.
      */
     (function() {
       var BOOKING_WHATSAPP_OWNER = '';
@@ -1411,6 +1565,28 @@
       var availabilityLoadSource = 'none';
       var AVAILABILITY_JSON = 'naomi-availability.json';
       var DAYS_OPEN_DEFAULT = [0, 1, 2, 3, 4, 5, 6];
+
+      /**
+       * GitHub Pages: כתובת user.github.io/RepoName בלי סלאש בסוף גורמת ל-fetch('naomi-availability.json')
+       * לפנות ל-user.github.io/naomi-availability.json (שגוי) → 404 → גיבוי ריק בלי חסימות.
+       */
+      function getAvailabilityFetchUrl() {
+        if (typeof window.NAOMI_AVAILABILITY_URL === 'string' && window.NAOMI_AVAILABILITY_URL.trim()) {
+          return window.NAOMI_AVAILABILITY_URL.trim();
+        }
+        var filename = AVAILABILITY_JSON || 'naomi-availability.json';
+        var path = window.location.pathname || '/';
+        if (!path.endsWith('/')) {
+          var lastSeg = path.split('/').pop() || '';
+          if (/\.[a-z0-9]{1,10}$/i.test(lastSeg)) {
+            path = path.replace(/[^/]+$/, '');
+          } else {
+            path = path + '/';
+          }
+        }
+        if (!path.endsWith('/')) path += '/';
+        return window.location.origin + path + filename;
+      }
 
       function parseEmbeddedAvailability() {
         var el = document.getElementById('naomi-availability-embed');
@@ -1497,6 +1673,285 @@
 
       function pad2(n) {
         return n < 10 ? '0' + n : '' + n;
+      }
+
+      var bookingCalYear;
+      var bookingCalMonth;
+      var BOOKING_MONTH_HE = [
+        'ינואר', 'פברואר', 'מרץ', 'אפריל', 'מאי', 'יוני',
+        'יולי', 'אוגוסט', 'ספטמבר', 'אוקטובר', 'נובמבר', 'דצמבר'
+      ];
+      var BOOKING_WD_SHORT = ['א׳', 'ב׳', 'ג׳', 'ד׳', 'ה׳', 'ו׳', 'ש׳'];
+
+      function bookingTodayKey() {
+        var t = new Date();
+        return t.getFullYear() + '-' + pad2(t.getMonth() + 1) + '-' + pad2(t.getDate());
+      }
+
+      function bookingDateKeyFromParts(y, mo, day) {
+        return y + '-' + pad2(mo + 1) + '-' + pad2(day);
+      }
+
+      function isDateCalendarSelectable(dateStr) {
+        if (!dateStr || dateStr < bookingTodayKey()) return false;
+        if (!meetingAvailability || meetingAvailability.version == null) return true;
+        var d = new Date(dateStr + 'T12:00:00');
+        if (isNaN(d.getTime())) return false;
+        var w = d.getDay();
+        var only = meetingAvailability.onlyOpenDates;
+        if (only && only.length > 0) {
+          if (only.indexOf(dateStr) === -1) return false;
+        } else {
+          var days = meetingAvailability.daysOpen;
+          if (!days || !days.length) return false;
+          if (days.indexOf(w) === -1) return false;
+        }
+        if (isBlockedDateStr(dateStr, meetingAvailability)) return false;
+        return true;
+      }
+
+      function canGoBookingCalPrev() {
+        var now = new Date();
+        var cy = now.getFullYear();
+        var cm = now.getMonth();
+        return bookingCalYear > cy || (bookingCalYear === cy && bookingCalMonth > cm);
+      }
+
+      function renderBookingCalendar() {
+        var root = document.getElementById('booking-date-cal-root');
+        var hidden = document.getElementById('booking-date');
+        var display = document.getElementById('booking-date-display');
+        if (!root) return;
+
+        if (typeof bookingCalYear === 'undefined') {
+          var n = new Date();
+          bookingCalYear = n.getFullYear();
+          bookingCalMonth = n.getMonth();
+        }
+
+        var y = bookingCalYear;
+        var m = bookingCalMonth;
+        var today = bookingTodayKey();
+        var selected = hidden && hidden.value ? hidden.value.trim() : '';
+
+        root.innerHTML = '';
+        var nav = document.createElement('div');
+        nav.className = 'booking-cal-nav';
+        var btnPrev = document.createElement('button');
+        btnPrev.type = 'button';
+        btnPrev.setAttribute('aria-label', 'חודש קודם');
+        btnPrev.textContent = '›';
+        btnPrev.disabled = !canGoBookingCalPrev();
+        btnPrev.addEventListener('click', function() {
+          if (!canGoBookingCalPrev()) return;
+          bookingCalMonth--;
+          if (bookingCalMonth < 0) {
+            bookingCalMonth = 11;
+            bookingCalYear--;
+          }
+          renderBookingCalendar();
+        });
+        var title = document.createElement('h4');
+        title.textContent = BOOKING_MONTH_HE[m] + ' ' + y;
+        var btnNext = document.createElement('button');
+        btnNext.type = 'button';
+        btnNext.setAttribute('aria-label', 'חודש הבא');
+        btnNext.textContent = '‹';
+        btnNext.addEventListener('click', function() {
+          bookingCalMonth++;
+          if (bookingCalMonth > 11) {
+            bookingCalMonth = 0;
+            bookingCalYear++;
+          }
+          renderBookingCalendar();
+        });
+        nav.appendChild(btnPrev);
+        nav.appendChild(title);
+        nav.appendChild(btnNext);
+        root.appendChild(nav);
+
+        var grid = document.createElement('div');
+        grid.className = 'booking-cal-grid';
+        for (var c = 0; c < 7; c++) {
+          var wh = document.createElement('div');
+          wh.className = 'booking-cal-wd';
+          wh.textContent = BOOKING_WD_SHORT[c];
+          grid.appendChild(wh);
+        }
+        var firstWd = new Date(y, m, 1).getDay();
+        var dim = new Date(y, m + 1, 0).getDate();
+        for (var pad = 0; pad < firstWd; pad++) {
+          var emp = document.createElement('div');
+          emp.className = 'booking-cal-day empty';
+          grid.appendChild(emp);
+        }
+        for (var day = 1; day <= dim; day++) {
+          var key = bookingDateKeyFromParts(y, m, day);
+          var cell = document.createElement('button');
+          cell.type = 'button';
+          cell.className = 'booking-cal-day';
+          cell.textContent = String(day);
+          cell.setAttribute('data-date', key);
+          if (key < today) {
+            cell.classList.add('past');
+            cell.disabled = true;
+            cell.setAttribute('aria-label', 'תאריך בעבר');
+          } else if (!isDateCalendarSelectable(key)) {
+            cell.classList.add('disabled');
+            cell.disabled = true;
+            cell.setAttribute('aria-label', 'לא זמין');
+          } else {
+            cell.classList.add('selectable');
+            if (selected === key) cell.classList.add('selected');
+            cell.setAttribute('aria-label', 'בחירת ' + key);
+            cell.addEventListener('click', function() {
+              var k = this.getAttribute('data-date');
+              if (!k || !isDateCalendarSelectable(k)) return;
+              if (hidden) hidden.value = k;
+              if (display) {
+                var p = k.split('-');
+                display.textContent = 'נבחר: ' + p[2] + '/' + p[1] + '/' + p[0];
+              }
+              renderBookingCalendar();
+              if (hidden) {
+                try {
+                  hidden.dispatchEvent(new Event('change', { bubbles: true }));
+                } catch (e) {}
+              }
+              refreshBookingSlotHint();
+              renderBookingTimeSlots();
+            });
+          }
+          grid.appendChild(cell);
+        }
+        root.appendChild(grid);
+      }
+
+      function minutesToHHMM(totalMin) {
+        var h = Math.floor(totalMin / 60);
+        var m = totalMin % 60;
+        if (h > 23) {
+          h = 23;
+          m = 59;
+        }
+        return pad2(h) + ':' + pad2(m);
+      }
+
+      function isBookingTimeInPast(dateStr, timeStr) {
+        var start = new Date(dateStr + 'T' + timeStr + ':00');
+        if (isNaN(start.getTime())) return true;
+        return start.getTime() < Date.now() - 60000;
+      }
+
+      function renderBookingTimeSlots() {
+        var root = document.getElementById('booking-time-slots-root');
+        var hidden = document.getElementById('booking-time');
+        var display = document.getElementById('booking-time-display');
+        if (!root) return;
+
+        var dateStr = (document.getElementById('booking-date') || {}).value || '';
+        root.innerHTML = '';
+
+        if (!dateStr) {
+          var ph = document.createElement('p');
+          ph.className = 'booking-cal-legend';
+          ph.style.margin = '0';
+          ph.textContent = 'בחרו תאריך בלוח כדי להציג שעות.';
+          root.appendChild(ph);
+          if (hidden) hidden.value = '';
+          if (display) display.textContent = 'לא נבחרה שעה.';
+          return;
+        }
+
+        var cfg = meetingAvailability;
+        var openStart;
+        var openEnd;
+        var slot;
+        var meetLen;
+
+        if (cfg && cfg.version != null) {
+          var sh = cfg.startHour != null ? cfg.startHour : 9;
+          var sm = cfg.startMinute != null ? cfg.startMinute : 0;
+          var eh = cfg.endHour != null ? cfg.endHour : 18;
+          var em = cfg.endMinute != null ? cfg.endMinute : 0;
+          openStart = sh * 60 + sm;
+          openEnd = eh * 60 + em;
+          if (eh === 24 && (em === 0 || cfg.endMinute == null)) {
+            openEnd = 24 * 60;
+          }
+          slot = cfg.slotMinutes || 30;
+          meetLen = cfg.meetingDurationMinutes || 60;
+        } else {
+          openStart = 8 * 60;
+          openEnd = 21 * 60;
+          slot = 30;
+          meetLen = 60;
+        }
+
+        var selected = hidden && hidden.value ? hidden.value.trim() : '';
+
+        if (selected && hidden) {
+          var slotOk = (cfg && cfg.version != null)
+            ? isSlotAllowed(dateStr, selected, cfg)
+            : true;
+          var pastOk = !isBookingTimeInPast(dateStr, selected);
+          if (!slotOk || !pastOk) {
+            hidden.value = '';
+            selected = '';
+            if (display) display.textContent = 'בחרו שעה מחדש.';
+          }
+        }
+
+        var wrap = document.createElement('div');
+        wrap.className = 'booking-time-slots';
+
+        for (var t = openStart; t + meetLen <= openEnd; t += slot) {
+          var timeStr = minutesToHHMM(t);
+          var allowed;
+          if (cfg && cfg.version != null) {
+            allowed = isSlotAllowed(dateStr, timeStr, cfg) && !isBookingTimeInPast(dateStr, timeStr);
+          } else {
+            allowed = !isBookingTimeInPast(dateStr, timeStr);
+          }
+
+          var btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'booking-time-slot';
+          btn.textContent = timeStr;
+          btn.setAttribute('data-time', timeStr);
+          if (!allowed) {
+            btn.classList.add('disabled');
+            btn.disabled = true;
+            btn.setAttribute('aria-label', 'לא זמין');
+          } else {
+            if (selected === timeStr) btn.classList.add('selected');
+            btn.setAttribute('aria-label', 'שעה ' + timeStr);
+            btn.addEventListener('click', function() {
+              var ts = this.getAttribute('data-time');
+              if (!ts) return;
+              if (hidden) hidden.value = ts;
+              if (display) display.textContent = 'נבחרה שעה: ' + ts;
+              renderBookingTimeSlots();
+              if (hidden) {
+                try {
+                  hidden.dispatchEvent(new Event('change', { bubbles: true }));
+                } catch (e1) {}
+              }
+              refreshBookingSlotHint();
+            });
+          }
+          wrap.appendChild(btn);
+        }
+        if (wrap.children.length === 0) {
+          var emptyMsg = document.createElement('p');
+          emptyMsg.className = 'booking-cal-legend';
+          emptyMsg.style.margin = '0';
+          emptyMsg.textContent = 'אין סלוטים בחלון השעות לתאריך זה (בדקי אורך פגישה מול שעת סיום ב־naomi-availability.json).';
+          root.appendChild(emptyMsg);
+          if (hidden) hidden.value = '';
+          return;
+        }
+        root.appendChild(wrap);
       }
 
       function toWaPhone(raw) {
@@ -1702,7 +2157,7 @@
           if (!meetingAvailability) {
             hint.innerHTML = '<strong style="color:#b71c1c">לא נטען לוח זמנים</strong> – כל התאריכים ייראו אפשריים אבל אין סנכרון. פתחי את האתר דרך שרת (לא קובץ ישירות), או הדביקי את תוכן <code>naomi-availability.json</code> לתג <code>&lt;script id="naomi-availability-embed"&gt;</code> ב־index.html.';
           } else if (availabilityLoadSource === 'embed') {
-            hint.innerHTML = 'לוח זמנים נטען מ<strong>הטמעה בדף</strong> (גיבוי). לעדכון: עדכנו גם את הקובץ באתר וגם את התוכן בתג <code>naomi-availability-embed</code>, או השתמשי בשרת.';
+            hint.innerHTML = 'לוח זמנים נטען מ<strong>הטמעה בדף</strong> (גיבוי) – כנראה <code>naomi-availability.json</code> לא נמצא בכתובת הנכונה ב-GitHub Pages. ודאי שהקובץ ב-commit, או הגדירי <code>window.NAOMI_AVAILABILITY_URL</code> לכתובת המלאה. עדכנו גם את תג <code>naomi-availability-embed</code> ב־index.';
           } else if (meetingAvailability.onlyOpenDates && meetingAvailability.onlyOpenDates.length) {
             hint.innerHTML = 'ניתן לקבוע רק בתאריכים הספציפיים שמופיעים בלוח (קובץ <code>naomi-availability.json</code>) + שעות לפי המרווח.';
           } else if (meetingAvailability.daysOpen && meetingAvailability.daysOpen.length) {
@@ -1710,13 +2165,6 @@
           } else {
             hint.innerHTML = 'לוח זמנים נטען; בדקי הגדרות ימים בקובץ.';
           }
-        }
-
-        var timeInput = document.getElementById('booking-time');
-        if (timeInput && meetingAvailability && meetingAvailability.slotMinutes) {
-          timeInput.step = meetingAvailability.slotMinutes * 60;
-        } else if (timeInput) {
-          timeInput.step = 900;
         }
 
         var form = document.getElementById('booking-form');
@@ -1734,12 +2182,8 @@
           });
         }
 
-        var dateInput = document.getElementById('booking-date');
-        if (dateInput) {
-          var t = new Date();
-          var min = t.getFullYear() + '-' + pad2(t.getMonth() + 1) + '-' + pad2(t.getDate());
-          dateInput.min = min;
-        }
+        renderBookingCalendar();
+        renderBookingTimeSlots();
 
         var birthInput = document.getElementById('booking-birthdate');
         if (birthInput) {
@@ -1750,13 +2194,17 @@
 
         var dateEl = document.getElementById('booking-date');
         var timeEl = document.getElementById('booking-time');
-        if (dateEl) dateEl.addEventListener('change', refreshBookingSlotHint);
+        if (dateEl) {
+          dateEl.addEventListener('change', function() {
+            renderBookingTimeSlots();
+            refreshBookingSlotHint();
+          });
+        }
         if (timeEl) timeEl.addEventListener('change', refreshBookingSlotHint);
       }
 
-      var fetchUrl = AVAILABILITY_JSON.indexOf('?') >= 0
-        ? AVAILABILITY_JSON + '&_=' + Date.now()
-        : AVAILABILITY_JSON + '?_=' + Date.now();
+      var fetchBase = getAvailabilityFetchUrl();
+      var fetchUrl = fetchBase + (fetchBase.indexOf('?') >= 0 ? '&' : '?') + '_=' + Date.now();
       fetch(fetchUrl, { cache: 'no-store' })
         .then(function(r) {
           if (!r.ok) throw new Error('no');
