@@ -191,6 +191,29 @@
       margin-top: 0.65rem;
       line-height: 1.45;
     }
+    .wd-open-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem 1rem;
+      margin-top: 0.5rem;
+    }
+    .wd-open-grid label {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      margin: 0;
+      cursor: pointer;
+      font-size: 0.88rem;
+      color: var(--text);
+    }
+    .wd-open-grid input { width: auto; margin: 0; }
+    .cal-cell.weekday-off {
+      background: rgba(189, 189, 189, 0.45);
+      opacity: 0.72;
+      cursor: default;
+      pointer-events: none;
+      font-size: 0.8rem;
+    }
   </style>
 </head>
 <body>
@@ -221,7 +244,7 @@
 
       <div class="card">
         <h2>יומן זמינות</h2>
-        <p style="font-size:0.82rem;color:var(--muted);margin-bottom:0.65rem;">כל הימים <strong>פתוחים</strong> כברירת מחדל. <strong>לחיצה</strong> על תאריך עתידי = סוגרת אותו לקביעות (אדום). לחיצה שוב = פותחת. השעות והמרווח מוגדרים בכרטיס „שעות” למטה.</p>
+        <p style="font-size:0.82rem;color:var(--muted);margin-bottom:0.65rem;"><strong>ימי שבוע:</strong> בכרטיס „ימים בשבוע לקביעה” למטה בוחרים אילו ימים בשבוע בכלל פתוחים בדף הפגישות – השאר יופיעו שם כלא זמינים. <strong>בלוח:</strong> לחיצה על תאריך עתידי (ביום שבוע פתוח) = חסימה נוספת לאותו תאריך בלבד (אדום).</p>
         <div class="cal-legend">
           <span><i style="background:rgba(129,199,132,0.45);"></i> פתוח לקביעה</span>
           <span><i style="background:rgba(239,154,154,0.55);"></i> חסום</span>
@@ -232,10 +255,24 @@
           <button type="button" class="btn-cal-next" aria-label="חודש הבא">‹</button>
         </div>
         <div class="cal-grid" id="cal-grid"></div>
-        <p class="cal-hint">חודשים שעברו באפור. בסוף: לחצי <strong>שמור</strong> לעדכון ב-GitHub או להעתקת JSON.</p>
+        <p class="cal-hint">חודשים שעברו באפור. ימי שבוע שלא סימנת בכרטיס למטה – מוצגים כאן באפור (לא ניתן לחסום בהם תאריך ספציפי דרך הלוח). בסוף: <strong>שמור</strong> + ודאי שהקובץ/ההטמעה באתר עודכנו.</p>
       </div>
 
       <textarea id="blocked" hidden aria-hidden="true"></textarea>
+
+      <div class="card">
+        <h2>ימים בשבוע לקביעה</h2>
+        <p style="font-size:0.82rem;color:var(--muted);margin-bottom:0.65rem;line-height:1.45;">רק הימים המסומנים יהיו ניתנים לבחירה ב<strong>דף קביעת הפגישה</strong>. ימים לא מסומנים = תמיד לא פנויים שם (בכל התאריכים). זה נשמר בשדה <code>daysOpen</code> בקובץ ה-JSON.</p>
+        <div class="wd-open-grid" id="wd-open-grid">
+          <label><input type="checkbox" id="wd-open-0" checked data-wd="0"> א׳</label>
+          <label><input type="checkbox" id="wd-open-1" checked data-wd="1"> ב׳</label>
+          <label><input type="checkbox" id="wd-open-2" checked data-wd="2"> ג׳</label>
+          <label><input type="checkbox" id="wd-open-3" checked data-wd="3"> ד׳</label>
+          <label><input type="checkbox" id="wd-open-4" checked data-wd="4"> ה׳</label>
+          <label><input type="checkbox" id="wd-open-5" checked data-wd="5"> ו׳</label>
+          <label><input type="checkbox" id="wd-open-6" checked data-wd="6"> ש׳</label>
+        </div>
+      </div>
 
       <div class="card">
         <h2>שעות</h2>
@@ -317,7 +354,7 @@
 
     var GH_UI_KEY = 'naomi_schedule_github_ui';
     var GH_TOKEN_SESSION = 'naomi_schedule_github_token_session';
-    /** כל ימי השבוע – הניהול הוא רק דרך לוח השנה (חסימות). */
+    /** כל ימי השבוע (ברירת מחדל אם לא נבחר כלום). */
     var DAYS_OPEN_ALL = [0, 1, 2, 3, 4, 5, 6];
     var MONTH_NAMES_HE = [
       'ינואר', 'פברואר', 'מרץ', 'אפריל', 'מאי', 'יוני',
@@ -355,6 +392,23 @@
       return dateKeyFromParts(t.getFullYear(), t.getMonth(), t.getDate());
     }
 
+    function getDaysOpenFromForm() {
+      var out = [];
+      for (var d = 0; d <= 6; d++) {
+        var el = document.getElementById('wd-open-' + d);
+        if (el && el.checked) out.push(d);
+      }
+      return out.sort(function(a, b) { return a - b; });
+    }
+
+    function bindWeekdayOpenInputs() {
+      var grid = document.getElementById('wd-open-grid');
+      if (!grid) return;
+      grid.addEventListener('change', function() {
+        if (typeof calViewYear === 'number') renderMonthCalendar();
+      });
+    }
+
     function renderMonthCalendar() {
       var grid = document.getElementById('cal-grid');
       var title = document.getElementById('cal-title');
@@ -366,6 +420,10 @@
       var blocked = getBlockedFromTextarea();
       var blockedSet = {};
       blocked.forEach(function(b) { blockedSet[b] = true; });
+
+      var openWd = getDaysOpenFromForm();
+      var openWdSet = {};
+      openWd.forEach(function(w) { openWdSet[w] = true; });
 
       var today = todayKey();
 
@@ -393,8 +451,12 @@
         cell.textContent = day;
         cell.setAttribute('data-date', key);
 
+        var cellWd = new Date(y, m, day).getDay();
         if (key < today) {
           cell.classList.add('past');
+        } else if (!openWdSet[cellWd]) {
+          cell.classList.add('weekday-off');
+          cell.title = 'יום זה לא מסומן ב„ימים בשבוע לקביעה” – לא יוצג כזמין בדף הפגישות';
         } else if (blockedSet[key]) {
           cell.classList.add('blocked');
           cell.title = 'לחצי לפתיחת היום לקביעות';
@@ -411,6 +473,15 @@
     function onCalCellClick() {
       var key = this.getAttribute('data-date');
       if (!key || key < todayKey()) return;
+      var parts = key.split('-');
+      var y = parseInt(parts[0], 10);
+      var mo = parseInt(parts[1], 10) - 1;
+      var d = parseInt(parts[2], 10);
+      if (!isNaN(y) && !isNaN(mo) && !isNaN(d)) {
+        var w = new Date(y, mo, d).getDay();
+        var openWd = getDaysOpenFromForm();
+        if (openWd.indexOf(w) === -1) return;
+      }
 
       var arr = getBlockedFromTextarea().slice();
       var i = arr.indexOf(key);
@@ -484,9 +555,10 @@
       var blocked = parseDateLinesTextarea('blocked');
       var st = parseTimeField('start-time', 9, 0);
       var et = parseTimeField('end-time', 18, 0);
+      var daysOpen = getDaysOpenFromForm();
       return {
         version: 1,
-        daysOpen: DAYS_OPEN_ALL.slice(),
+        daysOpen: daysOpen,
         startHour: st.h,
         startMinute: st.min,
         endHour: et.h,
@@ -513,6 +585,11 @@
       document.getElementById('slot-min').value = cfg.slotMinutes || 30;
         document.getElementById('meet-len').value = cfg.meetingDurationMinutes || 45;
       document.getElementById('blocked').value = (cfg.blockedDates || []).join('\n');
+      var dopen = (cfg.daysOpen && cfg.daysOpen.length) ? cfg.daysOpen.slice().sort(function(a, b) { return a - b; }) : DAYS_OPEN_ALL.slice();
+      for (var wd = 0; wd <= 6; wd++) {
+        var cb = document.getElementById('wd-open-' + wd);
+        if (cb) cb.checked = dopen.indexOf(wd) !== -1;
+      }
       if (typeof calViewYear === 'number') renderMonthCalendar();
     }
 
@@ -650,6 +727,7 @@
 
     calInitNav();
     bindCalendarNav();
+    bindWeekdayOpenInputs();
 
     document.getElementById('btn-login').addEventListener('click', function() {
       var pass = (document.getElementById('admin-pass').value || '').trim();
@@ -669,7 +747,7 @@
       loadGithubUiFields();
     });
 
-    function copyConfigToClipboard(cfg, onOk, onFail) {
+    function copyConfigToClipboard(cfg, onOk) {
       var text = JSON.stringify(cfg);
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(text).then(onOk).catch(function() {
@@ -683,6 +761,11 @@
     }
 
     document.getElementById('btn-save').addEventListener('click', function() {
+      if (!getDaysOpenFromForm().length) {
+        showSaveMsg('בחרי לפחות יום שבוע אחד ב„ימים בשבוע לקביעה”.', false);
+        setSyncMsg('', false, false);
+        return;
+      }
       var cfg = formToConfig();
       var openStart = cfg.startHour * 60 + (cfg.startMinute || 0);
       var openEnd = cfg.endHour * 60 + (cfg.endMinute || 0);
@@ -748,6 +831,10 @@
     });
 
     document.getElementById('btn-github-push').addEventListener('click', function() {
+      if (!getDaysOpenFromForm().length) {
+        showGithubMsg('בחרי לפחות יום שבוע אחד ב„ימים בשבוע לקביעה”.', false);
+        return;
+      }
       var cfg = formToConfig();
       if (!validateTimeWindow(cfg)) {
         showGithubMsg('שעת התחלה חייבת להיות לפני שעת הסיום', false);
@@ -785,7 +872,16 @@
       reader.onload = function() {
         try {
           var cfg = JSON.parse(reader.result);
-          cfg.daysOpen = DAYS_OPEN_ALL.slice();
+          var dArr = cfg.daysOpen;
+          if (!Array.isArray(dArr) || !dArr.length) {
+            dArr = DAYS_OPEN_ALL.slice();
+          } else {
+            dArr = dArr.filter(function(x) {
+              return x >= 0 && x <= 6 && x === Math.floor(Number(x));
+            });
+            if (!dArr.length) dArr = DAYS_OPEN_ALL.slice();
+          }
+          cfg.daysOpen = dArr.slice().sort(function(a, b) { return a - b; });
           if (cfg.onlyOpenDates && cfg.onlyOpenDates.length) {
             cfg.onlyOpenDates = [];
             showSaveMsg('ייבוא בוצע. רשימת onlyOpenDates הוסרה – הניהול הוא דרך הלוח בלבד. לחצי שמור לעדכון.', true);
