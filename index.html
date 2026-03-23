@@ -153,8 +153,11 @@
     }
 
     h1 .title-link.first-sentence {
-      color: #000;
-      text-shadow: none;
+      color: #fff;
+      text-shadow:
+        0 0 6px rgba(255, 255, 255, 0.9),
+        0 0 16px rgba(240, 235, 248, 0.65),
+        0 0 28px rgba(240, 235, 248, 0.45);
       font-size: 0.9em;
     }
 
@@ -374,22 +377,41 @@
       flex: 1 1 300px;
       flex-shrink: 0;
       border-radius: 12px;
-      overflow: hidden;
+      overflow: visible;
       border: none;
-      line-height: 0;
+      line-height: normal;
       margin-left: auto;
       margin-right: auto;
       max-width: 560px;
       width: 100%;
       margin-bottom: 2.5rem;
       display: flex;
-      justify-content: center;
+      flex-direction: column;
+      justify-content: flex-start;
       align-items: center;
       min-height: 260px;
     }
 
     .title-video-row .channel-intro-youtube {
       min-height: 280px;
+    }
+
+    /* מחירון מתחת לסרטון (עמודה ימנית) */
+    .channel-intro-youtube .pricing-section {
+      width: 100%;
+      max-width: 560px;
+      margin-top: 0.5rem;
+      margin-bottom: 0;
+      padding: 0.75rem 0 0;
+      line-height: normal;
+    }
+
+    .channel-intro-youtube .pricing-section h2 {
+      margin-bottom: 0.65rem;
+    }
+
+    .channel-intro-youtube .pricing-item {
+      padding: 0.65rem 0;
     }
 
     .title-video-row header {
@@ -497,8 +519,8 @@
       max-width: 480px;
       margin: 0 auto 2rem;
       padding: 1.5rem 1.25rem 2rem;
-      background: var(--bg-card);
-      border: 1px solid var(--border);
+      background: transparent;
+      border: 2px solid var(--border);
       border-radius: 16px;
       text-align: right;
     }
@@ -509,14 +531,6 @@
       font-size: 1.25rem;
       color: var(--accent);
       margin-bottom: 0.5rem;
-      text-align: center;
-    }
-
-    .booking-section .booking-note {
-      font-size: 0.82rem;
-      color: var(--text-muted);
-      line-height: 1.5;
-      margin-bottom: 1.25rem;
       text-align: center;
     }
 
@@ -984,6 +998,21 @@
       <span class="page-sparkle" aria-hidden="true">✧</span>
       <span class="page-sparkle" aria-hidden="true">⋆</span>
       <iframe width="560" height="315" src="https://www.youtube.com/embed/Cmc2zo_T6ok?autoplay=1&mute=1&playsinline=1&si=1FaAR45pOJT9XLI_" title="YouTube video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+      <section class="pricing-section" aria-label="מחירון">
+        <h2>מחירון</h2>
+        <div class="pricing-item">
+          <span class="name">שאלה 1 ממוקדת</span>
+          <span class="price">111 ₪</span>
+        </div>
+        <div class="pricing-item">
+          <span class="name">הרשמה לערוץ תוכן</span>
+          <span class="price">222 ₪ חודשי</span>
+        </div>
+        <div class="pricing-item">
+          <span class="name">פגישה אישית בזום</span>
+          <span class="price">400 ₪</span>
+        </div>
+      </section>
       </div>
     </div>
 
@@ -1022,32 +1051,14 @@
         </form>
         <div class="channel-intro-cta-wrap">
           <p class="channel-intro-cta">
-            <a href="#" id="entry-channel-btn" class="cta-link btn">הרשמה לערוץ</a>
+            <a href="#" id="entry-channel-btn" class="cta-link btn">כניסה למח שלי</a>
           </p>
         </div>
       </section>
     </div>
 
-    <section class="pricing-section" aria-label="מחירון">
-      <h2>מחירון</h2>
-      <div class="pricing-item">
-        <span class="name">רישום לערוץ</span>
-        <span class="price">222 ₪</span>
-      </div>
-      <div class="pricing-item">
-        <span class="name">פגישה דרך הזום</span>
-        <span class="price">400 ₪</span>
-      </div>
-      <div class="pricing-item">
-        <span class="name">שאלה</span>
-        <span class="price">111 ₪</span>
-      </div>
-    </section>
-
     <section class="booking-section" id="booking-meeting" aria-label="קביעת פגישה">
       <h2>קביעת פגישת זום</h2>
-      <p class="booking-note">הלוח לפי <strong>naomi-availability.json</strong>. <strong>ניתן לקבוע רק מ־48 שעות מראש</strong> לפחות. <strong>אישור</strong> – שמירת הפרטים בדף. <strong>שמירה ב־Google Calendar</strong> – מעבירה ליומן גוגל עם האירוע המוכן לשמירה. מומלץ תזכורת <strong>שעה לפני</strong> לפני השמירה בגוגל. אם החלון נחסם – קישור גיבוי למטה.</p>
-      <p class="booking-note" id="booking-availability-hint" style="margin-top:-0.75rem;font-size:0.78rem;opacity:0.95;"></p>
       <form id="booking-form" novalidate>
         <p class="booking-questionnaire-title">שאלון</p>
         <div class="form-group">
@@ -1177,7 +1188,7 @@
   </script>
 
   <!-- גיבוי אם fetch נכשל – שמרו כמו naomi-availability.json; אופציונלי: window.NAOMI_AVAILABILITY_URL -->
-  <script type="application/json" id="naomi-availability-embed">{"version":1,"daysOpen":[0,1,2,3,4],"startHour":11,"startMinute":30,"endHour":13,"endMinute":0,"slotMinutes":30,"meetingDurationMinutes":45,"blockedDates":[],"onlyOpenDates":[]}</script>
+  <script type="application/json" id="naomi-availability-embed">{"version":1,"availabilityBySelectedDatesOnly":false,"daysOpen":[0,1,2,3,4],"startHour":11,"startMinute":30,"endHour":13,"endMinute":0,"slotMinutes":30,"meetingDurationMinutes":45,"blockedDates":[],"onlyOpenDates":[]}</script>
 
   <!-- Supabase: Dashboard → Project Settings → API → Project URL + anon public key. BOOKING-SYNC-SUPABASE.md -->
   <script>
@@ -1243,7 +1254,6 @@
         'לטובתך הגבוהה ביותר\n' +
         'מחכה לך 🤍✨';
       var meetingAvailability = null;
-      var availabilityLoadSource = 'none';
       var AVAILABILITY_JSON = 'naomi-availability.json';
       var DAYS_OPEN_DEFAULT = [0, 1, 2, 3, 4];
       var BOOKING_FALLBACK_SH = 11;
@@ -1286,6 +1296,7 @@
         if (!raw || typeof raw !== 'object') return null;
         var cfg = raw;
         cfg.version = cfg.version != null ? cfg.version : 1;
+        cfg.availabilityBySelectedDatesOnly = !!cfg.availabilityBySelectedDatesOnly;
         cfg.blockedDates = (cfg.blockedDates || []).map(function(s) {
           return String(s).trim();
         }).filter(function(s) {
@@ -1296,7 +1307,9 @@
         }).filter(function(s) {
           return /^\d{4}-\d{2}-\d{2}$/.test(s);
         });
-        if (!cfg.daysOpen || !cfg.daysOpen.length) {
+        if (cfg.availabilityBySelectedDatesOnly) {
+          if (!Array.isArray(cfg.daysOpen)) cfg.daysOpen = [];
+        } else if (!cfg.daysOpen || !cfg.daysOpen.length) {
           if (!cfg.onlyOpenDates || !cfg.onlyOpenDates.length) {
             cfg.daysOpen = DAYS_OPEN_DEFAULT.slice();
           }
@@ -1318,13 +1331,19 @@
         var d = new Date(dateStr + 'T12:00:00');
         if (isNaN(d.getTime())) return false;
         var w = d.getDay();
-        var only = cfg.onlyOpenDates;
-        if (only && only.length > 0) {
-          if (only.indexOf(dateStr) === -1) return false;
+        if (cfg.availabilityBySelectedDatesOnly) {
+          var sel = cfg.onlyOpenDates || [];
+          if (!sel.length) return false;
+          if (sel.indexOf(dateStr) === -1) return false;
         } else {
-          var days = cfg.daysOpen;
-          if (!days || !days.length) return false;
-          if (days.indexOf(w) === -1) return false;
+          var only = cfg.onlyOpenDates;
+          if (only && only.length > 0) {
+            if (only.indexOf(dateStr) === -1) return false;
+          } else {
+            var days = cfg.daysOpen;
+            if (!days || !days.length) return false;
+            if (days.indexOf(w) === -1) return false;
+          }
         }
         if (isBlockedDateStr(dateStr, cfg)) return false;
         var parts = (timeStr || '').split(':');
@@ -1380,13 +1399,19 @@
         var d = new Date(dateStr + 'T12:00:00');
         if (isNaN(d.getTime())) return false;
         var w = d.getDay();
-        var only = meetingAvailability.onlyOpenDates;
-        if (only && only.length > 0) {
-          if (only.indexOf(dateStr) === -1) return false;
+        if (meetingAvailability.availabilityBySelectedDatesOnly) {
+          var sel2 = meetingAvailability.onlyOpenDates || [];
+          if (!sel2.length) return false;
+          if (sel2.indexOf(dateStr) === -1) return false;
         } else {
-          var days = meetingAvailability.daysOpen;
-          if (!days || !days.length) return false;
-          if (days.indexOf(w) === -1) return false;
+          var only = meetingAvailability.onlyOpenDates;
+          if (only && only.length > 0) {
+            if (only.indexOf(dateStr) === -1) return false;
+          } else {
+            var days = meetingAvailability.daysOpen;
+            if (!days || !days.length) return false;
+            if (days.indexOf(w) === -1) return false;
+          }
         }
         if (isBlockedDateStr(dateStr, meetingAvailability)) return false;
         return true;
@@ -2016,29 +2041,6 @@
       }
 
       function initBookingUI() {
-        var hint = document.getElementById('booking-availability-hint');
-        if (hint) {
-          if (!meetingAvailability) {
-            hint.innerHTML = '<strong style="color:#b71c1c">לא נטען לוח זמנים</strong> – כל התאריכים ייראו אפשריים אבל אין סנכרון. פתחי את האתר דרך שרת (לא קובץ ישירות), או הדביקי את תוכן <code>naomi-availability.json</code> לתג <code>&lt;script id="naomi-availability-embed"&gt;</code> ב־index.html.';
-          } else if (availabilityLoadSource === 'fetch') {
-            if (meetingAvailability.onlyOpenDates && meetingAvailability.onlyOpenDates.length) {
-              hint.innerHTML = '<strong>naomi-availability.json</strong> נטען מהאתר. ניתן לקבוע רק בתאריכים מהרשימה בקובץ + שעות לפי המרווח.';
-            } else if (meetingAvailability.daysOpen && meetingAvailability.daysOpen.length) {
-              hint.innerHTML = '<strong>naomi-availability.json</strong> נטען מהשרת – הלוח והשעות לפי הקובץ (תאריכים חסומים, חלון שעות, מרווח סלוטים).';
-            } else {
-              hint.innerHTML = '<strong>naomi-availability.json</strong> נטען מהאתר.';
-            }
-          } else if (availabilityLoadSource === 'embed') {
-            hint.innerHTML = 'לוח זמנים מ<strong>גיבוי בדף</strong> (לא מהקובץ ברשת) – כנראה <code>naomi-availability.json</code> לא נטען. ודאי שהקובץ ב-commit ליד <code>index.html</code>, או הגדירי <code>window.NAOMI_AVAILABILITY_URL</code>. עדכנו גם את <code>naomi-availability-embed</code> כדי שיתאים.';
-          } else if (meetingAvailability.onlyOpenDates && meetingAvailability.onlyOpenDates.length) {
-            hint.innerHTML = 'ניתן לקבוע רק בתאריכים מהקובץ <code>naomi-availability.json</code> + שעות לפי המרווח.';
-          } else if (meetingAvailability.daysOpen && meetingAvailability.daysOpen.length) {
-            hint.innerHTML = 'לוח זמנים לפי <code>naomi-availability.json</code> (תאריכים חסומים בניהול = לא זמינים כאן).';
-          } else {
-            hint.innerHTML = 'לוח זמנים נטען; בדקי את <code>naomi-availability.json</code>.';
-          }
-        }
-
         var form = document.getElementById('booking-form');
         if (form) {
           form.addEventListener('submit', function(e) {
@@ -2086,12 +2088,10 @@
         })
         .then(function(j) {
           meetingAvailability = normalizeAvailability(j);
-          availabilityLoadSource = 'fetch';
         })
         .catch(function() {
           var emb = parseEmbeddedAvailability();
           meetingAvailability = normalizeAvailability(emb);
-          availabilityLoadSource = meetingAvailability ? 'embed' : 'none';
         })
         .finally(initBookingUI);
     })();

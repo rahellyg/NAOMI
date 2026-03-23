@@ -299,7 +299,12 @@
 
       <div class="card">
         <h2>יומן זמינות</h2>
-        <p style="font-size:0.82rem;color:var(--muted);margin-bottom:0.65rem;">כל הימים <strong>פתוחים</strong> כברירת מחדל. <strong>לחיצה</strong> על תאריך עתידי = סוגרת אותו לקביעות (אדום). לחיצה שוב = פותחת. השעות והמרווח בכרטיס „שעות” למטה.</p>
+        <label style="display:flex;align-items:flex-start;gap:0.55rem;font-size:0.86rem;margin-bottom:0.65rem;cursor:pointer;line-height:1.5;color:var(--text);">
+          <input type="checkbox" id="schedule-by-selected-only" style="margin-top:0.25rem;flex-shrink:0;width:auto;">
+          <span><strong>זמינות רק לפי ימים נבחרים</strong> – בדף ההזמנה ייפתחו <em>רק</em> התאריכים שמסומנים <strong>ירוק</strong> בלוח. בלי ירוקים – אין תאריכים לבחירה. כבוי = כל העתידים פתוחים למעט ימים <strong>אדומים</strong> (חסומים), לפי מצב קובץ ה-JSON.</span>
+        </label>
+        <p id="cal-hint-legacy" style="font-size:0.82rem;color:var(--muted);margin-bottom:0.65rem;line-height:1.5;">לחיצה על תאריך עתידי = <strong>חסימה</strong> (אדום). שוב = ביטול חסימה. השעות והמרווח בכרטיס „שעות” למטה.</p>
+        <p id="cal-hint-selected" style="font-size:0.82rem;color:var(--muted);margin-bottom:0.65rem;line-height:1.5;display:none;">לחיצה על תאריך עתידי = <strong>הוספה</strong> לימים הפתוחים (ירוק). שוב = הסרה. <strong>שמור</strong> כדי לעדכן את <code>naomi-availability.json</code> ואת הטמעה ב־index אם צריך.</p>
         <div class="cal-legend">
           <span><i style="background:rgba(129,199,132,0.45);"></i> פתוח לקביעה</span>
           <span><i style="background:rgba(239,154,154,0.55);"></i> חסום</span>
@@ -334,6 +339,7 @@
       </div>
 
       <textarea id="blocked" hidden aria-hidden="true"></textarea>
+      <textarea id="only-open-dates" hidden aria-hidden="true"></textarea>
 
       <div class="card">
         <h2>שעות</h2>
@@ -472,6 +478,32 @@
       document.getElementById('blocked').value = sorted.join('\n');
     }
 
+    function getOnlyOpenFromTextarea() {
+      return (document.getElementById('only-open-dates').value || '')
+        .split(/\r?\n/)
+        .map(function(l) { return l.trim(); })
+        .filter(function(l) { return /^\d{4}-\d{2}-\d{2}$/.test(l); });
+    }
+
+    function setOnlyOpenTextarea(arr) {
+      var u = {};
+      arr.forEach(function(x) { u[x] = true; });
+      document.getElementById('only-open-dates').value = Object.keys(u).sort().join('\n');
+    }
+
+    function isScheduleBySelectedOnly() {
+      var el = document.getElementById('schedule-by-selected-only');
+      return !!(el && el.checked);
+    }
+
+    function updateCalendarModeHints() {
+      var on = isScheduleBySelectedOnly();
+      var leg = document.getElementById('cal-hint-legacy');
+      var sel = document.getElementById('cal-hint-selected');
+      if (leg) leg.style.display = on ? 'none' : 'block';
+      if (sel) sel.style.display = on ? 'block' : 'none';
+    }
+
     function todayKey() {
       var t = new Date();
       return dateKeyFromParts(t.getFullYear(), t.getMonth(), t.getDate());
@@ -485,9 +517,13 @@
       var m = calViewMonth;
       title.textContent = MONTH_NAMES_HE[m] + ' ' + y;
 
+      var selectedOnly = isScheduleBySelectedOnly();
       var blocked = getBlockedFromTextarea();
       var blockedSet = {};
       blocked.forEach(function(b) { blockedSet[b] = true; });
+      var openOnly = getOnlyOpenFromTextarea();
+      var openSet = {};
+      openOnly.forEach(function(b) { openSet[b] = true; });
 
       var today = todayKey();
 
@@ -517,6 +553,16 @@
 
         if (key < today) {
           cell.classList.add('past');
+        } else if (selectedOnly) {
+          if (openSet[key]) {
+            cell.classList.add('available');
+            cell.title = 'יום פתוח לקביעה – לחצי להסרה מהרשימה';
+            cell.addEventListener('click', onCalCellClick);
+          } else {
+            cell.classList.add('blocked');
+            cell.title = 'סגור – לחצי להוספה לימים הפתוחים';
+            cell.addEventListener('click', onCalCellClick);
+          }
         } else if (blockedSet[key]) {
           cell.classList.add('blocked');
           cell.title = 'לחצי לפתיחת היום לקביעות';
@@ -539,14 +585,25 @@
       var key = this.getAttribute('data-date');
       if (!key || key < todayKey()) return;
 
-      var arr = getBlockedFromTextarea().slice();
-      var i = arr.indexOf(key);
-      if (i === -1) {
-        arr.push(key);
+      if (isScheduleBySelectedOnly()) {
+        var oa = getOnlyOpenFromTextarea().slice();
+        var io = oa.indexOf(key);
+        if (io === -1) {
+          oa.push(key);
+        } else {
+          oa.splice(io, 1);
+        }
+        setOnlyOpenTextarea(oa);
       } else {
-        arr.splice(i, 1);
+        var arr = getBlockedFromTextarea().slice();
+        var i = arr.indexOf(key);
+        if (i === -1) {
+          arr.push(key);
+        } else {
+          arr.splice(i, 1);
+        }
+        setBlockedTextarea(arr);
       }
-      setBlockedTextarea(arr);
       renderMonthCalendar();
     }
 
@@ -588,6 +645,7 @@
     function defaultConfig() {
       return {
         version: 1,
+        availabilityBySelectedDatesOnly: false,
         daysOpen: DAYS_OPEN_DEFAULT.slice(),
         startHour: 11,
         startMinute: 30,
@@ -608,26 +666,48 @@
     }
 
     function formToConfig() {
-      var blocked = parseDateLinesTextarea('blocked');
+      var selectedOnly = isScheduleBySelectedOnly();
       var st = parseTimeField('start-time', 11, 30);
       var et = parseTimeField('end-time', 13, 0);
-      return {
+      var base = {
         version: 1,
-        daysOpen: scheduleDaysOpen.slice(),
+        availabilityBySelectedDatesOnly: selectedOnly,
         startHour: st.h,
         startMinute: st.min,
         endHour: et.h,
         endMinute: et.min,
         slotMinutes: Math.max(5, parseInt(document.getElementById('slot-min').value, 10) || 30),
-        meetingDurationMinutes: Math.max(15, parseInt(document.getElementById('meet-len').value, 10) || 45),
+        meetingDurationMinutes: Math.max(15, parseInt(document.getElementById('meet-len').value, 10) || 45)
+      };
+      if (selectedOnly) {
+        var openDates = parseDateLinesTextarea('only-open-dates');
+        return Object.assign({}, base, {
+          daysOpen: [],
+          blockedDates: [],
+          onlyOpenDates: openDates.slice().sort()
+        });
+      }
+      var blocked = parseDateLinesTextarea('blocked');
+      return Object.assign({}, base, {
+        daysOpen: scheduleDaysOpen.slice(),
         blockedDates: blocked,
         onlyOpenDates: []
-      };
+      });
     }
 
     function configToForm(cfg) {
       cfg = cfg || defaultConfig();
       scheduleDaysOpen = normalizeDaysOpen(cfg.daysOpen);
+      var selectedOnly = !!cfg.availabilityBySelectedDatesOnly;
+      var cb = document.getElementById('schedule-by-selected-only');
+      if (cb) cb.checked = selectedOnly;
+      if (selectedOnly) {
+        document.getElementById('only-open-dates').value = (cfg.onlyOpenDates || []).join('\n');
+        document.getElementById('blocked').value = '';
+      } else {
+        document.getElementById('only-open-dates').value = '';
+        document.getElementById('blocked').value = (cfg.blockedDates || []).join('\n');
+      }
       var sh = cfg.startHour != null ? cfg.startHour : 11;
       var sm = cfg.startMinute != null ? cfg.startMinute : 30;
       var eh = cfg.endHour != null ? cfg.endHour : 13;
@@ -640,7 +720,7 @@
       document.getElementById('end-time').value = pad2(eh) + ':' + pad2(em);
       document.getElementById('slot-min').value = cfg.slotMinutes || 30;
         document.getElementById('meet-len').value = cfg.meetingDurationMinutes || 45;
-      document.getElementById('blocked').value = (cfg.blockedDates || []).join('\n');
+      updateCalendarModeHints();
       if (typeof calViewYear === 'number') renderMonthCalendar();
     }
 
@@ -1122,6 +1202,13 @@
     document.getElementById('blocked').addEventListener('input', function() {
       if (typeof calViewYear === 'number') renderMonthCalendar();
     });
+    document.getElementById('only-open-dates').addEventListener('input', function() {
+      if (typeof calViewYear === 'number') renderMonthCalendar();
+    });
+    document.getElementById('schedule-by-selected-only').addEventListener('change', function() {
+      updateCalendarModeHints();
+      if (typeof calViewYear === 'number') renderMonthCalendar();
+    });
 
     calInitNav();
     bindCalendarNav();
@@ -1164,7 +1251,9 @@
       console.log(SAVE_LOG, 'Save clicked');
       var cfg = formToConfig();
       console.log(SAVE_LOG, 'Config:', {
+        availabilityBySelectedDatesOnly: !!cfg.availabilityBySelectedDatesOnly,
         blockedDates: (cfg.blockedDates && cfg.blockedDates.length) || 0,
+        onlyOpenDates: (cfg.onlyOpenDates && cfg.onlyOpenDates.length) || 0,
         slotMinutes: cfg.slotMinutes,
         meetingDurationMinutes: cfg.meetingDurationMinutes,
         timeWindow: cfg.startHour + ':' + (cfg.startMinute || 0) + '–' + cfg.endHour + ':' + (cfg.endMinute || 0)
@@ -1231,13 +1320,10 @@
         try {
           var cfg = JSON.parse(reader.result);
           cfg.daysOpen = normalizeDaysOpen(cfg.daysOpen);
-          if (cfg.onlyOpenDates && cfg.onlyOpenDates.length) {
-            cfg.onlyOpenDates = [];
-            showSaveMsg('ייבוא בוצע. רשימת onlyOpenDates הוסרה – הניהול הוא דרך הלוח בלבד. לחצי שמור לעדכון.', true);
-          } else {
-            showSaveMsg('ייבוא הצליח.', true);
-          }
+          if (cfg.availabilityBySelectedDatesOnly == null) cfg.availabilityBySelectedDatesOnly = false;
           if (!cfg.blockedDates) cfg.blockedDates = [];
+          if (!cfg.onlyOpenDates) cfg.onlyOpenDates = [];
+          showSaveMsg('ייבוא הצליח.', true);
           configToForm(cfg);
         } catch (err) {
           showSaveMsg('קובץ לא תקין', false);
