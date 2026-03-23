@@ -196,7 +196,7 @@
 <body>
   <div class="wrap">
     <h1>ניהול זמינות לפגישות</h1>
-    <p class="sub">דף פרטי – אל תשתפי קישור. <strong>שמור</strong> דוחף ל-GitHub עם אותו טוקן כמו משתנה <code>UPDATE_JSON_KEY</code> (ראי תיבה צהובה – נשמר בדפדפן פעם אחת, בלי שדה בטופס).</p>
+    <p class="sub">דף פרטי – אל תשתפי קישור. <strong>שמור</strong> דוחף ל-GitHub עם טוקן GitHub (PAT) – הדביקי בשדה למטה או השתמשי ב־<code>localStorage</code> / <code>window.UPDATE_JSON_KEY</code> (ראי תיבה צהובה).</p>
 
     <div id="login-gate" class="card">
       <h2>כניסה</h2>
@@ -210,7 +210,7 @@
       <div class="warn">
         <strong>סנכרון עם דף „קביעת פגישה”:</strong> הדף הציבורי קורא את <code>naomi-availability.json</code> מהאתר. אם ה-<code>fetch</code> נכשל, נטען <strong>גיבוי</strong> מתוך <code>index.html</code> (תג <code>naomi-availability-embed</code>) – חייב להיות <strong>זהה</strong> לקובץ.<br><br>
         <strong>טוקן (<code>UPDATE_JSON_KEY</code>):</strong> ב-GitHub, סודות (Secrets) <strong>מוגנים</strong> — מוצפנים, לא מופיעים בלוגים, ולא נחשפים לדפדפן של מבקרים. זה בכוונה: דף כמו זה <strong>לא יכול</strong> למשוך את <code>UPDATE_JSON_KEY</code> מהריפו (אחרת כל אחד היה רואה אותו). הסוד זמין רק בתוך <strong>GitHub Actions</strong> כשמעבירים אותו לצעד בעבודה.<br><br>
-        <strong>בדפדפן (שמור ל-GitHub מהדף):</strong> אם רוצים דחיפה מהדפדפן, צריך <strong>עותק</strong> של אותו PAT — פעם אחת בקונסול (F12): <code style="user-select:all;">localStorage.setItem('UPDATE_JSON_KEY', '…')</code> או <code>window.UPDATE_JSON_KEY</code> מקומי שלא ב-commit. אל תשתפי קישור לדף הניהול.<br><br>
+        <strong>בדפדפן (שמור ל-GitHub מהדף):</strong> הדביקי את ה-PAT ב<strong>שדה „טוקן GitHub”</strong> בכרטיס למטה (מועדף). אפשר לסמן „זכור בדפדפן” כדי לשמור ב־<code>localStorage</code>. חלופה: קונסול (F12) <code style="user-select:all;">localStorage.setItem('UPDATE_JSON_KEY', '…')</code> או <code>window.UPDATE_JSON_KEY</code> — לא ב-commit. אל תשתפי קישור לדף הניהול.<br><br>
         <strong>אחרי שינוי בלוח:</strong> לחצי <strong>שמור</strong> – עדכון ל־<code>naomi-availability.json</code> בריפו (אם הדפדפן מאפשר). אם נכשל (CORS): יועתק JSON ללוח או <code>node tools/push-availability.mjs</code>. עדכני <code>naomi-availability-embed</code> ב־<code>index.html</code> אם משתמשים בגיבוי.<br><br>
         <span style="font-size:0.8rem;">מדריך מפורט: <code>github-schedule-sync.md</code> בתיקיית הפרויקט.</span>
       </div>
@@ -228,7 +228,7 @@
           <button type="button" class="btn-cal-next" aria-label="חודש הבא">‹</button>
         </div>
         <div class="cal-grid" id="cal-grid"></div>
-        <p class="cal-hint">חודשים שעברו באפור. בסוף: <strong>שמור</strong> (טוקן מ־<code>localStorage.UPDATE_JSON_KEY</code> או <code>window.UPDATE_JSON_KEY</code>).</p>
+        <p class="cal-hint">חודשים שעברו באפור. בסוף: <strong>שמור</strong> (טוקן מהשדה למטה, או <code>localStorage</code> / <code>window</code>).</p>
       </div>
 
       <textarea id="blocked" hidden aria-hidden="true"></textarea>
@@ -250,6 +250,17 @@
         <input type="number" id="slot-min" min="5" max="120" step="5" value="30">
         <label for="meet-len">אורך פגישה (דקות)</label>
         <input type="number" id="meet-len" min="30" max="180" step="15" value="45">
+      </div>
+
+      <div class="card">
+        <h2>טוקן GitHub (PAT)</h2>
+        <p style="font-size:0.82rem;color:var(--muted);margin-bottom:0.65rem;">להדבקה לפני <strong>שמור</strong> — אותו הרשאות כמו ל־<code>UPDATE_JSON_KEY</code> (repo, תוכן). הטוקן לא נשלח לשרת של האתר; רק ל־API של GitHub מהדפדפן שלך.</p>
+        <label for="gh-push-token">טוקן (הדבקה)</label>
+        <input type="password" id="gh-push-token" autocomplete="off" spellcheck="false" placeholder="ghp_… או fine-grained token" style="width:100%;font-family:monospace;font-size:0.85rem;">
+        <label style="margin-top:0.75rem;display:flex;align-items:center;gap:0.5rem;cursor:pointer;font-size:0.88rem;">
+          <input type="checkbox" id="gh-token-remember">
+          זכור בדפדפן (שומר ב־localStorage אחרי שמירה מוצלחת)
+        </label>
       </div>
 
       <div class="card">
@@ -543,11 +554,16 @@
 
     /**
      * Same key as Node: const token = process.env.UPDATE_JSON_KEY;
-     * Order: process.env (if injected, e.g. bundler) → window → localStorage.
-     * Plain GitHub Pages: only window / localStorage work; repo Secrets need CI env injection, not the browser.
+     * Order: #gh-push-token (paste) → process.env → window → localStorage.
+     * Plain GitHub Pages: input / window / localStorage; repo Secrets are not visible in the browser.
      */
     function getUpdateJsonKeyToken() {
       try {
+        var inputEl = document.getElementById('gh-push-token');
+        if (inputEl) {
+          var fromInput = String(inputEl.value || '').trim();
+          if (fromInput) return fromInput;
+        }
         if (typeof process !== 'undefined' && process.env && process.env.UPDATE_JSON_KEY) {
           var pe = String(process.env.UPDATE_JSON_KEY).trim();
           if (pe) return pe;
@@ -564,6 +580,10 @@
 
     function getUpdateJsonKeyTokenSource() {
       try {
+        var inputEl = document.getElementById('gh-push-token');
+        if (inputEl && String(inputEl.value || '').trim()) {
+          return 'input#gh-push-token';
+        }
         if (typeof process !== 'undefined' && process.env && String(process.env.UPDATE_JSON_KEY || '').trim()) {
           return 'process.env.UPDATE_JSON_KEY';
         }
@@ -573,6 +593,28 @@
         if (localStorage.getItem(UPDATE_JSON_STORAGE_KEY)) return 'localStorage.UPDATE_JSON_KEY';
       } catch (e) {}
       return 'none';
+    }
+
+    function maybePersistTokenAfterSave(token) {
+      if (!token) return;
+      var rem = document.getElementById('gh-token-remember');
+      if (!rem || !rem.checked) return;
+      try {
+        localStorage.setItem(UPDATE_JSON_STORAGE_KEY, token);
+      } catch (e) {}
+    }
+
+    function loadSavedTokenIntoField() {
+      var tokInput = document.getElementById('gh-push-token');
+      if (!tokInput || String(tokInput.value || '').trim()) return;
+      try {
+        var ls = localStorage.getItem(UPDATE_JSON_STORAGE_KEY);
+        if (ls) {
+          tokInput.value = String(ls).trim();
+          var rem = document.getElementById('gh-token-remember');
+          if (rem) rem.checked = true;
+        }
+      } catch (e) {}
     }
 
     document.getElementById('blocked').addEventListener('input', function() {
@@ -597,6 +639,7 @@
       configToForm(defaultConfig());
       calInitNav();
       renderMonthCalendar();
+      loadSavedTokenIntoField();
     });
 
     function copyConfigToClipboard(cfg, onOk) {
@@ -643,7 +686,7 @@
         console.warn(SAVE_LOG, 'No UPDATE_JSON_KEY token — copying JSON to clipboard only');
         copyConfigToClipboard(cfg, function() {
           console.log(SAVE_LOG, 'Clipboard copy done (no GitHub push)');
-          showSaveMsg('אין טוקן: הגדירי פעם אחת localStorage.setItem(\'UPDATE_JSON_KEY\', \'…\') בקונסול (ראי תיבה צהובה), או push-availability מהמחשב. הועתק JSON ללוח.', true);
+          showSaveMsg('אין טוקן: הדביקי PAT בשדה „טוקן GitHub” למטה, או הגדירי localStorage בקונסול (ראי תיבה צהובה), או push-availability מהמחשב. הועתק JSON ללוח.', true);
         });
         return;
       }
@@ -656,6 +699,7 @@
 
       pushAvailabilityToGithub(cfg, token)
         .then(function(res) {
+          maybePersistTokenAfterSave(token);
           console.log(SAVE_LOG, 'GitHub push OK', res && res.content ? res.content.html_url || res.content.path : res);
           showSaveMsg('הקובץ עודכן ב-GitHub (' + GITHUB_PUSH_OWNER + '/' + GITHUB_PUSH_REPO + '). המתיני עד דקה ל-Pages, רענון קשיח בדף הפגישות. עדכני גם naomi-availability-embed ב-index אם צריך.', true);
         })

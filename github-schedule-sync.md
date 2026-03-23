@@ -14,13 +14,13 @@ Repository **Secrets** in GitHub are **protected by design**:
 |--------|------------------------|
 | **GitHub Actions** | Reference `secrets.UPDATE_JSON_KEY` only inside workflow YAML (server-side). |
 | **Your PC** | `export UPDATE_JSON_KEY=...` or `node tools/push-availability.mjs` — stays on your machine. |
-| **Browser admin** | Optional: same PAT value stored once in `localStorage` under key `UPDATE_JSON_KEY` (your choice; keep the admin URL private). |
+| **Browser admin** | Paste the PAT in the **„טוקן GitHub”** field on `schedule-admin.html`, or store once in `localStorage` (`UPDATE_JSON_KEY`) / `window.UPDATE_JSON_KEY` (keep the admin URL private). |
 
 ---
 
 ## Update JSON from the manage calendar page
 
-1. **`schedule-admin.html` → שמור** – Uses the same token as env/secret **`UPDATE_JSON_KEY`**, but **GitHub Actions secrets are not available in the browser**. One-time in the browser console (F12) on that site: `localStorage.setItem('UPDATE_JSON_KEY', 'your_pat_here')`, or set `window.UPDATE_JSON_KEY` from a local script (do not commit). Then **שמור** uploads **`naomi-availability.json`** via the API to **`rahellyg/NAOMI`** (`GITHUB_PUSH_*` in the page script). If **CORS** blocks, JSON is copied to the clipboard; use **`push-availability.mjs`** or git.
+1. **`schedule-admin.html` → שמור** – **Paste your PAT** in the **GitHub token** field (takes priority), or use `localStorage` / `window.UPDATE_JSON_KEY` as before. **GitHub Actions secrets are not available in the browser.** Optional: check **„זכור בדפדפן”** so a successful save writes the token to `localStorage` under `UPDATE_JSON_KEY`. Then **שמור** uploads **`naomi-availability.json`** via the API to **`rahellyg/NAOMI`** (`GITHUB_PUSH_*` in the page script). If **CORS** blocks, JSON is copied to the clipboard; use **`push-availability.mjs`** or git.
 
 2. **Push to GitHub – Node script** (from project folder; file must contain the JSON you want live):
    - Set **`UPDATE_JSON_KEY`** (preferred) or **`GITHUB_TOKEN`** to your fine-grained PAT (Contents: read+write on the repo).

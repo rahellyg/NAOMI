@@ -1,0 +1,4 @@
+# Local secrets (token for push-availability.mjs)
+.env
+.env.local
+.env.*.local
