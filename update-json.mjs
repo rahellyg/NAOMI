@@ -1,6 +1,6 @@
 /**
  * Updates a JSON file in a GitHub repo via the Contents API.
- * Set UPDATE_JSON_KEY to a fine-grained PAT or classic PAT with repo scope.
+ * Set UPDATE_JSON_KEY to a PAT with repo scope, or use GITHUB_TOKEN in Actions (same repo).
  *
  * Usage:
  *   UPDATE_JSON_KEY=ghp_... node update-json.mjs [path-in-repo] '<json-merge>'

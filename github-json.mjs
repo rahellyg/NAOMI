@@ -1,4 +1,4 @@
-export function encodeRepoPath(path) {
+function encodeRepoPath(path) {
   return path
     .split('/')
     .filter(Boolean)
@@ -6,7 +6,7 @@ export function encodeRepoPath(path) {
     .join('/');
 }
 
-export function deepMerge(target, source) {
+function deepMerge(target, source) {
   if (source === null || typeof source !== 'object' || Array.isArray(source)) {
     return source;
   }
@@ -28,7 +28,7 @@ export function deepMerge(target, source) {
   return out;
 }
 
-export function createGithubClient(token) {
+function createGithubClient(token) {
   return async function github(method, path, body) {
     const res = await fetch(`https://api.github.com${path}`, {
       method,
@@ -86,8 +86,6 @@ export async function mergeIntoRepoJson({
     sha: current.sha,
     branch,
   });
-
-  return { filePath, next };
 }
 
 /** Turn a form value string into JSON value (number, bool, object, or string). */
