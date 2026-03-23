@@ -1,12 +1,6 @@
 {
   "version": 1,
-  "daysOpen": [
-    0,
-    1,
-    2,
-    3,
-    4
-  ],
+  "daysOpen": [0, 1, 2, 3, 4],
   "startHour": 11,
   "startMinute": 30,
   "endHour": 23,

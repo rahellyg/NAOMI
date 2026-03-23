@@ -920,7 +920,9 @@
     <div class="access-box" role="dialog" aria-labelledby="access-title" aria-modal="true">
       <h2 id="access-title">גישה לדף</h2>
       <p>הזינו את קוד הגישה שקיבלתם</p>
-      <form id="access-form" novalidate>
+      <form id="access-form" novalidate autocomplete="on">
+        <label class="visually-hidden" for="access-username">מזהה</label>
+        <input type="text" id="access-username" name="username" autocomplete="username" class="visually-hidden" tabindex="-1" aria-hidden="true">
         <label class="visually-hidden" for="access-code-input">קוד גישה</label>
         <input type="password" id="access-code-input" name="accesscode" autocomplete="current-password" placeholder="קוד גישה" required>
         <button type="submit">כניסה</button>
@@ -1765,7 +1767,7 @@
         var form = document.getElementById('booking-form');
         var msg = document.getElementById('booking-msg');
         if (!form) return;
-        clearBookingGoogleCalendarLink();
+        setBookingGcalLink(null);
         var name = (document.getElementById('booking-name') || {}).value || '';
         var birthStr = (document.getElementById('booking-birthdate') || {}).value || '';
         var phone = (document.getElementById('booking-phone') || {}).value || '';
