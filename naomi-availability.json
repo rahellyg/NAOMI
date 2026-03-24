@@ -1,7 +1,7 @@
 {
   "version": 1,
   "availabilityBySelectedDatesOnly": true,
-  "bookingsSuspended": false,
+  "bookingsSuspended": true,
   "startHour": 11,
   "startMinute": 30,
   "endHour": 13,
