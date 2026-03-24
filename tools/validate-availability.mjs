@@ -71,10 +71,66 @@ if (j.hoursByDay != null) {
         break;
       }
       if (ent.closed === true) continue;
-      for (const k of ['startHour', 'startMinute', 'endHour', 'endMinute']) {
-        if (ent[k] != null && typeof ent[k] !== 'number') {
-          errors.push(`hoursByDay[${dk}].${k} must be a number if present`);
-          break;
+      if (Array.isArray(ent.windows) && ent.windows.length) {
+        for (let wi = 0; wi < ent.windows.length; wi++) {
+          const w = ent.windows[wi];
+          if (w == null || typeof w !== 'object') {
+            errors.push(`hoursByDay[${dk}].windows[${wi}] must be an object`);
+            break;
+          }
+          for (const k of ['startHour', 'startMinute', 'endHour', 'endMinute']) {
+            if (w[k] != null && typeof w[k] !== 'number') {
+              errors.push(`hoursByDay[${dk}].windows[${wi}].${k} must be a number if present`);
+              break;
+            }
+          }
+        }
+      } else {
+        for (const k of ['startHour', 'startMinute', 'endHour', 'endMinute']) {
+          if (ent[k] != null && typeof ent[k] !== 'number') {
+            errors.push(`hoursByDay[${dk}].${k} must be a number if present`);
+            break;
+          }
+        }
+      }
+    }
+  }
+}
+
+if (j.hoursByDate != null) {
+  if (typeof j.hoursByDate !== 'object' || Array.isArray(j.hoursByDate)) {
+    errors.push('hoursByDate must be an object (date YYYY-MM-DD -> windows or { closed: true })');
+  } else {
+    for (const [dk, ent] of Object.entries(j.hoursByDate)) {
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(String(dk).trim())) {
+        errors.push(`hoursByDate: invalid date key "${dk}"`);
+        break;
+      }
+      if (ent == null || typeof ent !== 'object') {
+        errors.push(`hoursByDate[${dk}] must be an object`);
+        break;
+      }
+      if (ent.closed === true) continue;
+      if (Array.isArray(ent.windows) && ent.windows.length) {
+        for (let wi = 0; wi < ent.windows.length; wi++) {
+          const w = ent.windows[wi];
+          if (w == null || typeof w !== 'object') {
+            errors.push(`hoursByDate[${dk}].windows[${wi}] must be an object`);
+            break;
+          }
+          for (const k of ['startHour', 'startMinute', 'endHour', 'endMinute']) {
+            if (w[k] != null && typeof w[k] !== 'number') {
+              errors.push(`hoursByDate[${dk}].windows[${wi}].${k} must be a number if present`);
+              break;
+            }
+          }
+        }
+      } else {
+        for (const k of ['startHour', 'startMinute', 'endHour', 'endMinute']) {
+          if (ent[k] != null && typeof ent[k] !== 'number') {
+            errors.push(`hoursByDate[${dk}].${k} must be a number if present`);
+            break;
+          }
         }
       }
     }

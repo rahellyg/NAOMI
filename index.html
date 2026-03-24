@@ -673,7 +673,8 @@
     .booking-section input[type="date"],
     .booking-section input[type="time"],
     .booking-section input[type="tel"],
-    .booking-section input[type="text"] {
+    .booking-section input[type="text"],
+    .booking-section input[type="email"] {
       width: 100%;
       padding: 0.75rem 1rem;
       border: 1px solid var(--border);
@@ -682,6 +683,26 @@
       font-size: 1rem;
       background: #fff;
       color: var(--text);
+    }
+
+    .booking-section textarea {
+      width: 100%;
+      min-height: 120px;
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 1rem;
+      background: #fff;
+      color: var(--text);
+      resize: vertical;
+    }
+
+    .question-form-note {
+      font-size: 0.86rem;
+      color: var(--text-muted);
+      margin: -0.25rem 0 1rem;
+      line-height: 1.5;
     }
 
     .booking-section button[type="submit"] {
@@ -1068,6 +1089,30 @@
       white-space: nowrap;
       border: 0;
     }
+
+    .site-credit-wrap {
+      text-align: center;
+      padding: 0 1rem 2rem;
+      max-width: min(94vw, 1040px);
+      margin: 0 auto;
+    }
+
+    .site-credit {
+      font-size: 0.875rem;
+      line-height: 1.5;
+      color: #1a1a1a;
+      margin: 0;
+    }
+
+    .site-credit-link {
+      font-weight: 600;
+      text-decoration: underline;
+      color: #1565c0;
+    }
+
+    .site-credit-link:hover {
+      opacity: 0.8;
+    }
   </style>
 </head>
 <body>
@@ -1221,7 +1266,48 @@
         </p>
       </form>
     </section>
+
+    <section class="booking-section question-submit-section" id="ask-question" aria-label="שאלה 1 ממוקדת">
+      <h2>שאלה 1 ממוקדת</h2>
+      <p class="booking-questionnaire-title">מילוי פרטים</p>
+      <form id="question-form" novalidate>
+        <div class="form-group">
+          <label for="question-name">שם מלא <span aria-hidden="true">*</span></label>
+          <input type="text" id="question-name" name="questionName" placeholder="שם פרטי ומשפחה" required autocomplete="name">
+        </div>
+        <div class="form-group">
+          <label for="question-birthdate">תאריך לידה <span aria-hidden="true">*</span></label>
+          <input type="date" id="question-birthdate" name="questionBirthdate" required autocomplete="bday" aria-label="תאריך לידה">
+        </div>
+        <div class="form-group">
+          <label for="question-text">שאלה <span aria-hidden="true">*</span></label>
+          <p class="question-form-note" id="question-text-hint">מענה יינתן עד 72 שעות בוואטסאפ</p>
+          <textarea id="question-text" name="questionText" required placeholder="מענה יינתן עד 72 שעות בוואטסאפ" aria-describedby="question-text-hint"></textarea>
+        </div>
+        <div class="form-group">
+          <label for="question-phone">טלפון <span aria-hidden="true">*</span></label>
+          <input type="tel" id="question-phone" name="questionPhone" placeholder="050-1234567" required autocomplete="tel">
+        </div>
+        <div class="form-group">
+          <label for="question-email">מייל <span aria-hidden="true">*</span></label>
+          <input type="email" id="question-email" name="questionEmail" placeholder="yourname@gmail.com" required autocomplete="email" inputmode="email">
+        </div>
+        <button type="submit" id="question-submit">שליחה</button>
+        <p class="booking-msg" id="question-msg" role="status"></p>
+      </form>
+    </section>
   </div>
+  <footer class="site-credit-wrap" role="contentinfo">
+    <p class="site-credit">
+      נבנה על ידי
+      <a
+        href="https://rahellyg.github.io/busipro/"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="site-credit-link"
+      >BusiPro</a>
+    </p>
+  </footer>
   </div>
 
   <script>
@@ -1325,14 +1411,12 @@
 
   <script>
     /**
-     * לוח: fetch / embed. אישור = שליחה שקטה ברקע (אם הוגדר) + קישור Google.
-     * BOOKING_OWNER_EMAIL = נעמי כאורחת ב-Google.
-     * עדכון שקט למזמינה:
-     *   • BOOKING_WEB3FORMS_ACCESS_KEY – מייל מ־web3forms.com (חינם, בלי חלון אצל הלקוחה).
-     *   • BOOKING_NOTIFY_WEBHOOK – JSON ל־Make/Zapier/n8n → וואטסאפ (אם השירות מאפשר CORS מהדפדפן).
-     * אפשר גם לפני הסקריפט: window.NAOMI_BOOKING_WEB3FORMS_KEY / window.NAOMI_BOOKING_NOTIFY_WEBHOOK
-     * BOOKING_LEDGER_WEBHOOK – אופציונלי: POST עם { booking } לעדכון naomi-bookings.json דרך Make/GitHub.
-     * Supabase (מומלץ לראות פגישות מכל דפדפן): NAOMI_SUPABASE_URL + NAOMI_SUPABASE_ANON_KEY – ראי BOOKING-SYNC-SUPABASE.md
+     * לוח: fetch / embed. אישור פגישה = רישום ל־Supabase / localStorage / webhook מנהל (אופציונלי) + קישור Google Calendar.
+     * אין שליחת מייל מהדף – הפרטים מוצגים בדפי הניהול (פגישות / שאלות).
+     * BOOKING_OWNER_EMAIL = נעמי כאורחת ב-Google Calendar.
+     * BOOKING_LEDGER_WEBHOOK – אופציונלי: POST עם { booking } לעדכון naomi-bookings.json (Make/GitHub).
+     * QUESTION_LEDGER_WEBHOOK – אופציונלי: POST עם { question } ל־naomi-questions.json.
+     * Supabase: NAOMI_SUPABASE_URL + NAOMI_SUPABASE_ANON_KEY – ראי BOOKING-SYNC-SUPABASE.md (naomi_bookings, naomi_questions).
      * השבתת טופס: NAOMI_BOOKING_DISABLED = true תמיד מסתירה; = false תמיד מציגה; בלי הגדרה — לפי bookingsSuspended ב־JSON (ניהול).
      */
     (function() {
@@ -1347,21 +1431,19 @@
       var BOOKING_MIN_LEAD_HOURS = 48;
       var BOOKING_MIN_LEAD_MS = BOOKING_MIN_LEAD_HOURS * 60 * 60 * 1000;
       var BOOKINGS_LOCAL_STORAGE_KEY = 'naomi_bookings_v1';
+      var QUESTIONS_LOCAL_STORAGE_KEY = 'naomi_questions_v1';
 
       var BOOKING_ZOOM_LINK = '';
       var BOOKING_OWNER_EMAIL = 'naomi.amsalem@gmail.com';
-      /** מפתח מ־https://web3forms.com – מגיע מייל עם פרטי ההזמנה (שקט, ברקע). */
-      var BOOKING_WEB3FORMS_ACCESS_KEY = '';
-      /** כתובת Webhook (למשל Make: Webhooks → Custom webhook) – גוף JSON. */
-      var BOOKING_NOTIFY_WEBHOOK = '';
-      /** אופציונלי: נשלח בכותרת X-Booking-Secret לבדיקה בסנריו. */
-      var BOOKING_NOTIFY_SECRET = '';
       /** Webhook נפרד לרישום פגישה (למשל Make → עדכון naomi-bookings.json ב-GitHub). */
       var BOOKING_LEDGER_WEBHOOK = '';
+      /** Webhook לרישום שאלה (למשל Make → naomi-questions.json). */
+      var QUESTION_LEDGER_WEBHOOK = '';
       /** Supabase – ראי BOOKING-SYNC-SUPABASE.md (ריק = בלי סנכרון ענן). */
       var SUPABASE_URL = '';
       var SUPABASE_ANON_KEY = '';
       var SUPABASE_BOOKINGS_TABLE = 'naomi_bookings';
+      var SUPABASE_QUESTIONS_TABLE = 'naomi_questions';
 
       var PRE_MEETING_REMINDER_HE =
         'היי אהובה\n' +
@@ -1906,6 +1988,60 @@
         }).catch(function() {});
       }
 
+      function appendQuestionToLocalLedger(entry) {
+        try {
+          var raw = localStorage.getItem(QUESTIONS_LOCAL_STORAGE_KEY);
+          var arr = raw ? JSON.parse(raw) : [];
+          if (!Array.isArray(arr)) arr = [];
+          arr.push(entry);
+          localStorage.setItem(QUESTIONS_LOCAL_STORAGE_KEY, JSON.stringify(arr));
+        } catch (eQ) {}
+      }
+
+      function postQuestionLedgerWebhook(question) {
+        var wq = typeof window !== 'undefined' ? window : {};
+        var url = String(wq.NAOMI_QUESTION_LEDGER_WEBHOOK || QUESTION_LEDGER_WEBHOOK || '').trim();
+        if (!url) return;
+        fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ source: 'naomi-landing', type: 'question_append', question: question }),
+          mode: 'cors',
+          keepalive: true
+        }).catch(function() {});
+      }
+
+      function syncQuestionToSupabase(entry) {
+        var wq = typeof window !== 'undefined' ? window : {};
+        var base = String(wq.NAOMI_SUPABASE_URL || SUPABASE_URL || '')
+          .trim()
+          .replace(/\/$/, '');
+        var key = String(wq.NAOMI_SUPABASE_ANON_KEY || SUPABASE_ANON_KEY || '').trim();
+        var table = String(wq.NAOMI_SUPABASE_QUESTIONS_TABLE || SUPABASE_QUESTIONS_TABLE || 'naomi_questions').trim();
+        if (!base || !key) return;
+        var row = {
+          id: entry.id,
+          created_at: entry.createdAt,
+          full_name: entry.fullName,
+          birth_date: entry.birthDate,
+          phone: entry.phone,
+          email: entry.email,
+          question_text: entry.questionText
+        };
+        fetch(base + '/rest/v1/' + encodeURIComponent(table), {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            apikey: key,
+            Authorization: 'Bearer ' + key,
+            Prefer: 'return=minimal'
+          },
+          body: JSON.stringify(row),
+          mode: 'cors',
+          keepalive: true
+        }).catch(function() {});
+      }
+
       function syncBookingToSupabase(entry) {
         var w = typeof window !== 'undefined' ? window : {};
         var base = String(w.NAOMI_SUPABASE_URL || SUPABASE_URL || '')
@@ -2141,68 +2277,6 @@
         el.className = 'booking-msg ' + (ok ? 'ok' : 'err');
       }
 
-      function getBookingNotifyConfig() {
-        var w = typeof window !== 'undefined' ? window : {};
-        return {
-          web3: String(w.NAOMI_BOOKING_WEB3FORMS_KEY || BOOKING_WEB3FORMS_ACCESS_KEY || '').trim(),
-          webhook: String(w.NAOMI_BOOKING_NOTIFY_WEBHOOK || BOOKING_NOTIFY_WEBHOOK || '').trim(),
-          secret: String(w.NAOMI_BOOKING_NOTIFY_SECRET || BOOKING_NOTIFY_SECRET || '').trim()
-        };
-      }
-
-      /** שליחה ברקע בלי חלונות – כשלים לא מוצגים למזמינה. */
-      function sendBookingNotificationBackground(payload) {
-        var cfg = getBookingNotifyConfig();
-        var textBody = [
-          'הזמנת פגישת זום מהדף',
-          'שם מלא: ' + payload.fullName,
-          'תאריך לידה: ' + payload.birthDateDisplay,
-          'תאריך פגישה: ' + payload.meetingDateDisplay,
-          'שעת פגישה: ' + payload.meetingTime,
-          'משך (דק׳): ' + payload.durationMinutes,
-          'טלפון: ' + payload.phone,
-          'אימייל מזמינה: ' + payload.clientEmail,
-          'אימייל נעמי ביומן: ' + payload.ownerCalendarEmail,
-          payload.zoomLink ? 'קישור זום:\n' + payload.zoomLink : '',
-          '',
-          'קישור להוספה ל-Google Calendar:',
-          payload.googleCalendarUrl,
-          '',
-          '──────── טקסט הכנה לפני פגישה (לשליחה ללקוחה) ────────',
-          PRE_MEETING_REMINDER_HE
-        ]
-          .filter(Boolean)
-          .join('\n');
-
-        if (cfg.web3) {
-          fetch('https://api.web3forms.com/submit', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-            body: JSON.stringify({
-              access_key: cfg.web3,
-              subject: 'הזמנת פגישה – ' + payload.fullName,
-              from_name: 'דף נחיתה נעמי',
-              name: payload.fullName,
-              email: payload.clientEmail,
-              phone: payload.phone,
-              message: textBody
-            })
-          }).catch(function() {});
-        }
-
-        if (cfg.webhook) {
-          var headers = { 'Content-Type': 'application/json' };
-          if (cfg.secret) headers['X-Booking-Secret'] = cfg.secret;
-          fetch(cfg.webhook, {
-            method: 'POST',
-            headers: headers,
-            body: JSON.stringify(payload),
-            mode: 'cors',
-            keepalive: true
-          }).catch(function() {});
-        }
-      }
-
       function runBooking(mode) {
         if (isBookingUiDisabled()) return;
         var isConfirm = mode === 'confirm';
@@ -2325,26 +2399,6 @@
             meetingAvailability && meetingAvailability.meetingDurationMinutes != null
               ? meetingAvailability.meetingDurationMinutes
               : 45;
-          var humanDate = dateStr.split('-').reverse().join('/');
-          var birthHuman = birthStr.split('-').reverse().join('/');
-          sendBookingNotificationBackground({
-            source: 'naomi-landing',
-            type: 'booking_confirm',
-            fullName: name,
-            birthDate: birthStr,
-            birthDateDisplay: birthHuman,
-            meetingDate: dateStr,
-            meetingDateDisplay: humanDate,
-            meetingTime: timeStr,
-            durationMinutes: durMin,
-            phone: phone,
-            clientEmail: emailStr,
-            ownerCalendarEmail: String(BOOKING_OWNER_EMAIL || '').trim(),
-            zoomLink: String(BOOKING_ZOOM_LINK || '').trim() || null,
-            googleCalendarUrl: gcalUrl,
-            prepTextForClient: PRE_MEETING_REMINDER_HE,
-            submittedAt: new Date().toISOString()
-          });
           var ledgerEntry = {
             id: 'b-' + Date.now() + '-' + Math.random().toString(36).slice(2, 9),
             createdAt: new Date().toISOString(),
@@ -2471,6 +2525,70 @@
           })
           .finally(initBookingUI);
       }
+
+      (function initQuestionForm() {
+        var form = document.getElementById('question-form');
+        var msg = document.getElementById('question-msg');
+        if (!form || !msg) return;
+        form.addEventListener('submit', function(e) {
+          e.preventDefault();
+          var name = (document.getElementById('question-name') || {}).value || '';
+          var birth = (document.getElementById('question-birthdate') || {}).value || '';
+          var phone = (document.getElementById('question-phone') || {}).value || '';
+          var emailStr = (document.getElementById('question-email') || {}).value || '';
+          var qtext = (document.getElementById('question-text') || {}).value || '';
+          name = name.trim();
+          birth = birth.trim();
+          phone = phone.trim();
+          emailStr = emailStr.trim();
+          qtext = qtext.trim();
+          if (!name) {
+            showMsg(msg, 'נא למלא שם מלא', false);
+            return;
+          }
+          if (!birth) {
+            showMsg(msg, 'נא לבחור תאריך לידה', false);
+            return;
+          }
+          var birthD = new Date(birth + 'T12:00:00');
+          if (isNaN(birthD.getTime()) || birthD.getTime() > Date.now()) {
+            showMsg(msg, 'תאריך לידה לא תקין', false);
+            return;
+          }
+          if (!qtext) {
+            showMsg(msg, 'נא לכתוב את השאלה', false);
+            return;
+          }
+          if (!phone) {
+            showMsg(msg, 'נא למלא טלפון', false);
+            return;
+          }
+          if (!isProbablyBookingEmail(emailStr)) {
+            showMsg(msg, 'נא למלא אימייל תקין', false);
+            return;
+          }
+          var qEntry = {
+            id: 'q-' + Date.now() + '-' + Math.random().toString(36).slice(2, 9),
+            createdAt: new Date().toISOString(),
+            fullName: name,
+            birthDate: birth,
+            phone: phone,
+            email: emailStr,
+            questionText: qtext
+          };
+          appendQuestionToLocalLedger(qEntry);
+          postQuestionLedgerWebhook(qEntry);
+          syncQuestionToSupabase(qEntry);
+          showMsg(msg, 'הפרטים נקלטו. מענה עד 72 שעות בוואטסאפ; אפשר לראות בדף הניהול (שאלות).', true);
+          form.reset();
+        });
+        var bq = document.getElementById('question-birthdate');
+        if (bq) {
+          var tn = new Date();
+          var maxBirth = tn.getFullYear() + '-' + pad2(tn.getMonth() + 1) + '-' + pad2(tn.getDate());
+          bq.max = maxBirth;
+        }
+      })();
     })();
   </script>
 </body>

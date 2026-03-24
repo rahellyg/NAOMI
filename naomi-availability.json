@@ -1,7 +1,8 @@
 {
   "version": 1,
   "availabilityBySelectedDatesOnly": true,
-  "bookingsSuspended": true,
+  "bookingsSuspended": false,
+  "daysOpen": [0, 1, 2, 3, 4],
   "startHour": 11,
   "startMinute": 30,
   "endHour": 13,
@@ -9,95 +10,15 @@
   "slotMinutes": 90,
   "meetingDurationMinutes": 45,
   "hoursByDay": {
-    "0": {
-      "windows": [
-        {
-          "startHour": 11,
-          "startMinute": 30,
-          "endHour": 13,
-          "endMinute": 0
-        }
-      ]
-    },
-    "1": {
-      "windows": [
-        {
-          "startHour": 11,
-          "startMinute": 30,
-          "endHour": 13,
-          "endMinute": 0
-        }
-      ]
-    },
-    "2": {
-      "windows": [
-        {
-          "startHour": 11,
-          "startMinute": 30,
-          "endHour": 13,
-          "endMinute": 0
-        }
-      ]
-    },
-    "3": {
-      "windows": [
-        {
-          "startHour": 11,
-          "startMinute": 30,
-          "endHour": 13,
-          "endMinute": 0
-        }
-      ]
-    },
-    "4": {
-      "windows": [
-        {
-          "startHour": 11,
-          "startMinute": 30,
-          "endHour": 13,
-          "endMinute": 0
-        }
-      ]
-    },
-    "5": {
-      "closed": true
-    },
-    "6": {
-      "closed": true
-    }
+    "0": { "startHour": 11, "startMinute": 30, "endHour": 13, "endMinute": 0 },
+    "1": { "startHour": 11, "startMinute": 30, "endHour": 13, "endMinute": 0 },
+    "2": { "startHour": 11, "startMinute": 30, "endHour": 13, "endMinute": 0 },
+    "3": { "startHour": 11, "startMinute": 30, "endHour": 13, "endMinute": 0 },
+    "4": { "startHour": 11, "startMinute": 30, "endHour": 13, "endMinute": 0 },
+    "5": { "closed": true },
+    "6": { "closed": true }
   },
-  "hoursByDate": {
-    "2026-03-31": {
-      "windows": [
-        {
-          "startHour": 11,
-          "startMinute": 30,
-          "endHour": 13,
-          "endMinute": 0
-        },
-        {
-          "startHour": 19,
-          "startMinute": 30,
-          "endHour": 21,
-          "endMinute": 0
-        }
-      ]
-    },
-    "2026-03-26": {
-      "windows": [
-        {
-          "startHour": 11,
-          "startMinute": 30,
-          "endHour": 13,
-          "endMinute": 0
-        }
-      ]
-    }
-  },
-  "daysOpen": [],
+  "hoursByDate": {},
   "blockedDates": [],
-  "onlyOpenDates": [
-    "2026-03-26",
-    "2026-03-31"
-  ]
+  "onlyOpenDates": []
 }

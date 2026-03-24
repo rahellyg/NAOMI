@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ניהול שאלות | פרטי</title>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700&family=Rubik:wght@500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #b87ad4;
+      --accent: #5c2d7a;
+      --text: #2d2438;
+      --muted: #4a3d5c;
+      --white-glass: rgba(255, 255, 255, 0.39);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Heebo', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 1.5rem;
+    }
+    .wrap { max-width: 560px; margin: 0 auto; }
+    h1 {
+      font-family: 'Rubik', sans-serif;
+      font-size: 1.35rem;
+      color: var(--accent);
+      margin-bottom: 0.35rem;
+      text-align: center;
+    }
+    .sub {
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 1.5rem;
+      line-height: 1.5;
+    }
+    .card {
+      background: var(--white-glass);
+      backdrop-filter: blur(5px);
+      border: 1px solid rgba(255, 255, 255, 0.43);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    .card h2 {
+      font-size: 1rem;
+      margin-bottom: 0.75rem;
+      color: var(--accent);
+    }
+    label { display: block; font-size: 0.88rem; margin-bottom: 0.35rem; color: var(--muted); }
+    input[type="password"], input[type="text"] {
+      width: 100%;
+      padding: 0.65rem 0.75rem;
+      border-radius: 8px;
+      border: 1px solid rgba(92, 45, 122, 0.35);
+      font-family: inherit;
+      margin-bottom: 0.75rem;
+    }
+    button {
+      width: 100%;
+      padding: 0.85rem;
+      border: none;
+      border-radius: 10px;
+      font-family: inherit;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      margin-top: 0.35rem;
+    }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-secondary { background: rgba(255,255,255,0.5); color: var(--accent); margin-top: 0.5rem; }
+    .btn-file { margin-top: 0.5rem; }
+    .msg { margin-top: 0.75rem; padding: 0.6rem; border-radius: 8px; font-size: 0.88rem; text-align: center; display: none; }
+    .msg.ok { display: block; background: rgba(255, 250, 240, 0.97); color: #1e1530; border: 1px solid rgba(212, 184, 122, 0.65); }
+    .msg.err { display: block; background: rgba(255, 245, 245, 0.95); color: #8b1532; border: 1px solid rgba(198, 40, 40, 0.35); }
+    #login-gate { margin-top: 2rem; }
+    #admin-panel[hidden] { display: none !important; }
+    .warn {
+      background: rgba(255, 193, 7, 0.2);
+      border: 1px solid rgba(255, 152, 0, 0.4);
+      border-radius: 10px;
+      padding: 0.75rem;
+      font-size: 0.82rem;
+      margin-bottom: 1rem;
+      line-height: 1.5;
+    }
+    .admin-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      justify-content: center;
+      margin-bottom: 1rem;
+    }
+    .admin-nav a {
+      display: inline-block;
+      padding: 0.5rem 0.85rem;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.5);
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.88rem;
+      border: 1px solid rgba(92, 45, 122, 0.25);
+    }
+    .admin-nav a:hover { background: rgba(255, 255, 255, 0.75); }
+    .admin-nav a[aria-current="page"] {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+    .questions-list {
+      list-style: none;
+      margin: 0.75rem 0 0;
+      padding: 0;
+      max-height: 520px;
+      overflow-y: auto;
+      font-size: 0.82rem;
+      line-height: 1.45;
+    }
+    .questions-list li {
+      background: rgba(255,255,255,0.45);
+      border: 1px solid rgba(92, 45, 122, 0.2);
+      border-radius: 8px;
+      padding: 0.55rem 0.65rem;
+      margin-bottom: 0.45rem;
+    }
+    .questions-list li strong { color: var(--accent); }
+    .q-item-title { font-weight: 700; color: var(--accent); margin-bottom: 0.4rem; font-size: 0.9rem; }
+    .q-item-rows { display: grid; gap: 0.25rem; font-size: 0.8rem; }
+    .q-item-rows span.lbl { color: var(--muted); font-weight: 600; min-width: 5.5rem; display: inline-block; }
+    .q-item-body {
+      margin-top: 0.5rem;
+      padding: 0.45rem;
+      background: rgba(255,255,255,0.35);
+      border-radius: 6px;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-size: 0.8rem;
+    }
+    .bookings-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+    .bookings-toolbar button { width: auto; flex: 1; min-width: 8rem; margin-top: 0; }
+    .btn-wa-question {
+      margin-top: 0.55rem;
+      width: 100%;
+      padding: 0.55rem 0.75rem;
+      font-size: 0.82rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: inherit;
+      background: #25d366;
+      color: #fff;
+    }
+    .btn-wa-question:hover:not(:disabled) { filter: brightness(1.06); }
+    .btn-wa-question:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      background: rgba(0, 0, 0, 0.2);
+      color: var(--text);
+    }
+    .site-credit-wrap {
+      text-align: center;
+      margin-top: 1.25rem;
+      padding: 0 0.5rem 1.25rem;
+    }
+    .site-credit {
+      font-size: 0.875rem;
+      line-height: 1.5;
+      color: #1a1a1a;
+      margin: 0;
+    }
+    .site-credit-link {
+      font-weight: 600;
+      text-decoration: underline;
+      color: #1565c0;
+    }
+    .site-credit-link:hover {
+      opacity: 0.8;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>שאלות מהדף</h1>
+    <p class="sub">טופס „שאלה 1 ממוקדת” – ריכוז מ־GitHub, Supabase ו־localStorage של הדפדפן.</p>
+
+    <div id="login-gate" class="card">
+      <h2>כניסה</h2>
+      <label for="admin-pass">סיסמה</label>
+      <input type="password" id="admin-pass" autocomplete="current-password" placeholder="הסיסמה שהגדרת בקוד">
+      <button type="button" class="btn-primary" id="btn-login">כניסה לניהול</button>
+      <p class="msg err" id="login-err"></p>
+    </div>
+
+    <div id="admin-panel" hidden>
+      <div class="warn">
+        <strong>מקורות:</strong> אין שליחת מייל מהדף – השאלות נשמרות ב־Supabase / <code>naomi-questions.json</code> / localStorage. לראות מכל דפדפן: הגדירי טבלת <code>naomi_questions</code> (ראי <code>BOOKING-SYNC-SUPABASE.md</code>).
+      </div>
+
+      <nav class="admin-nav" aria-label="ניווט ניהול">
+        <a href="schedule-admin.html">דף הבית</a>
+        <a href="schedule-admin-availability.html">זמינות ולוח</a>
+        <a href="schedule-admin-bookings.html">פגישות</a>
+        <a href="schedule-admin-questions.html" aria-current="page">שאלות</a>
+      </nav>
+
+      <div class="card" id="questions-card">
+        <h2>רשימת שאלות</h2>
+        <p style="font-size:0.82rem;color:var(--muted);margin-bottom:0.65rem;line-height:1.5;">
+          <strong>רענון</strong> ממזג GitHub Raw + Supabase + localStorage של דפדפן זה (אותו מפתח כמו בטופס הלקוחות אם שלחו מאותו דפדפן).
+        </p>
+        <div class="bookings-toolbar">
+          <button type="button" class="btn-secondary" id="btn-questions-refresh">רענון</button>
+          <label class="btn-secondary btn-file" style="display:flex;align-items:center;justify-content:center;padding:0.85rem;cursor:pointer;">
+            ייבוא JSON
+            <input type="file" id="questions-import-file" accept=".json,application/json" style="display:none;">
+          </label>
+        </div>
+        <ul class="questions-list" id="questions-list" aria-live="polite"></ul>
+        <button type="button" class="btn-primary" id="btn-questions-push" style="margin-top:0.75rem;">שמור שאלות ל-GitHub</button>
+        <p class="msg" id="questions-msg"></p>
+      </div>
+
+      <div class="card" id="admin-card-token">
+        <h2>טוקן GitHub (PAT)</h2>
+        <p style="font-size:0.82rem;color:var(--muted);margin-bottom:0.65rem;">אותו טוקן כמו בזמינות – לעדכון <code>naomi-questions.json</code>.</p>
+        <label for="gh-push-token">טוקן (הדבקה)</label>
+        <input type="password" id="gh-push-token" autocomplete="off" spellcheck="false" placeholder="ghp_… או fine-grained token" style="width:100%;font-family:monospace;font-size:0.85rem;">
+        <label style="margin-top:0.75rem;display:flex;align-items:center;gap:0.5rem;cursor:pointer;font-size:0.88rem;">
+          <input type="checkbox" id="gh-token-remember">
+          זכור בדפדפן (שומר ב־localStorage אחרי שמירה מוצלחת)
+        </label>
+      </div>
+    </div>
+    <footer class="site-credit-wrap" role="contentinfo">
+      <p class="site-credit">
+        נבנה על ידי
+        <a
+          href="https://rahellyg.github.io/busipro/"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="site-credit-link"
+        >BusiPro</a>
+      </p>
+    </footer>
+  </div>
+
+  <script>
+    window.NAOMI_SUPABASE_URL = 'https://bwxwgplcnhzqjaiodthf.supabase.co';
+    window.NAOMI_SUPABASE_ANON_KEY = 'sb_publishable_aUDhNC9rZubTq6Yajrb1iA_l0fVUHgt';
+  </script>
+
+  <script>
+    var ADMIN_PASSWORD = '123456';
+    var ADMIN_SESSION_KEY = 'naomi_schedule_admin_ok_v1';
+    function isAdminSessionOk() {
+      try {
+        return sessionStorage.getItem(ADMIN_SESSION_KEY) === '1';
+      } catch (e) {
+        return false;
+      }
+    }
+    function setAdminSessionOk() {
+      try {
+        sessionStorage.setItem(ADMIN_SESSION_KEY, '1');
+      } catch (e) {}
+    }
+
+    var GITHUB_PUSH_OWNER = 'rahellyg';
+    var GITHUB_PUSH_REPO = 'NAOMI';
+    var GITHUB_PUSH_BRANCH = 'main';
+    var GITHUB_QUESTIONS_PATH = 'naomi-questions.json';
+    var QUESTIONS_STORAGE_KEY = 'naomi_questions_v1';
+    var UPDATE_JSON_STORAGE_KEY = 'UPDATE_JSON_KEY';
+    var SUPABASE_URL = '';
+    var SUPABASE_ANON_KEY = '';
+    var SUPABASE_QUESTIONS_TABLE = 'naomi_questions';
+
+    var naomiQuestions = [];
+
+    var CLIENT_QUESTION_WHATSAPP_HE =
+      'היי 🤍\n' +
+      'קיבלתי את השאלה ששלחת מהאתר – נמשיך כאן בוואטסאפ.';
+
+    function pad2(n) {
+      return n < 10 ? '0' + n : '' + n;
+    }
+
+    function escapeHtml(s) {
+      if (s == null || s === '') return '';
+      return String(s)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function formatDateIlYmd(ymd) {
+      if (!ymd || !/^\d{4}-\d{2}-\d{2}$/.test(String(ymd))) return '—';
+      var p = String(ymd).split('-');
+      return p[2] + '/' + p[1] + '/' + p[0];
+    }
+
+    function formatDateTimeRegistered(iso) {
+      if (!iso) return '';
+      try {
+        var d = new Date(iso);
+        if (isNaN(d.getTime())) return '';
+        return (
+          pad2(d.getDate()) +
+          '/' +
+          pad2(d.getMonth() + 1) +
+          '/' +
+          d.getFullYear() +
+          ' · ' +
+          pad2(d.getHours()) +
+          ':' +
+          pad2(d.getMinutes())
+        );
+      } catch (e) {
+        return '';
+      }
+    }
+
+    function toWaPhoneForClient(raw) {
+      var d = String(raw || '').replace(/\D/g, '');
+      if (!d) return '';
+      if (d.indexOf('972') === 0) return d;
+      if (d.charAt(0) === '0') return '972' + d.slice(1);
+      if (d.length === 9) return '972' + d;
+      return d;
+    }
+
+    function findQuestionById(id) {
+      if (!id) return null;
+      for (var i = 0; i < naomiQuestions.length; i++) {
+        if (naomiQuestions[i] && naomiQuestions[i].id === id) return naomiQuestions[i];
+      }
+      return null;
+    }
+
+    function getGithubRawQuestionsUrl() {
+      var o = String(GITHUB_PUSH_OWNER || '').trim();
+      var r = String(GITHUB_PUSH_REPO || '').trim();
+      var br = String(GITHUB_PUSH_BRANCH || 'main').trim();
+      var p = String(GITHUB_QUESTIONS_PATH || 'naomi-questions.json').trim();
+      if (!o || !r) return '';
+      var parts = p.split('/').filter(Boolean).map(encodeURIComponent).join('/');
+      return 'https://raw.githubusercontent.com/' + encodeURIComponent(o) + '/' + encodeURIComponent(r) + '/' + encodeURIComponent(br) + '/' + parts;
+    }
+
+    function getQuestionsFetchUrlPages() {
+      var path = window.location.pathname || '/';
+      if (!path.endsWith('/')) {
+        var lastSeg = path.split('/').pop() || '';
+        if (/\.[a-z0-9]{1,10}$/i.test(lastSeg)) {
+          path = path.replace(/[^/]+$/, '');
+        } else {
+          path = path + '/';
+        }
+      }
+      if (!path.endsWith('/')) path += '/';
+      path = path.replace(/\/schedule-admin\/+$/i, '/');
+      return window.location.origin + path + GITHUB_QUESTIONS_PATH;
+    }
+
+    function normalizeQuestionsArray(arr) {
+      if (!arr || !Array.isArray(arr)) return [];
+      return arr
+        .map(function(q) {
+          if (!q || typeof q !== 'object') return null;
+          var text = q.questionText != null ? String(q.questionText) : q.question_text != null ? String(q.question_text) : '';
+          if (!String(q.fullName || q.full_name || '').trim() && !text.trim()) return null;
+          return {
+            id:
+              q.id ||
+              'q-' +
+              Math.random()
+                .toString(36)
+                .slice(2, 12),
+            createdAt: q.createdAt || q.created_at || new Date().toISOString(),
+            fullName: q.fullName || q.full_name || '',
+            birthDate: q.birthDate || q.birth_date || '',
+            phone: q.phone || '',
+            email: q.email || '',
+            questionText: text
+          };
+        })
+        .filter(Boolean);
+    }
+
+    function questionMergeKey(q) {
+      if (q.id) return 'id:' + q.id;
+      return (
+        'k:' +
+        (q.email || '') +
+        '|' +
+        (q.createdAt || '') +
+        '|' +
+        String(q.questionText || '').slice(0, 120)
+      );
+    }
+
+    function mergeQuestionsArrays(a, b) {
+      var map = {};
+      function take(arr) {
+        arr.forEach(function(x) {
+          if (!x) return;
+          var k = questionMergeKey(x);
+          var prev = map[k];
+          if (!prev || (x.createdAt && prev.createdAt && String(x.createdAt) > String(prev.createdAt))) {
+            map[k] = x;
+          }
+        });
+      }
+      take(a || []);
+      take(b || []);
+      return Object.keys(map)
+        .map(function(k) {
+          return map[k];
+        })
+        .sort(function(x, y) {
+          return String(y.createdAt || '').localeCompare(String(x.createdAt || ''));
+        });
+    }
+
+    function loadQuestionsFromLocalStorage() {
+      try {
+        var raw = localStorage.getItem(QUESTIONS_STORAGE_KEY);
+        if (!raw) return [];
+        var parsed = JSON.parse(raw);
+        var arr = Array.isArray(parsed) ? parsed : parsed && Array.isArray(parsed.questions) ? parsed.questions : [];
+        return normalizeQuestionsArray(arr);
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function fetchQuestionsJsonFromUrl(baseUrl) {
+      var url = baseUrl + (baseUrl.indexOf('?') >= 0 ? '&' : '?') + '_=' + Date.now();
+      return fetch(url, { cache: 'no-store', headers: { Accept: 'application/json' } }).then(function(r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+      }).then(function(j) {
+        var arr = j && Array.isArray(j.questions) ? j.questions : Array.isArray(j) ? j : [];
+        return normalizeQuestionsArray(arr);
+      });
+    }
+
+    function fetchQuestionsFromRemote() {
+      if (typeof window.NAOMI_QUESTIONS_JSON_URL === 'string' && window.NAOMI_QUESTIONS_JSON_URL.trim()) {
+        return fetchQuestionsJsonFromUrl(window.NAOMI_QUESTIONS_JSON_URL.trim());
+      }
+      var raw = getGithubRawQuestionsUrl();
+      if (raw) {
+        return fetchQuestionsJsonFromUrl(raw).catch(function() {
+          return fetchQuestionsJsonFromUrl(getQuestionsFetchUrlPages());
+        });
+      }
+      return fetchQuestionsJsonFromUrl(getQuestionsFetchUrlPages());
+    }
+
+    function supabaseRowToQuestion(row) {
+      if (!row) return null;
+      return {
+        id: row.id || 'sbq-' + Math.random().toString(36).slice(2),
+        createdAt: row.created_at || new Date().toISOString(),
+        fullName: row.full_name || '',
+        birthDate: row.birth_date || '',
+        phone: row.phone || '',
+        email: row.email || '',
+        questionText: row.question_text || ''
+      };
+    }
+
+    function fetchQuestionsFromSupabase() {
+      var w = typeof window !== 'undefined' ? window : {};
+      var base = String(w.NAOMI_SUPABASE_URL || SUPABASE_URL || '')
+        .trim()
+        .replace(/\/$/, '');
+      var key = String(w.NAOMI_SUPABASE_ANON_KEY || SUPABASE_ANON_KEY || '').trim();
+      var table = String(w.NAOMI_SUPABASE_QUESTIONS_TABLE || SUPABASE_QUESTIONS_TABLE || 'naomi_questions').trim();
+      if (!base || !key) return Promise.resolve([]);
+      return fetch(
+        base + '/rest/v1/' + encodeURIComponent(table) + '?select=*&order=created_at.desc',
+        {
+          headers: {
+            apikey: key,
+            Authorization: 'Bearer ' + key,
+            Accept: 'application/json'
+          },
+          cache: 'no-store'
+        }
+      )
+        .then(function(r) {
+          if (!r.ok) throw new Error('Supabase HTTP ' + r.status);
+          return r.json();
+        })
+        .then(function(rows) {
+          if (!Array.isArray(rows)) return [];
+          return rows.map(supabaseRowToQuestion).filter(Boolean);
+        });
+    }
+
+    function showQuestionsMsg(text, ok) {
+      var el = document.getElementById('questions-msg');
+      if (!el) return;
+      el.textContent = text;
+      el.className = 'msg ' + (ok ? 'ok' : 'err');
+    }
+
+    function renderQuestionsList() {
+      var ul = document.getElementById('questions-list');
+      if (!ul) return;
+      ul.innerHTML = '';
+      if (!naomiQuestions.length) {
+        var empty = document.createElement('li');
+        empty.style.opacity = '0.88';
+        empty.textContent =
+          'אין שאלות. אחרי שליחה מהדף: הגדירי טבלת naomi_questions ב-Supabase, או ודאי ש־naomi-questions.json מתעדכן (webhook), או בדקי localStorage באותו דפדפן.';
+        ul.appendChild(empty);
+        return;
+      }
+      naomiQuestions.forEach(function(q) {
+        var li = document.createElement('li');
+        var birthD = q.birthDate
+          ? /^\d{4}-\d{2}-\d{2}$/.test(String(q.birthDate))
+            ? formatDateIlYmd(q.birthDate)
+            : escapeHtml(String(q.birthDate))
+          : '—';
+        var reg = formatDateTimeRegistered(q.createdAt);
+        var sentLine = reg ? escapeHtml(reg) : '—';
+        var qid = escapeHtml(q.id || '');
+        var waNum = toWaPhoneForClient(q.phone);
+        var waOk = waNum && String(waNum).replace(/\D/g, '').length >= 9;
+        li.innerHTML =
+          '<div class="q-item-title">' +
+          escapeHtml(q.fullName || 'ללא שם') +
+          '</div>' +
+          '<div class="q-item-rows">' +
+          '<div><span class="lbl">תאריך ושעת שליחה:</span> ' +
+          sentLine +
+          '</div>' +
+          '<div><span class="lbl">תאריך לידה:</span> ' +
+          birthD +
+          '</div>' +
+          '<div><span class="lbl">טלפון:</span> ' +
+          escapeHtml(q.phone || '—') +
+          '</div>' +
+          '<div><span class="lbl">אימייל:</span> ' +
+          escapeHtml(q.email || '—') +
+          '</div>' +
+          '</div>' +
+          '<div class="q-item-body">' +
+          escapeHtml(q.questionText || '') +
+          '</div>' +
+          '<button type="button" class="btn-wa-question" data-question-wa="' +
+          qid +
+          '"' +
+          (waOk ? '' : ' disabled title="אין מספר טלפון תקין"') +
+          '>שלחי וואטסאפ לשולחת השאלה</button>';
+        ul.appendChild(li);
+      });
+    }
+
+    function loadAllQuestions() {
+      var local = loadQuestionsFromLocalStorage();
+      var pGit = fetchQuestionsFromRemote().catch(function() {
+        return [];
+      });
+      var pSb = fetchQuestionsFromSupabase().catch(function() {
+        return [];
+      });
+      return Promise.all([pGit, pSb]).then(function(pair) {
+        var merged = mergeQuestionsArrays(pair[0], pair[1]);
+        naomiQuestions = mergeQuestionsArrays(merged, local);
+        renderQuestionsList();
+      });
+    }
+
+    function utf8ToBase64(str) {
+      return btoa(unescape(encodeURIComponent(str)));
+    }
+
+    function githubContentsApiUrl(owner, repo, filepath) {
+      var parts = filepath.split('/').filter(Boolean).map(encodeURIComponent).join('/');
+      return 'https://api.github.com/repos/' + encodeURIComponent(owner) + '/' + encodeURIComponent(repo) + '/contents/' + parts;
+    }
+
+    function pushJsonFileToGithub(filepath, jsonObj, token, commitMessage) {
+      var owner = GITHUB_PUSH_OWNER;
+      var repo = GITHUB_PUSH_REPO;
+      var branch = GITHUB_PUSH_BRANCH;
+      if (!token) return Promise.reject(new Error('חסר טוקן'));
+      var jsonStr = JSON.stringify(jsonObj, null, 2);
+      var contentB64 = utf8ToBase64(jsonStr);
+      var apiUrl = githubContentsApiUrl(owner, repo, filepath);
+      var headers = {
+        Authorization: 'Bearer ' + token,
+        Accept: 'application/vnd.github+json',
+        'X-GitHub-Api-Version': '2022-11-28'
+      };
+      return fetch(apiUrl + '?ref=' + encodeURIComponent(branch), { headers: headers })
+        .then(function(r) {
+          if (r.status === 404) return null;
+          if (!r.ok) {
+            return r.json().then(function(j) {
+              throw new Error(j.message || 'HTTP ' + r.status);
+            });
+          }
+          return r.json();
+        })
+        .then(function(fileData) {
+          var body = {
+            message: commitMessage || 'Update ' + filepath,
+            content: contentB64,
+            branch: branch
+          };
+          if (fileData && fileData.sha) body.sha = fileData.sha;
+          return fetch(apiUrl, {
+            method: 'PUT',
+            headers: Object.assign({}, headers, { 'Content-Type': 'application/json' }),
+            body: JSON.stringify(body)
+          });
+        })
+        .then(function(r) {
+          if (!r.ok) {
+            return r.json().then(function(j) {
+              throw new Error(j.message || 'HTTP ' + r.status);
+            });
+          }
+          return r.json();
+        });
+    }
+
+    function getUpdateJsonKeyToken() {
+      try {
+        var inputEl = document.getElementById('gh-push-token');
+        if (inputEl) {
+          var fromInput = String(inputEl.value || '').trim();
+          if (fromInput) return fromInput;
+        }
+        if (typeof window !== 'undefined' && window.UPDATE_JSON_KEY) {
+          var w = String(window.UPDATE_JSON_KEY).trim();
+          if (w) return w;
+        }
+        var ls = localStorage.getItem(UPDATE_JSON_STORAGE_KEY);
+        if (ls) return String(ls).trim();
+      } catch (e) {}
+      return '';
+    }
+
+    function maybePersistTokenAfterSave(token) {
+      if (!token) return;
+      var rem = document.getElementById('gh-token-remember');
+      if (!rem || !rem.checked) return;
+      try {
+        localStorage.setItem(UPDATE_JSON_STORAGE_KEY, token);
+      } catch (e) {}
+    }
+
+    function loadSavedTokenIntoField() {
+      var tokInput = document.getElementById('gh-push-token');
+      if (!tokInput || String(tokInput.value || '').trim()) return;
+      try {
+        var ls = localStorage.getItem(UPDATE_JSON_STORAGE_KEY);
+        if (ls) {
+          tokInput.value = String(ls).trim();
+          var rem = document.getElementById('gh-token-remember');
+          if (rem) rem.checked = true;
+        }
+      } catch (e) {}
+    }
+
+    document.getElementById('btn-login').addEventListener('click', function() {
+      var pass = (document.getElementById('admin-pass').value || '').trim();
+      var err = document.getElementById('login-err');
+      if (pass !== ADMIN_PASSWORD) {
+        err.textContent = 'סיסמה שגויה';
+        err.style.display = 'block';
+        err.className = 'msg err';
+        return;
+      }
+      err.style.display = 'none';
+      setAdminSessionOk();
+      document.getElementById('login-gate').hidden = true;
+      document.getElementById('admin-panel').hidden = false;
+      loadSavedTokenIntoField();
+      loadAllQuestions();
+    });
+
+    if (isAdminSessionOk()) {
+      document.getElementById('login-gate').hidden = true;
+      document.getElementById('admin-panel').hidden = false;
+      loadSavedTokenIntoField();
+      loadAllQuestions();
+    }
+
+    document.getElementById('btn-questions-refresh').addEventListener('click', function() {
+      showQuestionsMsg('טוען…', true);
+      loadAllQuestions()
+        .then(function() {
+          showQuestionsMsg('רענון הושלם.', true);
+        })
+        .catch(function() {
+          showQuestionsMsg('לא ניתן לטעון מהרשת.', false);
+        });
+    });
+
+    document.getElementById('btn-questions-push').addEventListener('click', function() {
+      var token = getUpdateJsonKeyToken();
+      if (!token) {
+        showQuestionsMsg('הדביקי טוקן GitHub.', false);
+        return;
+      }
+      var btn = document.getElementById('btn-questions-push');
+      btn.disabled = true;
+      showQuestionsMsg('שולחת ל-GitHub…', true);
+      var doc = { version: 1, questions: naomiQuestions };
+      pushJsonFileToGithub(GITHUB_QUESTIONS_PATH, doc, token, 'Update naomi-questions.json (schedule-admin)')
+        .then(function() {
+          maybePersistTokenAfterSave(token);
+          showQuestionsMsg('naomi-questions.json עודכן ב-GitHub.', true);
+        })
+        .catch(function(err) {
+          var m = err && err.message ? String(err.message) : String(err);
+          showQuestionsMsg('שגיאה: ' + m, false);
+        })
+        .finally(function() {
+          btn.disabled = false;
+        });
+    });
+
+    document.getElementById('questions-import-file').addEventListener('change', function(e) {
+      var f = e.target.files && e.target.files[0];
+      if (!f) return;
+      var reader = new FileReader();
+      reader.onload = function() {
+        try {
+          var j = JSON.parse(reader.result);
+          var arr = j && Array.isArray(j.questions) ? j.questions : Array.isArray(j) ? j : [];
+          var norm = normalizeQuestionsArray(arr);
+          naomiQuestions = mergeQuestionsArrays(naomiQuestions, norm);
+          renderQuestionsList();
+          showQuestionsMsg('ייבוא הוזן למיזוג. לחצי „שמור שאלות ל-GitHub” לפרסום.', true);
+        } catch (err2) {
+          showQuestionsMsg('קובץ לא תקין', false);
+        }
+      };
+      reader.readAsText(f);
+      e.target.value = '';
+    });
+
+    document.getElementById('questions-list').addEventListener('click', function(e) {
+      var btn = e.target.closest('.btn-wa-question');
+      if (!btn || btn.disabled) return;
+      var id = btn.getAttribute('data-question-wa');
+      var rec = findQuestionById(id);
+      if (!rec) {
+        showQuestionsMsg('לא נמצאה רשומת שאלה.', false);
+        return;
+      }
+      var num = toWaPhoneForClient(rec.phone);
+      if (!num || String(num).replace(/\D/g, '').length < 9) {
+        showQuestionsMsg('אין מספר טלפון תקין.', false);
+        return;
+      }
+      var firstName = String(rec.fullName || '')
+        .trim()
+        .split(/\s+/)[0];
+      var text =
+        firstName && firstName.length > 0
+          ? 'היי ' + firstName + ' 🤍\n' + 'קיבלתי את השאלה ששלחת מהאתר – נמשיך כאן בוואטסאפ.'
+          : CLIENT_QUESTION_WHATSAPP_HE;
+      var url = 'https://wa.me/' + String(num).replace(/\D/g, '') + '?text=' + encodeURIComponent(text);
+      try {
+        window.open(url, '_blank', 'noopener,noreferrer');
+      } catch (errWa) {
+        showQuestionsMsg('לא ניתן לפתוח חלון. נסי שוב.', false);
+      }
+    });
+  </script>
+</body>
+</html>
