@@ -82,11 +82,22 @@
           "endMinute": 0
         }
       ]
+    },
+    "2026-03-26": {
+      "windows": [
+        {
+          "startHour": 11,
+          "startMinute": 30,
+          "endHour": 13,
+          "endMinute": 0
+        }
+      ]
     }
   },
   "daysOpen": [],
   "blockedDates": [],
   "onlyOpenDates": [
+    "2026-03-26",
     "2026-03-31"
   ]
 }
