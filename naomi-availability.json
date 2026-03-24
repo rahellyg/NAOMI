@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "availabilityBySelectedDatesOnly": true,
+  "availabilityBySelectedDatesOnly": false,
   "bookingsSuspended": false,
   "startHour": 11,
   "startMinute": 30,
@@ -10,34 +10,54 @@
   "meetingDurationMinutes": 45,
   "hoursByDay": {
     "0": {
-      "startHour": 11,
-      "startMinute": 30,
-      "endHour": 13,
-      "endMinute": 0
+      "windows": [
+        {
+          "startHour": 11,
+          "startMinute": 30,
+          "endHour": 13,
+          "endMinute": 0
+        }
+      ]
     },
     "1": {
-      "startHour": 11,
-      "startMinute": 30,
-      "endHour": 13,
-      "endMinute": 0
+      "windows": [
+        {
+          "startHour": 11,
+          "startMinute": 30,
+          "endHour": 13,
+          "endMinute": 0
+        }
+      ]
     },
     "2": {
-      "startHour": 11,
-      "startMinute": 30,
-      "endHour": 13,
-      "endMinute": 0
+      "windows": [
+        {
+          "startHour": 11,
+          "startMinute": 30,
+          "endHour": 13,
+          "endMinute": 0
+        }
+      ]
     },
     "3": {
-      "startHour": 11,
-      "startMinute": 30,
-      "endHour": 13,
-      "endMinute": 0
+      "windows": [
+        {
+          "startHour": 11,
+          "startMinute": 30,
+          "endHour": 13,
+          "endMinute": 0
+        }
+      ]
     },
     "4": {
-      "startHour": 11,
-      "startMinute": 30,
-      "endHour": 13,
-      "endMinute": 0
+      "windows": [
+        {
+          "startHour": 11,
+          "startMinute": 30,
+          "endHour": 13,
+          "endMinute": 0
+        }
+      ]
     },
     "5": {
       "closed": true
@@ -46,11 +66,17 @@
       "closed": true
     }
   },
-  "daysOpen": [],
-  "blockedDates": [],
-  "onlyOpenDates": [
+  "daysOpen": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "blockedDates": [
     "2026-03-24",
     "2026-03-25",
     "2026-03-26"
-  ]
+  ],
+  "onlyOpenDates": []
 }
