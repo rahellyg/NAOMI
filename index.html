@@ -1315,7 +1315,7 @@
   </script>
 
   <!-- גיבוי אם fetch נכשל – שמרו כמו naomi-availability.json; אופציונלי: window.NAOMI_AVAILABILITY_URL -->
-  <script type="application/json" id="naomi-availability-embed">{"version":1,"availabilityBySelectedDatesOnly":false,"bookingsSuspended":false,"daysOpen":[0,1,2,3,4],"startHour":11,"startMinute":30,"endHour":13,"endMinute":0,"slotMinutes":90,"meetingDurationMinutes":45,"hoursByDay":{"0":{"startHour":11,"startMinute":30,"endHour":13,"endMinute":0},"1":{"startHour":11,"startMinute":30,"endHour":13,"endMinute":0},"2":{"startHour":11,"startMinute":30,"endHour":13,"endMinute":0},"3":{"startHour":11,"startMinute":30,"endHour":13,"endMinute":0},"4":{"startHour":11,"startMinute":30,"endHour":13,"endMinute":0},"5":{"closed":true},"6":{"closed":true}},"blockedDates":[],"onlyOpenDates":[]}</script>
+  <script type="application/json" id="naomi-availability-embed">{"version":1,"availabilityBySelectedDatesOnly":false,"bookingsSuspended":true,"daysOpen":[0,1,2,3,4],"startHour":11,"startMinute":30,"endHour":13,"endMinute":0,"slotMinutes":90,"meetingDurationMinutes":45,"hoursByDay":{"0":{"startHour":11,"startMinute":30,"endHour":13,"endMinute":0},"1":{"startHour":11,"startMinute":30,"endHour":13,"endMinute":0},"2":{"startHour":11,"startMinute":30,"endHour":13,"endMinute":0},"3":{"startHour":11,"startMinute":30,"endHour":13,"endMinute":0},"4":{"startHour":11,"startMinute":30,"endHour":13,"endMinute":0},"5":{"closed":true},"6":{"closed":true}},"hoursByDate":{},"blockedDates":[],"onlyOpenDates":[]}</script>
 
   <!-- Supabase: Dashboard → Project Settings → API → Project URL + anon public key. BOOKING-SYNC-SUPABASE.md -->
   <script>
@@ -1451,6 +1451,7 @@
         }
         cfg.bookingsSuspended = !!cfg.bookingsSuspended;
         cfg.hoursByDay = normalizeHoursByDay(cfg.hoursByDay);
+        cfg.hoursByDate = normalizeHoursByDate(cfg.hoursByDate);
         if (cfg.slotMinutes == null) cfg.slotMinutes = 90;
         if (cfg.meetingDurationMinutes == null) cfg.meetingDurationMinutes = 45;
         return cfg;
@@ -1467,50 +1468,173 @@
             out[key] = { closed: true };
             continue;
           }
-          var sh = parseInt(e.startHour, 10);
-          var sm = parseInt(e.startMinute, 10);
-          var eh = parseInt(e.endHour, 10);
-          var em = parseInt(e.endMinute, 10);
-          if (isNaN(sh) || isNaN(eh)) continue;
-          out[key] = {
-            startHour: Math.max(0, Math.min(23, sh)),
-            startMinute: Math.max(0, Math.min(59, isNaN(sm) ? 0 : sm)),
-            endHour: Math.max(0, Math.min(24, eh)),
-            endMinute: Math.max(0, Math.min(59, isNaN(em) ? 0 : em))
-          };
+          var wins = [];
+          if (e.windows && Array.isArray(e.windows)) {
+            for (var wi = 0; wi < e.windows.length; wi++) {
+              var w = e.windows[wi];
+              if (!w || typeof w !== 'object') continue;
+              var sh = parseInt(w.startHour, 10);
+              var sm = parseInt(w.startMinute, 10);
+              var eh = parseInt(w.endHour, 10);
+              var em = parseInt(w.endMinute, 10);
+              if (isNaN(sh) || isNaN(eh)) continue;
+              wins.push({
+                startHour: Math.max(0, Math.min(23, sh)),
+                startMinute: Math.max(0, Math.min(59, isNaN(sm) ? 0 : sm)),
+                endHour: Math.max(0, Math.min(24, eh)),
+                endMinute: Math.max(0, Math.min(59, isNaN(em) ? 0 : em))
+              });
+            }
+          }
+          if (!wins.length) {
+            var sh2 = parseInt(e.startHour, 10);
+            var sm2 = parseInt(e.startMinute, 10);
+            var eh2 = parseInt(e.endHour, 10);
+            var em2 = parseInt(e.endMinute, 10);
+            if (!isNaN(sh2) && !isNaN(eh2)) {
+              wins.push({
+                startHour: Math.max(0, Math.min(23, sh2)),
+                startMinute: Math.max(0, Math.min(59, isNaN(sm2) ? 0 : sm2)),
+                endHour: Math.max(0, Math.min(24, eh2)),
+                endMinute: Math.max(0, Math.min(59, isNaN(em2) ? 0 : em2))
+              });
+            }
+          }
+          if (wins.length) out[key] = { windows: wins };
         }
         return Object.keys(out).length ? out : null;
       }
 
-      function getDayWindow(cfg, weekday) {
+      function normalizeHoursByDate(raw) {
+        if (!raw || typeof raw !== 'object') return {};
+        var out = {};
+        for (var k in raw) {
+          if (!Object.prototype.hasOwnProperty.call(raw, k)) continue;
+          var dk = String(k).trim();
+          if (!/^\d{4}-\d{2}-\d{2}$/.test(dk)) continue;
+          var e = raw[k];
+          if (!e || typeof e !== 'object') continue;
+          if (e.closed === true) {
+            out[dk] = { closed: true };
+            continue;
+          }
+          var wins = [];
+          if (e.windows && Array.isArray(e.windows)) {
+            for (var wi = 0; wi < e.windows.length; wi++) {
+              var w = e.windows[wi];
+              if (!w || typeof w !== 'object') continue;
+              var sh = parseInt(w.startHour, 10);
+              var sm = parseInt(w.startMinute, 10);
+              var eh = parseInt(w.endHour, 10);
+              var em = parseInt(w.endMinute, 10);
+              if (isNaN(sh) || isNaN(eh)) continue;
+              wins.push({
+                startHour: Math.max(0, Math.min(23, sh)),
+                startMinute: Math.max(0, Math.min(59, isNaN(sm) ? 0 : sm)),
+                endHour: Math.max(0, Math.min(24, eh)),
+                endMinute: Math.max(0, Math.min(59, isNaN(em) ? 0 : em))
+              });
+            }
+          }
+          if (!wins.length) {
+            var sh2 = parseInt(e.startHour, 10);
+            var sm2 = parseInt(e.startMinute, 10);
+            var eh2 = parseInt(e.endHour, 10);
+            var em2 = parseInt(e.endMinute, 10);
+            if (!isNaN(sh2) && !isNaN(eh2)) {
+              wins.push({
+                startHour: Math.max(0, Math.min(23, sh2)),
+                startMinute: Math.max(0, Math.min(59, isNaN(sm2) ? 0 : sm2)),
+                endHour: Math.max(0, Math.min(24, eh2)),
+                endMinute: Math.max(0, Math.min(59, isNaN(em2) ? 0 : em2))
+              });
+            }
+          }
+          if (wins.length) out[dk] = { windows: wins };
+        }
+        return out;
+      }
+
+      function windowOpenRangeMinutes(win) {
+        var sh = win.startHour;
+        var sm = win.startMinute != null ? win.startMinute : 0;
+        var eh = win.endHour;
+        var em = win.endMinute != null ? win.endMinute : 0;
+        var openStart = sh * 60 + sm;
+        var openEnd = eh * 60 + em;
+        if (eh === 24 && em === 0) openEnd = 24 * 60;
+        return { openStart: openStart, openEnd: openEnd };
+      }
+
+      function getDayWindows(cfg, weekday, dateStr) {
+        dateStr = dateStr ? String(dateStr).trim() : '';
+        if (dateStr && cfg && cfg.hoursByDate && typeof cfg.hoursByDate === 'object') {
+          var od = cfg.hoursByDate[dateStr];
+          if (od && typeof od === 'object') {
+            if (od.closed === true) return [];
+            if (od.windows && Array.isArray(od.windows) && od.windows.length) {
+              return od.windows.map(function(w) {
+                return {
+                  startHour: w.startHour,
+                  startMinute: w.startMinute != null ? w.startMinute : 0,
+                  endHour: w.endHour,
+                  endMinute: w.endMinute != null ? w.endMinute : 0
+                };
+              });
+            }
+            if (od.startHour != null && od.endHour != null) {
+              return [
+                {
+                  startHour: od.startHour,
+                  startMinute: od.startMinute != null ? od.startMinute : 0,
+                  endHour: od.endHour,
+                  endMinute: od.endMinute != null ? od.endMinute : 0
+                }
+              ];
+            }
+          }
+        }
+        function fallbackGlobals() {
+          var sh = cfg.startHour != null ? cfg.startHour : BOOKING_FALLBACK_SH;
+          var sm = cfg.startMinute != null ? cfg.startMinute : BOOKING_FALLBACK_SM;
+          var eh = cfg.endHour != null ? cfg.endHour : BOOKING_FALLBACK_EH;
+          var em = cfg.endMinute != null ? cfg.endMinute : BOOKING_FALLBACK_EM;
+          return [{ startHour: sh, startMinute: sm, endHour: eh, endMinute: em }];
+        }
         if (!cfg || cfg.version == null) {
-          return {
-            closed: false,
-            startHour: BOOKING_FALLBACK_SH,
-            startMinute: BOOKING_FALLBACK_SM,
-            endHour: BOOKING_FALLBACK_EH,
-            endMinute: BOOKING_FALLBACK_EM
-          };
+          return [
+            {
+              startHour: BOOKING_FALLBACK_SH,
+              startMinute: BOOKING_FALLBACK_SM,
+              endHour: BOOKING_FALLBACK_EH,
+              endMinute: BOOKING_FALLBACK_EM
+            }
+          ];
         }
         var hb = cfg.hoursByDay;
         var entry = hb && (hb[String(weekday)] != null ? hb[String(weekday)] : hb[weekday]);
-        if (entry && entry.closed === true) return { closed: true };
-        if (entry && entry.startHour != null && entry.endHour != null) {
-          return {
-            closed: false,
-            startHour: entry.startHour,
-            startMinute: entry.startMinute != null ? entry.startMinute : 0,
-            endHour: entry.endHour,
-            endMinute: entry.endMinute != null ? entry.endMinute : 0
-          };
+        if (entry && entry.closed === true) return [];
+        if (entry && entry.windows && Array.isArray(entry.windows) && entry.windows.length) {
+          return entry.windows.map(function(w) {
+            return {
+              startHour: w.startHour,
+              startMinute: w.startMinute != null ? w.startMinute : 0,
+              endHour: w.endHour,
+              endMinute: w.endMinute != null ? w.endMinute : 0
+            };
+          });
         }
-        return {
-          closed: false,
-          startHour: cfg.startHour != null ? cfg.startHour : BOOKING_FALLBACK_SH,
-          startMinute: cfg.startMinute != null ? cfg.startMinute : BOOKING_FALLBACK_SM,
-          endHour: cfg.endHour != null ? cfg.endHour : BOOKING_FALLBACK_EH,
-          endMinute: cfg.endMinute != null ? cfg.endMinute : BOOKING_FALLBACK_EM
-        };
+        if (entry && entry.startHour != null && entry.endHour != null) {
+          return [
+            {
+              startHour: entry.startHour,
+              startMinute: entry.startMinute != null ? entry.startMinute : 0,
+              endHour: entry.endHour,
+              endMinute: entry.endMinute != null ? entry.endMinute : 0
+            }
+          ];
+        }
+        return fallbackGlobals();
       }
 
       function isBlockedDateStr(dateStr, cfg) {
@@ -1542,28 +1666,23 @@
           }
         }
         if (isBlockedDateStr(dateStr, cfg)) return false;
-        var dw = getDayWindow(cfg, w);
-        if (dw.closed) return false;
+        var wins = getDayWindows(cfg, w, dateStr);
+        if (!wins.length) return false;
         var parts = (timeStr || '').split(':');
         var h = parseInt(parts[0], 10);
         var mi = parseInt(parts[1] || '0', 10);
         if (isNaN(h) || isNaN(mi)) return false;
         var startMin = h * 60 + mi;
-        var sh = dw.startHour;
-        var sm = dw.startMinute;
-        var eh = dw.endHour;
-        var em = dw.endMinute;
         var slot = cfg.slotMinutes != null ? cfg.slotMinutes : 90;
         var meetLen = cfg.meetingDurationMinutes != null ? cfg.meetingDurationMinutes : 45;
-        var openStart = sh * 60 + sm;
-        var openEnd = eh * 60 + em;
-        if (eh === 24 && (em === 0 || dw.endMinute == null)) {
-          openEnd = 24 * 60;
+        for (var wi = 0; wi < wins.length; wi++) {
+          var rng = windowOpenRangeMinutes(wins[wi]);
+          if (startMin < rng.openStart) continue;
+          if (startMin + meetLen > rng.openEnd) continue;
+          if ((startMin - rng.openStart) % slot !== 0) continue;
+          return true;
         }
-        if (startMin < openStart) return false;
-        if (startMin + meetLen > openEnd) return false;
-        if ((startMin - openStart) % slot !== 0) return false;
-        return true;
+        return false;
       }
 
       function isProbablyBookingEmail(s) {
@@ -1612,21 +1731,17 @@
           }
         }
         if (isBlockedDateStr(dateStr, meetingAvailability)) return false;
-        var dw = getDayWindow(meetingAvailability, w);
-        if (dw.closed) return false;
+        var wins = getDayWindows(meetingAvailability, w, dateStr);
+        if (!wins.length) return false;
         var meetLen =
           meetingAvailability.meetingDurationMinutes != null
             ? meetingAvailability.meetingDurationMinutes
             : 45;
-        var sh = dw.startHour;
-        var sm = dw.startMinute;
-        var eh = dw.endHour;
-        var em = dw.endMinute;
-        var openStart = sh * 60 + sm;
-        var openEnd = eh * 60 + em;
-        if (eh === 24 && em === 0) openEnd = 24 * 60;
-        if (openStart + meetLen > openEnd) return false;
-        return true;
+        for (var wi = 0; wi < wins.length; wi++) {
+          var rng = windowOpenRangeMinutes(wins[wi]);
+          if (rng.openStart + meetLen <= rng.openEnd) return true;
+        }
+        return false;
       }
 
       function canGoBookingCalPrev() {
@@ -1845,38 +1960,27 @@
         }
 
         var cfg = meetingAvailability;
-        var openStart;
-        var openEnd;
         var slot;
         var meetLen;
         var dayClosed = false;
+        var winsForDay = [];
 
         if (cfg && cfg.version != null) {
           var dPick = new Date(dateStr + 'T12:00:00');
           var wPick = isNaN(dPick.getTime()) ? 0 : dPick.getDay();
-          var dw = getDayWindow(cfg, wPick);
-          if (dw.closed) {
-            dayClosed = true;
-            openStart = 0;
-            openEnd = 0;
-            slot = cfg.slotMinutes != null ? cfg.slotMinutes : 90;
-            meetLen = cfg.meetingDurationMinutes != null ? cfg.meetingDurationMinutes : 45;
-          } else {
-            var sh = dw.startHour;
-            var sm = dw.startMinute;
-            var eh = dw.endHour;
-            var em = dw.endMinute;
-            openStart = sh * 60 + sm;
-            openEnd = eh * 60 + em;
-            if (eh === 24 && (em === 0 || dw.endMinute == null)) {
-              openEnd = 24 * 60;
-            }
-            slot = cfg.slotMinutes != null ? cfg.slotMinutes : 90;
-            meetLen = cfg.meetingDurationMinutes != null ? cfg.meetingDurationMinutes : 45;
-          }
+          winsForDay = getDayWindows(cfg, wPick, dateStr);
+          slot = cfg.slotMinutes != null ? cfg.slotMinutes : 90;
+          meetLen = cfg.meetingDurationMinutes != null ? cfg.meetingDurationMinutes : 45;
+          if (!winsForDay.length) dayClosed = true;
         } else {
-          openStart = BOOKING_FALLBACK_SH * 60 + BOOKING_FALLBACK_SM;
-          openEnd = BOOKING_FALLBACK_EH * 60 + BOOKING_FALLBACK_EM;
+          winsForDay = [
+            {
+              startHour: BOOKING_FALLBACK_SH,
+              startMinute: BOOKING_FALLBACK_SM,
+              endHour: BOOKING_FALLBACK_EH,
+              endMinute: BOOKING_FALLBACK_EM
+            }
+          ];
           slot = 90;
           meetLen = 45;
         }
@@ -1910,8 +2014,17 @@
         var wrap = document.createElement('div');
         wrap.className = 'booking-time-slots';
 
-        for (var t = openStart; t + meetLen <= openEnd; t += slot) {
-          var timeStr = minutesToHHMM(t);
+        var slotTimesMap = {};
+        for (var wx = 0; wx < winsForDay.length; wx++) {
+          var rngW = windowOpenRangeMinutes(winsForDay[wx]);
+          for (var t = rngW.openStart; t + meetLen <= rngW.openEnd; t += slot) {
+            slotTimesMap[minutesToHHMM(t)] = true;
+          }
+        }
+        var slotTimesList = Object.keys(slotTimesMap).sort();
+
+        for (var si = 0; si < slotTimesList.length; si++) {
+          var timeStr = slotTimesList[si];
           var allowed;
           if (cfg && cfg.version != null) {
             allowed =

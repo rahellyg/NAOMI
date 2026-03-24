@@ -66,22 +66,63 @@
       gap: 0.75rem;
     }
     @media (max-width: 400px) { .row2 { grid-template-columns: 1fr; } }
-    .day-hours-row {
+    .day-block {
+      margin-bottom: 1rem;
+      padding-bottom: 0.65rem;
+      border-bottom: 1px solid rgba(92, 45, 122, 0.22);
+    }
+    .day-block:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+    .day-block-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .day-block-head .day-wd {
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: var(--accent);
+    }
+    .wd-windows-list { margin-bottom: 0.25rem; }
+    .wd-win-row {
       display: grid;
-      grid-template-columns: 2.5rem 1fr 1fr auto;
+      grid-template-columns: 1fr auto;
       gap: 0.45rem;
       align-items: end;
-      margin-bottom: 0.55rem;
+      margin-bottom: 0.45rem;
     }
-    .day-hours-row .day-wd {
-      font-weight: 600;
+    .wd-win-times {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.45rem;
+    }
+    @media (max-width: 400px) {
+      .wd-win-times { grid-template-columns: 1fr; }
+    }
+    .wd-win-row .wd-inner label { font-size: 0.78rem; margin-bottom: 0.2rem; }
+    .wd-win-row input[type="time"] { margin-bottom: 0; }
+    .btn-add-window {
+      width: 100%;
+      margin-top: 0.15rem;
+      padding: 0.55rem 0.65rem;
       font-size: 0.82rem;
-      color: var(--accent);
-      margin: 0;
-      padding-bottom: 0.35rem;
+      font-weight: 600;
     }
-    .day-hours-row input[type="time"] { margin-bottom: 0; }
-    .day-hours-row .wd-inner label { font-size: 0.78rem; margin-bottom: 0.2rem; }
+    .btn-rm-win {
+      width: auto;
+      min-width: 3.2rem;
+      padding: 0.5rem 0.55rem;
+      margin: 0;
+      font-size: 0.78rem;
+      background: rgba(255, 210, 210, 0.55);
+      color: #7a1e2e;
+    }
     .wd-closed-wrap {
       display: flex;
       align-items: center;
@@ -93,7 +134,6 @@
       cursor: pointer;
     }
     @media (max-width: 480px) {
-      .day-hours-row { grid-template-columns: 1fr; }
       .wd-closed-wrap { justify-content: flex-start; }
     }
     button {
@@ -225,6 +265,38 @@
       box-shadow: inset 0 0 0 2px rgba(212, 184, 122, 0.95);
       font-weight: 700;
     }
+    .cal-cell.weekday-schedule-closed {
+      background: rgba(200, 186, 218, 0.65);
+      border-style: dashed;
+      cursor: default;
+      font-weight: 600;
+      text-decoration: none;
+    }
+    .cal-cell.weekday-schedule-closed:hover {
+      transform: none;
+      box-shadow: none;
+    }
+    .hbd-known-dates {
+      list-style: none;
+      margin: 0.5rem 0 0;
+      padding: 0;
+      font-size: 0.82rem;
+      line-height: 1.5;
+    }
+    .hbd-known-dates li { margin-bottom: 0.35rem; }
+    .hbd-known-dates button.link-load-hbd {
+      background: none;
+      border: none;
+      padding: 0;
+      margin: 0;
+      font: inherit;
+      font-weight: 600;
+      color: var(--accent);
+      cursor: pointer;
+      text-decoration: underline;
+      width: auto;
+      margin-top: 0;
+    }
     .cal-cell.has-booking::after {
       content: '';
       position: absolute;
@@ -337,7 +409,8 @@
         <p id="cal-hint-selected" style="font-size:0.82rem;color:var(--muted);margin-bottom:0.65rem;line-height:1.5;display:none;">לחיצה על תאריך עתידי = <strong>הוספה</strong> לימים הפתוחים (ירוק). שוב = הסרה. <strong>שמור</strong> כדי לעדכן את <code>naomi-availability.json</code> ואת הטמעה ב־index אם צריך.</p>
         <div class="cal-legend">
           <span><i style="background:rgba(129,199,132,0.45);"></i> פתוח לקביעה</span>
-          <span><i style="background:rgba(239,154,154,0.55);"></i> חסום</span>
+          <span><i style="background:rgba(239,154,154,0.55);"></i> חסום ידנית</span>
+          <span><i style="background:rgba(200,186,218,0.65);border-style:dashed;"></i> סגור לפי „שעות לפי יום” / ימי עבודה</span>
           <span><i style="box-shadow:inset 0 0 0 2px rgba(212,184,122,0.95);background:rgba(255,255,255,0.35);"></i> יש פגישה</span>
         </div>
         <div class="cal-nav">
@@ -346,7 +419,7 @@
           <button type="button" class="btn-cal-next" aria-label="חודש הבא">‹</button>
         </div>
         <div class="cal-grid" id="cal-grid"></div>
-        <p class="cal-hint">חודשים שעברו באפור. <strong>מסגרת זהובה</strong> = יום עם פגישה מהרשימה למטה. בסוף: <strong>שמור</strong> (טוקן מהשדה למטה, או <code>localStorage</code> / <code>window</code>).</p>
+        <p class="cal-hint">חודשים שעברו באפור. <strong>מסגרת זהובה</strong> = יום עם פגישה מהרשימה למטה. <strong>מסגרת מקווקוות</strong> = יום בשבוע סגור בכרטיס „שעות לפי יום” (או מחוץ ל־<code>daysOpen</code>). שעות ליום קלנדרי אחד – בכרטיס <strong>שעות לתאריך בודד</strong> למטה. בסוף: <strong>שמור</strong>.</p>
       </div>
 
       <div class="card" id="bookings-card">
@@ -396,16 +469,70 @@
 
       <div class="card" id="hours-by-day-card">
         <h2>שעות לפי יום</h2>
-        <p style="font-size:0.82rem;color:var(--muted);margin-bottom:0.75rem;line-height:1.5;">לכל יום: סימון „סגור” = אין פגישות. שעות מותאמות ליום ספציפי; אם אין שדות ייעודיים בקובץ ישן — נלקחות מהשעות הכלליות למעלה.</p>
+        <p style="font-size:0.82rem;color:var(--muted);margin-bottom:0.75rem;line-height:1.5;">לכל יום אפשר כמה <strong>חלונות שעות</strong> (למשל בוקר וערב). „סגור” = אין פגישות באותו יום. קובץ ישן עם שדה בודד — עדיין נתמך; אחרי שמירה יישמר כ־<code>windows</code>.</p>
         <div id="day-hours-rows">
-          <div class="day-hours-row" data-day="0"><span class="day-wd">א׳</span><div class="wd-inner"><label for="wd-start-0">התחלה</label><input type="time" id="wd-start-0" value="11:30" step="300"></div><div class="wd-inner"><label for="wd-end-0">סיום</label><input type="time" id="wd-end-0" value="13:00" step="300"></div><label class="wd-closed-wrap"><input type="checkbox" id="wd-closed-0"> סגור</label></div>
-          <div class="day-hours-row" data-day="1"><span class="day-wd">ב׳</span><div class="wd-inner"><label for="wd-start-1">התחלה</label><input type="time" id="wd-start-1" value="11:30" step="300"></div><div class="wd-inner"><label for="wd-end-1">סיום</label><input type="time" id="wd-end-1" value="13:00" step="300"></div><label class="wd-closed-wrap"><input type="checkbox" id="wd-closed-1"> סגור</label></div>
-          <div class="day-hours-row" data-day="2"><span class="day-wd">ג׳</span><div class="wd-inner"><label for="wd-start-2">התחלה</label><input type="time" id="wd-start-2" value="11:30" step="300"></div><div class="wd-inner"><label for="wd-end-2">סיום</label><input type="time" id="wd-end-2" value="13:00" step="300"></div><label class="wd-closed-wrap"><input type="checkbox" id="wd-closed-2"> סגור</label></div>
-          <div class="day-hours-row" data-day="3"><span class="day-wd">ד׳</span><div class="wd-inner"><label for="wd-start-3">התחלה</label><input type="time" id="wd-start-3" value="11:30" step="300"></div><div class="wd-inner"><label for="wd-end-3">סיום</label><input type="time" id="wd-end-3" value="13:00" step="300"></div><label class="wd-closed-wrap"><input type="checkbox" id="wd-closed-3"> סגור</label></div>
-          <div class="day-hours-row" data-day="4"><span class="day-wd">ה׳</span><div class="wd-inner"><label for="wd-start-4">התחלה</label><input type="time" id="wd-start-4" value="11:30" step="300"></div><div class="wd-inner"><label for="wd-end-4">סיום</label><input type="time" id="wd-end-4" value="13:00" step="300"></div><label class="wd-closed-wrap"><input type="checkbox" id="wd-closed-4"> סגור</label></div>
-          <div class="day-hours-row" data-day="5"><span class="day-wd">ו׳</span><div class="wd-inner"><label for="wd-start-5">התחלה</label><input type="time" id="wd-start-5" value="11:30" step="300"></div><div class="wd-inner"><label for="wd-end-5">סיום</label><input type="time" id="wd-end-5" value="13:00" step="300"></div><label class="wd-closed-wrap"><input type="checkbox" id="wd-closed-5" checked> סגור</label></div>
-          <div class="day-hours-row" data-day="6"><span class="day-wd">ש׳</span><div class="wd-inner"><label for="wd-start-6">התחלה</label><input type="time" id="wd-start-6" value="11:30" step="300"></div><div class="wd-inner"><label for="wd-end-6">סיום</label><input type="time" id="wd-end-6" value="13:00" step="300"></div><label class="wd-closed-wrap"><input type="checkbox" id="wd-closed-6" checked> סגור</label></div>
+          <div class="day-block" data-day="0">
+            <div class="day-block-head"><span class="day-wd">יום א׳</span><label class="wd-closed-wrap"><input type="checkbox" id="wd-closed-0"> סגור</label></div>
+            <div class="wd-windows-list" id="wd-windows-list-0"></div>
+            <button type="button" class="btn-secondary btn-add-window" data-day="0">+ הוסף חלון שעות</button>
+          </div>
+          <div class="day-block" data-day="1">
+            <div class="day-block-head"><span class="day-wd">יום ב׳</span><label class="wd-closed-wrap"><input type="checkbox" id="wd-closed-1"> סגור</label></div>
+            <div class="wd-windows-list" id="wd-windows-list-1"></div>
+            <button type="button" class="btn-secondary btn-add-window" data-day="1">+ הוסף חלון שעות</button>
+          </div>
+          <div class="day-block" data-day="2">
+            <div class="day-block-head"><span class="day-wd">יום ג׳</span><label class="wd-closed-wrap"><input type="checkbox" id="wd-closed-2"> סגור</label></div>
+            <div class="wd-windows-list" id="wd-windows-list-2"></div>
+            <button type="button" class="btn-secondary btn-add-window" data-day="2">+ הוסף חלון שעות</button>
+          </div>
+          <div class="day-block" data-day="3">
+            <div class="day-block-head"><span class="day-wd">יום ד׳</span><label class="wd-closed-wrap"><input type="checkbox" id="wd-closed-3"> סגור</label></div>
+            <div class="wd-windows-list" id="wd-windows-list-3"></div>
+            <button type="button" class="btn-secondary btn-add-window" data-day="3">+ הוסף חלון שעות</button>
+          </div>
+          <div class="day-block" data-day="4">
+            <div class="day-block-head"><span class="day-wd">יום ה׳</span><label class="wd-closed-wrap"><input type="checkbox" id="wd-closed-4"> סגור</label></div>
+            <div class="wd-windows-list" id="wd-windows-list-4"></div>
+            <button type="button" class="btn-secondary btn-add-window" data-day="4">+ הוסף חלון שעות</button>
+          </div>
+          <div class="day-block" data-day="5">
+            <div class="day-block-head"><span class="day-wd">יום ו׳</span><label class="wd-closed-wrap"><input type="checkbox" id="wd-closed-5" checked> סגור</label></div>
+            <div class="wd-windows-list" id="wd-windows-list-5"></div>
+            <button type="button" class="btn-secondary btn-add-window" data-day="5">+ הוסף חלון שעות</button>
+          </div>
+          <div class="day-block" data-day="6">
+            <div class="day-block-head"><span class="day-wd">יום ש׳</span><label class="wd-closed-wrap"><input type="checkbox" id="wd-closed-6" checked> סגור</label></div>
+            <div class="wd-windows-list" id="wd-windows-list-6"></div>
+            <button type="button" class="btn-secondary btn-add-window" data-day="6">+ הוסף חלון שעות</button>
+          </div>
         </div>
+      </div>
+
+      <div class="card" id="hours-by-date-card">
+        <h2>שעות לתאריך בודד</h2>
+        <p style="font-size:0.82rem;color:var(--muted);margin-bottom:0.75rem;line-height:1.5;">דורס ליום אחד בלבד (לפי <code>YYYY-MM-DD</code>) את „שעות לפי יום בשבוע” בדף ההזמנה. אחרי <strong>שמור התאמה לתאריך</strong> – לחצי <strong>שמור</strong> ל-GitHub כרגיל.</p>
+        <div class="row2">
+          <div>
+            <label for="hbd-date">תאריך</label>
+            <input type="date" id="hbd-date">
+          </div>
+          <div style="display:flex;align-items:flex-end;padding-bottom:0.15rem;">
+            <button type="button" class="btn-secondary" id="btn-hbd-load" style="margin:0;">טען / חדש</button>
+          </div>
+        </div>
+        <label class="wd-closed-wrap" style="margin:0.65rem 0 0.5rem;">
+          <input type="checkbox" id="hbd-closed"> סגור לחלוטין בתאריך הזה (גם אם יום בשבוע פתוח)
+        </label>
+        <div class="wd-windows-list" id="hbd-windows-list" style="margin-bottom:0.35rem;"></div>
+        <button type="button" class="btn-secondary" id="btn-hbd-add-window" style="margin-top:0.15rem;">+ הוסף חלון שעות</button>
+        <div class="row2" style="margin-top:0.65rem;">
+          <button type="button" class="btn-primary" id="btn-hbd-save">שמור התאמה לתאריך</button>
+          <button type="button" class="btn-secondary" id="btn-hbd-delete">מחק התאמה</button>
+        </div>
+        <p class="msg" id="hbd-msg" style="display:none;margin-top:0.5rem;"></p>
+        <p style="font-size:0.8rem;color:var(--muted);margin-top:0.65rem;">תאריכים עם התאמה שמורה (לחצי לטעינה):</p>
+        <ul class="hbd-known-dates" id="hbd-known-dates" aria-live="polite"></ul>
       </div>
 
       <div class="card">
@@ -480,18 +607,24 @@
       'מחכה לך 🤍✨';
     var DAYS_OPEN_DEFAULT = [0, 1, 2, 3, 4];
     var scheduleDaysOpen = DAYS_OPEN_DEFAULT.slice();
+    /** תאריך (YYYY-MM-DD) → { closed } או { windows: [...] } — נשמר ב-hoursByDate ב-JSON */
+    var scheduleHoursByDate = {};
     var DAY_NAMES_HE = ['א׳', 'ב׳', 'ג׳', 'ד׳', 'ה׳', 'ו׳', 'ש׳'];
 
     function defaultHoursByDay() {
-      var w = { startHour: 11, startMinute: 30, endHour: 13, endMinute: 0 };
+      var win = { startHour: 11, startMinute: 30, endHour: 13, endMinute: 0 };
       var o = {};
       var d;
       for (d = 0; d <= 4; d++) {
         o[String(d)] = {
-          startHour: w.startHour,
-          startMinute: w.startMinute,
-          endHour: w.endHour,
-          endMinute: w.endMinute
+          windows: [
+            {
+              startHour: win.startHour,
+              startMinute: win.startMinute,
+              endHour: win.endHour,
+              endMinute: win.endMinute
+            }
+          ]
         };
       }
       o['5'] = { closed: true };
@@ -502,11 +635,16 @@
     function applyAllWdClosedStates() {
       for (var d = 0; d <= 6; d++) {
         var t = document.getElementById('wd-closed-' + d);
-        var st = document.getElementById('wd-start-' + d);
-        var en = document.getElementById('wd-end-' + d);
-        if (t && st && en) {
-          st.disabled = en.disabled = !!t.checked;
+        var list = document.getElementById('wd-windows-list-' + d);
+        var addBtn = document.querySelector('.btn-add-window[data-day="' + d + '"]');
+        var closed = !!(t && t.checked);
+        if (list) {
+          var inputs = list.querySelectorAll('input');
+          for (var i = 0; i < inputs.length; i++) inputs[i].disabled = closed;
+          var rms = list.querySelectorAll('.btn-rm-win');
+          for (var j = 0; j < rms.length; j++) rms[j].disabled = closed;
         }
+        if (addBtn) addBtn.disabled = closed;
       }
     }
 
@@ -586,6 +724,17 @@
       return dateKeyFromParts(t.getFullYear(), t.getMonth(), t.getDate());
     }
 
+    function isWdClosedInForm(wd) {
+      var el = document.getElementById('wd-closed-' + wd);
+      return !!(el && el.checked);
+    }
+
+    function isAdminWeekdayUnavailable(wd) {
+      if (isWdClosedInForm(wd)) return true;
+      if (!scheduleDaysOpen || !scheduleDaysOpen.length) return true;
+      return scheduleDaysOpen.indexOf(wd) === -1;
+    }
+
     function renderMonthCalendar() {
       var grid = document.getElementById('cal-grid');
       var title = document.getElementById('cal-title');
@@ -623,6 +772,14 @@
 
       for (var day = 1; day <= dim; day++) {
         var key = dateKeyFromParts(y, m, day);
+        var wd = new Date(key + 'T12:00:00').getDay();
+        var baseScheduleOff = isAdminWeekdayUnavailable(wd);
+        var hbdEnt = scheduleHoursByDate[key];
+        var scheduleOff = baseScheduleOff;
+        if (hbdEnt && typeof hbdEnt === 'object') {
+          if (hbdEnt.closed === true) scheduleOff = true;
+          else if (hbdEnt.windows && hbdEnt.windows.length) scheduleOff = false;
+        }
         var cell = document.createElement('div');
         cell.className = 'cal-cell';
         cell.textContent = day;
@@ -632,9 +789,21 @@
           cell.classList.add('past');
         } else if (selectedOnly) {
           if (openSet[key]) {
-            cell.classList.add('available');
-            cell.title = 'יום פתוח לקביעה – לחצי להסרה מהרשימה';
-            cell.addEventListener('click', onCalCellClick);
+            if (scheduleOff) {
+              cell.classList.add('blocked');
+              cell.classList.add('weekday-schedule-closed');
+              cell.title =
+                'ברשימת הימים הפתוחים, אבל יום בשבוע זה סגור ב„שעות לפי יום” – בדף ההזמנה לא ייפתח. לחצי להסרה מהרשימה.';
+              cell.addEventListener('click', onCalCellClick);
+            } else {
+              cell.classList.add('available');
+              cell.title = 'יום פתוח לקביעה – לחצי להסרה מהרשימה';
+              cell.addEventListener('click', onCalCellClick);
+            }
+          } else if (scheduleOff) {
+            cell.classList.add('blocked');
+            cell.classList.add('weekday-schedule-closed');
+            cell.title = 'יום בשבוע זה סגור ב„שעות לפי יום” (או מחוץ לימי עבודה) – לא ניתן להוסיף לרשימה.';
           } else {
             cell.classList.add('blocked');
             cell.title = 'סגור – לחצי להוספה לימים הפתוחים';
@@ -642,11 +811,15 @@
           }
         } else if (blockedSet[key]) {
           cell.classList.add('blocked');
-          cell.title = 'לחצי לפתיחת היום לקביעות';
+          cell.title = 'חסום ידנית – לחצי לפתיחת היום לקביעות';
           cell.addEventListener('click', onCalCellClick);
+        } else if (scheduleOff) {
+          cell.classList.add('blocked');
+          cell.classList.add('weekday-schedule-closed');
+          cell.title = 'סגור לפי „שעות לפי יום” או מחוץ לימי עבודה – שני בכרטיס למטה.';
         } else {
           cell.classList.add('available');
-          cell.title = 'לחצי לסגירת היום לקביעות';
+          cell.title = 'לחצי לסגירת היום לקביעות (חסימה ידנית)';
           cell.addEventListener('click', onCalCellClick);
         }
         var bc = countBookingsOnDate(key);
@@ -719,6 +892,34 @@
       return { h: h, min: min };
     }
 
+    function parseTimeFromInput(el, fallbackH, fallbackM) {
+      var s = el && el.value ? String(el.value).trim() : '';
+      var m = s.match(/^(\d{1,2}):(\d{2})(?::\d{2})?$/);
+      if (!m) return { h: fallbackH, min: fallbackM };
+      var h = Math.max(0, Math.min(23, parseInt(m[1], 10) || 0));
+      var min = Math.max(0, Math.min(59, parseInt(m[2], 10) || 0));
+      return { h: h, min: min };
+    }
+
+    function appendWindowRowToList(listEl, sh, sm, eh, em) {
+      var row = document.createElement('div');
+      row.className = 'wd-win-row';
+      row.innerHTML =
+        '<div class="wd-win-times">' +
+        '<div class="wd-inner"><label>התחלה</label><input type="time" class="wd-in-start" step="300" value="' +
+        pad2(sh) +
+        ':' +
+        pad2(sm) +
+        '"></div>' +
+        '<div class="wd-inner"><label>סיום</label><input type="time" class="wd-in-end" step="300" value="' +
+        pad2(eh) +
+        ':' +
+        pad2(em) +
+        '"></div></div>' +
+        '<button type="button" class="btn-rm-win" aria-label="הסר חלון">הסר</button>';
+      listEl.appendChild(row);
+    }
+
     function collectHoursByDay() {
       var defSt = parseTimeField('start-time', 11, 30);
       var defEt = parseTimeField('end-time', 13, 0);
@@ -729,14 +930,33 @@
           out[String(d)] = { closed: true };
           continue;
         }
-        var st = parseTimeField('wd-start-' + d, defSt.h, defSt.min);
-        var et = parseTimeField('wd-end-' + d, defEt.h, defEt.min);
-        out[String(d)] = {
-          startHour: st.h,
-          startMinute: st.min,
-          endHour: et.h,
-          endMinute: et.min
-        };
+        var list = document.getElementById('wd-windows-list-' + d);
+        var windows = [];
+        if (list) {
+          var rows = list.querySelectorAll('.wd-win-row');
+          for (var r = 0; r < rows.length; r++) {
+            var row = rows[r];
+            var stEl = row.querySelector('.wd-in-start');
+            var etEl = row.querySelector('.wd-in-end');
+            var st = parseTimeFromInput(stEl, defSt.h, defSt.min);
+            var et = parseTimeFromInput(etEl, defEt.h, defEt.min);
+            windows.push({
+              startHour: st.h,
+              startMinute: st.min,
+              endHour: et.h,
+              endMinute: et.min
+            });
+          }
+        }
+        if (!windows.length) {
+          windows.push({
+            startHour: defSt.h,
+            startMinute: defSt.min,
+            endHour: defEt.h,
+            endMinute: defEt.min
+          });
+        }
+        out[String(d)] = { windows: windows };
       }
       return out;
     }
@@ -753,32 +973,252 @@
       var hb = cfg.hoursByDay || {};
       for (var d = 0; d <= 6; d++) {
         var closedEl = document.getElementById('wd-closed-' + d);
-        var startEl = document.getElementById('wd-start-' + d);
-        var endEl = document.getElementById('wd-end-' + d);
-        if (!closedEl || !startEl || !endEl) continue;
+        var list = document.getElementById('wd-windows-list-' + d);
+        if (!closedEl || !list) continue;
+        list.innerHTML = '';
         var e = hb[String(d)] != null ? hb[String(d)] : hb[d];
         if (e && e.closed === true) {
           closedEl.checked = true;
-          startEl.value = pad2(sh) + ':' + pad2(sm);
-          endEl.value = pad2(eh) + ':' + pad2(em);
-          startEl.disabled = true;
-          endEl.disabled = true;
+          appendWindowRowToList(list, sh, sm, eh, em);
         } else {
           closedEl.checked = false;
-          startEl.disabled = false;
-          endEl.disabled = false;
-          var dh = e && e.startHour != null ? e.startHour : sh;
-          var dm = e && e.startMinute != null ? e.startMinute : sm;
-          var deh = e && e.endHour != null ? e.endHour : eh;
-          var dem = e && e.endMinute != null ? e.endMinute : em;
-          if (deh === 24 && (e == null || e.endMinute == null || e.endMinute === 0)) {
-            deh = 23;
-            dem = 59;
+          var wins = [];
+          if (e && e.windows && e.windows.length) {
+            wins = e.windows;
+          } else if (e && e.startHour != null && e.endHour != null) {
+            wins = [
+              {
+                startHour: e.startHour,
+                startMinute: e.startMinute != null ? e.startMinute : 0,
+                endHour: e.endHour,
+                endMinute: e.endMinute != null ? e.endMinute : 0
+              }
+            ];
           }
-          startEl.value = pad2(dh) + ':' + pad2(dm);
-          endEl.value = pad2(deh) + ':' + pad2(dem);
+          if (!wins.length) {
+            appendWindowRowToList(list, sh, sm, eh, em);
+          } else {
+            for (var wi = 0; wi < wins.length; wi++) {
+              var w = wins[wi];
+              var dh = w.startHour != null ? w.startHour : sh;
+              var dm = w.startMinute != null ? w.startMinute : sm;
+              var deh = w.endHour != null ? w.endHour : eh;
+              var dem = w.endMinute != null ? w.endMinute : em;
+              if (deh === 24 && (w.endMinute == null || w.endMinute === 0)) {
+                deh = 23;
+                dem = 59;
+              }
+              appendWindowRowToList(list, dh, dm, deh, dem);
+            }
+          }
         }
       }
+    }
+
+    function showHbdMsg(text, ok) {
+      var el = document.getElementById('hbd-msg');
+      if (!el) return;
+      el.textContent = text || '';
+      el.className = 'msg ' + (ok ? 'ok' : 'err');
+      el.style.display = text ? 'block' : 'none';
+    }
+
+    function importCfgHoursByDate(cfg) {
+      scheduleHoursByDate = {};
+      var raw = cfg && cfg.hoursByDate;
+      if (!raw || typeof raw !== 'object') return;
+      for (var kk in raw) {
+        if (!Object.prototype.hasOwnProperty.call(raw, kk)) continue;
+        var key = String(kk).trim();
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(key)) continue;
+        var ve = raw[kk];
+        if (!ve || typeof ve !== 'object') continue;
+        if (ve.closed === true) scheduleHoursByDate[key] = { closed: true };
+        else if (ve.windows && ve.windows.length) {
+          scheduleHoursByDate[key] = {
+            windows: ve.windows.map(function(w) {
+              return {
+                startHour: w.startHour,
+                startMinute: w.startMinute != null ? w.startMinute : 0,
+                endHour: w.endHour,
+                endMinute: w.endMinute != null ? w.endMinute : 0
+              };
+            })
+          };
+        } else if (ve.startHour != null && ve.endHour != null) {
+          scheduleHoursByDate[key] = {
+            windows: [
+              {
+                startHour: ve.startHour,
+                startMinute: ve.startMinute != null ? ve.startMinute : 0,
+                endHour: ve.endHour,
+                endMinute: ve.endMinute != null ? ve.endMinute : 0
+              }
+            ]
+          };
+        }
+      }
+    }
+
+    function collectHbdWindowsFromList() {
+      var list = document.getElementById('hbd-windows-list');
+      var defSt = parseTimeField('start-time', 11, 30);
+      var defEt = parseTimeField('end-time', 13, 0);
+      var windows = [];
+      if (!list) return windows;
+      var rows = list.querySelectorAll('.wd-win-row');
+      for (var r = 0; r < rows.length; r++) {
+        var row = rows[r];
+        var stEl = row.querySelector('.wd-in-start');
+        var etEl = row.querySelector('.wd-in-end');
+        var st = parseTimeFromInput(stEl, defSt.h, defSt.min);
+        var et = parseTimeFromInput(etEl, defEt.h, defEt.min);
+        windows.push({
+          startHour: st.h,
+          startMinute: st.min,
+          endHour: et.h,
+          endMinute: et.min
+        });
+      }
+      return windows;
+    }
+
+    function applyHbdClosedUi() {
+      var closedCb = document.getElementById('hbd-closed');
+      var list = document.getElementById('hbd-windows-list');
+      var addBtn = document.getElementById('btn-hbd-add-window');
+      var closed = !!(closedCb && closedCb.checked);
+      if (list) {
+        var inputs = list.querySelectorAll('input');
+        for (var i = 0; i < inputs.length; i++) inputs[i].disabled = closed;
+        var rms = list.querySelectorAll('.btn-rm-win');
+        for (var j = 0; j < rms.length; j++) rms[j].disabled = closed;
+      }
+      if (addBtn) addBtn.disabled = closed;
+    }
+
+    function loadHbdEditorForDate(isoDate) {
+      var key = (isoDate || '').trim();
+      var list = document.getElementById('hbd-windows-list');
+      var closedCb = document.getElementById('hbd-closed');
+      var dateInp = document.getElementById('hbd-date');
+      var defSt = parseTimeField('start-time', 11, 30);
+      var defEt = parseTimeField('end-time', 13, 0);
+      if (!list || !closedCb) return;
+      if (dateInp) dateInp.value = key;
+      list.innerHTML = '';
+      if (!key) {
+        closedCb.checked = false;
+        appendWindowRowToList(list, defSt.h, defSt.min, defEt.h, defEt.min);
+        applyHbdClosedUi();
+        showHbdMsg('', true);
+        return;
+      }
+      var od = scheduleHoursByDate[key];
+      if (od && od.closed === true) {
+        closedCb.checked = true;
+        appendWindowRowToList(list, defSt.h, defSt.min, defEt.h, defEt.min);
+      } else {
+        closedCb.checked = false;
+        var wins =
+          od && od.windows && od.windows.length
+            ? od.windows
+            : [{ startHour: defSt.h, startMinute: defSt.min, endHour: defEt.h, endMinute: defEt.min }];
+        for (var wi = 0; wi < wins.length; wi++) {
+          var w = wins[wi];
+          appendWindowRowToList(
+            list,
+            w.startHour != null ? w.startHour : defSt.h,
+            w.startMinute != null ? w.startMinute : defSt.min,
+            w.endHour != null ? w.endHour : defEt.h,
+            w.endMinute != null ? w.endMinute : defEt.min
+          );
+        }
+      }
+      applyHbdClosedUi();
+      showHbdMsg('', true);
+    }
+
+    function renderHbdKnownDatesList() {
+      var ul = document.getElementById('hbd-known-dates');
+      if (!ul) return;
+      ul.innerHTML = '';
+      var keys = Object.keys(scheduleHoursByDate).sort();
+      if (!keys.length) {
+        var li0 = document.createElement('li');
+        li0.style.color = 'var(--muted)';
+        li0.textContent = '(אין עדיין – שמרי התאמה מהטופס למעלה)';
+        ul.appendChild(li0);
+        return;
+      }
+      keys.forEach(function(k) {
+        var ent = scheduleHoursByDate[k];
+        var desc =
+          ent && ent.closed === true
+            ? 'סגור'
+            : ent && ent.windows
+              ? ent.windows
+                  .map(function(w) {
+                    return (
+                      pad2(w.startHour != null ? w.startHour : 0) +
+                      ':' +
+                      pad2(w.startMinute != null ? w.startMinute : 0) +
+                      '–' +
+                      pad2(w.endHour != null ? w.endHour : 0) +
+                      ':' +
+                      pad2(w.endMinute != null ? w.endMinute : 0)
+                    );
+                  })
+                  .join(', ')
+              : '—';
+        var li = document.createElement('li');
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'link-load-hbd';
+        btn.setAttribute('data-date', k);
+        btn.textContent = k;
+        li.appendChild(btn);
+        li.appendChild(document.createTextNode(' — ' + desc));
+        ul.appendChild(li);
+      });
+    }
+
+    function hoursByDatePayloadForSave() {
+      var o = {};
+      for (var k in scheduleHoursByDate) {
+        if (!Object.prototype.hasOwnProperty.call(scheduleHoursByDate, k)) continue;
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(k)) continue;
+        o[k] = JSON.parse(JSON.stringify(scheduleHoursByDate[k]));
+      }
+      return o;
+    }
+
+    function validateHoursByDateAgainstConfig(cfg) {
+      var hbd = cfg.hoursByDate || {};
+      var meet = cfg.meetingDurationMinutes != null ? cfg.meetingDurationMinutes : 45;
+      for (var key in hbd) {
+        if (!Object.prototype.hasOwnProperty.call(hbd, key)) continue;
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(key)) continue;
+        var e = hbd[key];
+        if (!e || e.closed) continue;
+        var wins = e.windows;
+        if (!wins || !wins.length) {
+          return 'תאריך ' + key + ': נדרש לפחות חלון שעות אחד';
+        }
+        for (var wi = 0; wi < wins.length; wi++) {
+          var w = wins[wi];
+          var os = w.startHour * 60 + (w.startMinute || 0);
+          var oe = w.endHour * 60 + (w.endMinute || 0);
+          if (w.endHour === 24 && (w.endMinute == null || w.endMinute === 0)) oe = 24 * 60;
+          if (os >= oe) {
+            return 'תאריך ' + key + ', חלון ' + (wi + 1) + ': שעת התחלה לפני סיום';
+          }
+          if (os + meet > oe) {
+            return 'תאריך ' + key + ', חלון ' + (wi + 1) + ': חלון קצר מדי (' + meet + ' דק׳)';
+          }
+        }
+      }
+      return '';
     }
 
     function validateHoursByDayAgainstConfig(cfg) {
@@ -787,14 +1227,29 @@
       for (var d = 0; d <= 6; d++) {
         var e = hb[String(d)];
         if (!e || e.closed) continue;
-        var os = e.startHour * 60 + (e.startMinute || 0);
-        var oe = e.endHour * 60 + (e.endMinute || 0);
-        if (e.endHour === 24 && (e.endMinute == null || e.endMinute === 0)) oe = 24 * 60;
-        if (os >= oe) {
-          return 'יום ' + DAY_NAMES_HE[d] + ': שעת התחלה חייבת להיות לפני שעת הסיום';
+        var wins = e.windows;
+        if (!wins || !wins.length) {
+          return 'יום ' + DAY_NAMES_HE[d] + ': נדרש לפחות חלון שעות אחד';
         }
-        if (os + meet > oe) {
-          return 'יום ' + DAY_NAMES_HE[d] + ': חלון השעות קצר מדי לאורך הפגישה (' + meet + ' דק׳)';
+        for (var wi = 0; wi < wins.length; wi++) {
+          var w = wins[wi];
+          var os = w.startHour * 60 + (w.startMinute || 0);
+          var oe = w.endHour * 60 + (w.endMinute || 0);
+          if (w.endHour === 24 && (w.endMinute == null || w.endMinute === 0)) oe = 24 * 60;
+          if (os >= oe) {
+            return 'יום ' + DAY_NAMES_HE[d] + ', חלון ' + (wi + 1) + ': שעת התחלה חייבת להיות לפני הסיום';
+          }
+          if (os + meet > oe) {
+            return (
+              'יום ' +
+              DAY_NAMES_HE[d] +
+              ', חלון ' +
+              (wi + 1) +
+              ': חלון קצר מדי לאורך הפגישה (' +
+              meet +
+              ' דק׳)'
+            );
+          }
         }
       }
       return '';
@@ -813,6 +1268,7 @@
         slotMinutes: 90,
         meetingDurationMinutes: 45,
         hoursByDay: defaultHoursByDay(),
+        hoursByDate: {},
         blockedDates: [],
         onlyOpenDates: []
       };
@@ -840,7 +1296,8 @@
         endMinute: et.min,
         slotMinutes: Math.max(5, parseInt(document.getElementById('slot-min').value, 10) || 90),
         meetingDurationMinutes: Math.max(15, parseInt(document.getElementById('meet-len').value, 10) || 45),
-        hoursByDay: collectHoursByDay()
+        hoursByDay: collectHoursByDay(),
+        hoursByDate: hoursByDatePayloadForSave()
       };
       if (selectedOnly) {
         var openDates = parseDateLinesTextarea('only-open-dates');
@@ -891,6 +1348,9 @@
       }
       fillDayHoursFromConfig(fillCfg);
       applyAllWdClosedStates();
+      importCfgHoursByDate(cfg);
+      renderHbdKnownDatesList();
+      loadHbdEditorForDate('');
       updateCalendarModeHints();
       if (typeof calViewYear === 'number') renderMonthCalendar();
     }
@@ -1373,15 +1833,113 @@
     document.getElementById('day-hours-rows').addEventListener('change', function(ev) {
       var t = ev.target;
       if (t && t.id && t.id.indexOf('wd-closed-') === 0) {
-        var d = t.id.replace('wd-closed-', '');
-        var st = document.getElementById('wd-start-' + d);
-        var en = document.getElementById('wd-end-' + d);
-        if (st && en) {
-          st.disabled = en.disabled = !!t.checked;
+        applyAllWdClosedStates();
+        if (typeof calViewYear === 'number') renderMonthCalendar();
+      }
+    });
+
+    document.getElementById('day-hours-rows').addEventListener('click', function(ev) {
+      var addBtn = ev.target.closest('.btn-add-window');
+      if (addBtn && !addBtn.disabled) {
+        var d = addBtn.getAttribute('data-day');
+        var list = document.getElementById('wd-windows-list-' + d);
+        if (list) {
+          var defSt = parseTimeField('start-time', 11, 30);
+          var defEt = parseTimeField('end-time', 13, 0);
+          appendWindowRowToList(list, defSt.h, defSt.min, defEt.h, defEt.min);
+          applyAllWdClosedStates();
         }
+        return;
+      }
+      var rm = ev.target.closest('.btn-rm-win');
+      if (rm && !rm.disabled) {
+        var row = rm.closest('.wd-win-row');
+        var list = row && row.parentElement;
+        if (list && list.classList.contains('wd-windows-list')) {
+          var n = list.querySelectorAll('.wd-win-row').length;
+          if (n > 1) row.remove();
+        }
+        return;
       }
     });
     applyAllWdClosedStates();
+
+    (function bindHoursByDateCard() {
+      var hClosed = document.getElementById('hbd-closed');
+      if (hClosed) hClosed.addEventListener('change', applyHbdClosedUi);
+      var btnLoad = document.getElementById('btn-hbd-load');
+      if (btnLoad) {
+        btnLoad.addEventListener('click', function() {
+          var v = (document.getElementById('hbd-date').value || '').trim();
+          loadHbdEditorForDate(v);
+        });
+      }
+      var btnAdd = document.getElementById('btn-hbd-add-window');
+      if (btnAdd) {
+        btnAdd.addEventListener('click', function() {
+          var c = document.getElementById('hbd-closed');
+          if (c && c.checked) return;
+          var list = document.getElementById('hbd-windows-list');
+          if (!list) return;
+          var defSt = parseTimeField('start-time', 11, 30);
+          var defEt = parseTimeField('end-time', 13, 0);
+          appendWindowRowToList(list, defSt.h, defSt.min, defEt.h, defEt.min);
+          applyHbdClosedUi();
+        });
+      }
+      var ulKnown = document.getElementById('hbd-known-dates');
+      if (ulKnown) {
+        ulKnown.addEventListener('click', function(ev) {
+          var b = ev.target.closest('.link-load-hbd');
+          if (!b) return;
+          var k = b.getAttribute('data-date');
+          if (k) {
+            var di = document.getElementById('hbd-date');
+            if (di) di.value = k;
+            loadHbdEditorForDate(k);
+          }
+        });
+      }
+      var btnSave = document.getElementById('btn-hbd-save');
+      if (btnSave) {
+        btnSave.addEventListener('click', function() {
+          var key = (document.getElementById('hbd-date').value || '').trim();
+          if (!/^\d{4}-\d{2}-\d{2}$/.test(key)) {
+            showHbdMsg('בחרי תאריך תקין.', false);
+            return;
+          }
+          var c = document.getElementById('hbd-closed');
+          if (c && c.checked) {
+            scheduleHoursByDate[key] = { closed: true };
+          } else {
+            var wins = collectHbdWindowsFromList();
+            if (!wins.length) {
+              showHbdMsg('הוסיפי חלון שעות או סמני „סגור”.', false);
+              return;
+            }
+            scheduleHoursByDate[key] = { windows: wins };
+          }
+          renderHbdKnownDatesList();
+          if (typeof calViewYear === 'number') renderMonthCalendar();
+          showHbdMsg('נשמר בזיכרון הדף – לחצי „שמור” ל-GitHub.', true);
+        });
+      }
+      var btnDel = document.getElementById('btn-hbd-delete');
+      if (btnDel) {
+        btnDel.addEventListener('click', function() {
+          var key = (document.getElementById('hbd-date').value || '').trim();
+          if (!key || !scheduleHoursByDate[key]) {
+            showHbdMsg('אין התאמה למחיקה לתאריך הזה.', false);
+            return;
+          }
+          delete scheduleHoursByDate[key];
+          renderHbdKnownDatesList();
+          loadHbdEditorForDate('');
+          if (typeof calViewYear === 'number') renderMonthCalendar();
+          showHbdMsg('הוסר – שמרי ל-GitHub לעדכון האתר.', true);
+        });
+      }
+    })();
 
     document.getElementById('blocked').addEventListener('input', function() {
       if (typeof calViewYear === 'number') renderMonthCalendar();
@@ -1460,6 +2018,12 @@
         return;
       }
 
+      var hbdErr = validateHoursByDateAgainstConfig(cfg);
+      if (hbdErr) {
+        showSaveMsg(hbdErr, false);
+        return;
+      }
+
       var token = getUpdateJsonKeyToken();
       var tokenSource = getUpdateJsonKeyTokenSource();
       var btn = document.getElementById('btn-save');
@@ -1514,6 +2078,7 @@
           if (cfg.bookingsSuspended == null) cfg.bookingsSuspended = false;
           if (!cfg.blockedDates) cfg.blockedDates = [];
           if (!cfg.onlyOpenDates) cfg.onlyOpenDates = [];
+          if (!cfg.hoursByDate || typeof cfg.hoursByDate !== 'object') cfg.hoursByDate = {};
           showSaveMsg('ייבוא הצליח.', true);
           configToForm(cfg);
         } catch (err) {
