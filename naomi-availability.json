@@ -1,7 +1,7 @@
 {
   "version": 1,
   "availabilityBySelectedDatesOnly": false,
-  "bookingsSuspended": true,
+  "bookingsSuspended": false,
   "startHour": 11,
   "startMinute": 30,
   "endHour": 13,
@@ -26,6 +26,12 @@
           "startMinute": 30,
           "endHour": 13,
           "endMinute": 0
+        },
+        {
+          "startHour": 18,
+          "startMinute": 0,
+          "endHour": 19,
+          "endMinute": 30
         }
       ]
     },
@@ -74,6 +80,9 @@
     3,
     4
   ],
-  "blockedDates": [],
+  "blockedDates": [
+    "2026-03-25",
+    "2026-03-26"
+  ],
   "onlyOpenDates": []
 }
