@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "availabilityBySelectedDatesOnly": true,
+  "availabilityBySelectedDatesOnly": false,
   "bookingsSuspended": false,
   "daysOpen": [0, 1, 2, 3, 4],
   "startHour": 11,
