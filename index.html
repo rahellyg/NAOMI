@@ -1278,8 +1278,8 @@
         </div>
         <div class="form-group">
           <label for="question-text">שאלה <span aria-hidden="true">*</span></label>
-          <p class="question-form-note" id="question-text-hint">מענה יינתן עד 72 שעות בוואטסאפ</p>
-          <textarea id="question-text" name="questionText" required placeholder="מענה יינתן עד 72 שעות בוואטסאפ" aria-describedby="question-text-hint"></textarea>
+          <p class="question-form-note" id="question-text-hint">מענה יינתן עד 7 ימים בוואטסאפ</p>
+          <textarea id="question-text" name="questionText" required placeholder="מענה יינתן עד 7 ימים בוואטסאפ" aria-describedby="question-text-hint"></textarea>
         </div>
         <div class="form-group">
           <label for="question-phone">טלפון <span aria-hidden="true">*</span></label>
@@ -2897,7 +2897,7 @@
           appendQuestionToLocalLedger(qEntry);
           postQuestionLedgerWebhook(qEntry);
           syncQuestionToSupabase(qEntry);
-          showMsg(msg, 'הפרטים נקלטו. מענה עד 72 שעות בוואטסאפ; אפשר לראות בדף הניהול (שאלות).', true);
+          showMsg(msg, 'הפרטים נקלטו. מענה עד 7 ימים בוואטסאפ; אפשר לראות בדף הניהול (שאלות).', true);
           form.reset();
         });
         var bq = document.getElementById('question-birthdate');
