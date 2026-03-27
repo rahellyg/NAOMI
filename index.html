@@ -256,15 +256,17 @@
         max-width: 100%;
       }
 
-      /* שורת מחיר לא גולשת על טופס ההרשמה – עמודה + שבירת טקסט */
+        /* במובייל הפריט והמחיר נשארים באותה שורה */
       .hero-media-stack .pricing-item {
-        flex-direction: column;
-        align-items: stretch;
+          flex-direction: row;
+          align-items: center;
+          justify-content: space-between;
         gap: 0.35rem;
         padding: 0.7rem 0;
       }
 
       .hero-media-stack .pricing-item .name {
+          flex: 1 1 auto;
         min-width: 0;
         text-align: right;
         line-height: 1.35;
