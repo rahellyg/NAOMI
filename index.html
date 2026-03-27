@@ -1395,6 +1395,11 @@
   <!-- גיבוי אם fetch נכשל – שמרו כמו naomi-availability.json; אופציונלי: window.NAOMI_AVAILABILITY_URL -->
   <script type="application/json" id="naomi-availability-embed">{"version":1,"availabilityBySelectedDatesOnly":false,"bookingsSuspended":true,"daysOpen":[0,1,2,3,4],"startHour":11,"startMinute":30,"endHour":13,"endMinute":0,"slotMinutes":90,"meetingDurationMinutes":45,"hoursByDay":{"0":{"startHour":11,"startMinute":30,"endHour":13,"endMinute":0},"1":{"startHour":11,"startMinute":30,"endHour":13,"endMinute":0},"2":{"startHour":11,"startMinute":30,"endHour":13,"endMinute":0},"3":{"startHour":11,"startMinute":30,"endHour":13,"endMinute":0},"4":{"startHour":11,"startMinute":30,"endHour":13,"endMinute":0},"5":{"closed":true},"6":{"closed":true}},"hoursByDate":{},"blockedDates":[],"onlyOpenDates":[]}</script>
 
+  <script>
+    // Availability JSON is hosted on GitHub Pages so this page can run from any domain.
+    window.NAOMI_AVAILABILITY_URL = 'https://rahellyg.github.io/NAOMI/naomi-availability.json';
+  </script>
+
   <!-- Supabase: Dashboard → Project Settings → API → Project URL + anon public key. BOOKING-SYNC-SUPABASE.md -->
   <script>
     window.NAOMI_SUPABASE_URL = 'https://bwxwgplcnhzqjaiodthf.supabase.co';
