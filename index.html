@@ -733,24 +733,6 @@
       filter: brightness(1.08);
     }
 
-    .booking-section button.booking-btn-gcal {
-      width: 100%;
-      margin-top: 0.5rem;
-      padding: 0.85rem 1rem;
-      background: #fff;
-      color: #1565c0;
-      border: 2px solid rgba(66, 133, 244, 0.45);
-      border-radius: 8px;
-      font-family: inherit;
-      font-weight: 600;
-      font-size: 1rem;
-      cursor: pointer;
-    }
-
-    .booking-section button.booking-btn-gcal:hover {
-      background: rgba(66, 133, 244, 0.08);
-    }
-
     .booking-calendar-links a {
       color: var(--accent);
       font-size: 0.9rem;
@@ -1273,10 +1255,9 @@
           </div>
         </div>
         <button type="submit" id="booking-submit-main">אישור</button>
-        <button type="button" id="booking-open-gcal" class="booking-btn-gcal">שמירה ב־Google Calendar</button>
         <p class="booking-msg" id="booking-msg" role="status"></p>
         <p class="booking-calendar-links" id="booking-calendar-links" hidden>
-          <a href="#" id="booking-google-cal" class="booking-google-cal-link" target="_blank" rel="noopener noreferrer">שמירה מחדש ב־Google Calendar</a>
+          <a href="#" id="booking-google-cal" class="booking-google-cal-link" target="_blank" rel="noopener noreferrer">שמירה ב־Google Calendar</a>
         </p>
       </form>
     </section>
@@ -2535,27 +2516,6 @@
         return 'https://calendar.google.com/calendar/render?' + q.join('&');
       }
 
-      /** פתיחת Google Calendar – ב־iPhone Safari ‎window.open‎ לעיתים נחסם או מחזיר null; ‎<a target=_blank>‎ אמין יותר */
-      function openGoogleCalendarUrl(url) {
-        if (!url) return;
-        try {
-          var a = document.createElement('a');
-          a.href = url;
-          a.target = '_blank';
-          a.rel = 'noopener noreferrer';
-          a.setAttribute('aria-hidden', 'true');
-          a.style.cssText =
-            'position:fixed;left:0;top:0;width:1px;height:1px;opacity:0.01;padding:0;margin:0;border:0;';
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-        } catch (e1) {
-          try {
-            window.open(url, '_blank');
-          } catch (e2) {}
-        }
-      }
-
       function setBookingGcalLink(url) {
         var wrap = document.getElementById('booking-calendar-links');
         var a = document.getElementById('booking-google-cal');
@@ -2575,16 +2535,11 @@
         el.className = 'booking-msg ' + (ok ? 'ok' : 'err');
       }
 
-      function runBooking(mode) {
+      function runBooking() {
         if (isBookingUiDisabled()) return;
-        var isConfirm = mode === 'confirm';
-        var isGoogle = mode === 'google';
         var form = document.getElementById('booking-form');
         var msg = document.getElementById('booking-msg');
         if (!form) return;
-        if (isGoogle) {
-          setBookingGcalLink(null);
-        }
         var name = (document.getElementById('booking-name') || {}).value || '';
         var birthStr = (document.getElementById('booking-birthdate') || {}).value || '';
         var phone = (document.getElementById('booking-phone') || {}).value || '';
@@ -2672,16 +2627,7 @@
             : ' (BOOKING_OWNER_EMAIL – להזמנת נעמי.)';
         var okText;
 
-        if (isGoogle) {
-          openGoogleCalendarUrl(gcalUrl);
-          setBookingGcalLink(gcalUrl);
-          okText =
-            'אם לא נפתח Google Calendar – לחצי על הקישור למטה. בדף Google לחצי „שמירה” כדי להוסיף ליומן. מומלץ תזכורת שעה לפני.' +
-            ownerHint +
-            zoomHint;
-          showMsg(msg, okText, true);
-        } else if (isConfirm) {
-          refreshTakenBookingsAsync()
+        refreshTakenBookingsAsync()
             .catch(function() {})
             .then(function() {
               if (isSlotOverlappingExistingBooking(dateStr, timeStr, durMin)) {
@@ -2711,7 +2657,7 @@
                 .then(function() {
                   setBookingGcalLink(gcalUrl);
                   okText =
-                    'הפרטים נקלטו. לחצי „שמירה ב־Google Calendar” כדי להוסיף את האירוע ליומן. אם החלון נחסם – השתמשי בקישור הגיבוי למטה.' +
+                    'הפרטים נקלטו. לחצי על הקישור למטה לשמירה ב־Google Calendar; בדף Google לחצי „שמירה”. מומלץ תזכורת שעה לפני.' +
                     ownerHint +
                     zoomHint;
                   showMsg(msg, okText, true);
@@ -2754,7 +2700,6 @@
                     });
                 });
             });
-        }
       }
 
       function refreshBookingSlotHint() {
@@ -2820,13 +2765,7 @@
         if (form) {
           form.addEventListener('submit', function(e) {
             e.preventDefault();
-            runBooking('confirm');
-          });
-        }
-        var openGcal = document.getElementById('booking-open-gcal');
-        if (openGcal) {
-          openGcal.addEventListener('click', function() {
-            runBooking('google');
+            runBooking();
           });
         }
 
