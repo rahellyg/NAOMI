@@ -1239,10 +1239,6 @@
           <label for="booking-phone">טלפון <span aria-hidden="true">*</span></label>
           <input type="tel" id="booking-phone" name="bookingPhone" placeholder="050-1234567" required autocomplete="tel">
         </div>
-        <div class="form-group">
-          <label for="booking-email">אימייל (פרטי האירוע ב-Google) <span aria-hidden="true">*</span></label>
-          <input type="email" id="booking-email" name="bookingEmail" placeholder="yourname@gmail.com" required autocomplete="email" inputmode="email">
-        </div>
         <div class="form-row">
           <div class="form-group" style="margin-bottom: 0.75rem;">
             <label for="booking-date">תאריך פגישה: <span aria-hidden="true">*</span></label>
@@ -1287,10 +1283,6 @@
         <div class="form-group">
           <label for="question-phone">טלפון <span aria-hidden="true">*</span></label>
           <input type="tel" id="question-phone" name="questionPhone" placeholder="050-1234567" required autocomplete="tel">
-        </div>
-        <div class="form-group">
-          <label for="question-email">מייל <span aria-hidden="true">*</span></label>
-          <input type="email" id="question-email" name="questionEmail" placeholder="yourname@gmail.com" required autocomplete="email" inputmode="email">
         </div>
         <button type="submit" id="question-submit">שליחה</button>
         <p class="booking-msg" id="question-msg" role="status"></p>
@@ -2548,13 +2540,11 @@
         var name = (document.getElementById('booking-name') || {}).value || '';
         var birthStr = (document.getElementById('booking-birthdate') || {}).value || '';
         var phone = (document.getElementById('booking-phone') || {}).value || '';
-        var emailStr = (document.getElementById('booking-email') || {}).value || '';
         var dateStr = (document.getElementById('booking-date') || {}).value || '';
         var timeStr = (document.getElementById('booking-time') || {}).value || '';
         name = name.trim();
         birthStr = birthStr.trim();
         phone = phone.trim();
-        emailStr = emailStr.trim();
         if (!name) {
           showMsg(msg, 'נא למלא שם מלא', false);
           return;
@@ -2570,14 +2560,6 @@
         }
         if (!phone) {
           showMsg(msg, 'נא למלא מספר טלפון', false);
-          return;
-        }
-        if (!emailStr) {
-          showMsg(msg, 'נא למלא אימייל (לתזכורות ביומן)', false);
-          return;
-        }
-        if (!isProbablyBookingEmail(emailStr)) {
-          showMsg(msg, 'נא להזין כתובת אימייל תקינה', false);
           return;
         }
         if (!dateStr || !timeStr) {
@@ -2620,13 +2602,11 @@
         }
         var meetMs = durMin * 60 * 1000;
         var end = new Date(start.getTime() + meetMs);
-        var gcalUrl = buildGoogleCalendarUrl(start, end, name, birthStr, phone, emailStr);
+        var gcalUrl = buildGoogleCalendarUrl(start, end, name, birthStr, phone, '');
         var ownerLow = String(BOOKING_OWNER_EMAIL || '').trim().toLowerCase();
-        var guestLow = emailStr.toLowerCase();
-        var inviteOwner = isProbablyBookingEmail(ownerLow) && ownerLow !== guestLow;
-        var zoomHint = String(BOOKING_ZOOM_LINK || '').trim() ? ' כולל זום באירוע.' : ' (הוסיפי BOOKING_ZOOM_LINK.)';
+        var inviteOwner = isProbablyBookingEmail(ownerLow);
         var ownerHint = inviteOwner
-          ? ' נעמי כאורחת – אחרי שמירה תישלח הזמנה.'
+          ? ' אחרי שמירה תישלח הזמנה.'
           : isProbablyBookingEmail(ownerLow)
             ? ''
             : ' (BOOKING_OWNER_EMAIL – להזמנת נעמי.)';
@@ -2655,7 +2635,7 @@
                 durationMinutes: durMin,
                 fullName: name,
                 phone: phone,
-                email: emailStr,
+                email: '',
                 birthDate: birthStr
               };
               return syncBookingToSupabase(ledgerEntry)
@@ -2663,8 +2643,7 @@
                   setBookingGcalLink(gcalUrl);
                   okText =
                     'הפרטים נקלטו. לחצי על הקישור למטה לשמירה ב־Google Calendar; בדף Google לחצי „שמירה”. מומלץ תזכורת שעה לפני.' +
-                    ownerHint +
-                    zoomHint;
+                    ownerHint;
                   showMsg(msg, okText, true);
                   appendBookingToLocalLedger(ledgerEntry);
                   postBookingLedgerWebhook(ledgerEntry);
@@ -2856,12 +2835,10 @@
           var name = (document.getElementById('question-name') || {}).value || '';
           var birth = (document.getElementById('question-birthdate') || {}).value || '';
           var phone = (document.getElementById('question-phone') || {}).value || '';
-          var emailStr = (document.getElementById('question-email') || {}).value || '';
           var qtext = (document.getElementById('question-text') || {}).value || '';
           name = name.trim();
           birth = birth.trim();
           phone = phone.trim();
-          emailStr = emailStr.trim();
           qtext = qtext.trim();
           if (!name) {
             showMsg(msg, 'נא למלא שם מלא', false);
@@ -2884,23 +2861,19 @@
             showMsg(msg, 'נא למלא טלפון', false);
             return;
           }
-          if (!isProbablyBookingEmail(emailStr)) {
-            showMsg(msg, 'נא למלא אימייל תקין', false);
-            return;
-          }
           var qEntry = {
             id: 'q-' + Date.now() + '-' + Math.random().toString(36).slice(2, 9),
             createdAt: new Date().toISOString(),
             fullName: name,
             birthDate: birth,
             phone: phone,
-            email: emailStr,
+            email: '',
             questionText: qtext
           };
           appendQuestionToLocalLedger(qEntry);
           postQuestionLedgerWebhook(qEntry);
           syncQuestionToSupabase(qEntry);
-          showMsg(msg, 'הפרטים נקלטו. מענה עד 7 ימים בוואטסאפ; אפשר לראות בדף הניהול (שאלות).', true);
+          showMsg(msg, 'הפרטים נקלטו. מענה עד 7 ימים בוואטסאפ;', true);
           form.reset();
         });
         var bq = document.getElementById('question-birthdate');
