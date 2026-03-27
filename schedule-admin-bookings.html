@@ -393,7 +393,8 @@
       margin-top: 0.5rem;
     }
     .bookings-toolbar button { width: auto; flex: 1; min-width: 8rem; margin-top: 0; }
-    .btn-wa-client {
+    .btn-wa-client,
+    .btn-wa-payment {
       margin-top: 0.55rem;
       width: 100%;
       padding: 0.55rem 0.75rem;
@@ -406,8 +407,10 @@
       background: #25d366;
       color: #fff;
     }
-    .btn-wa-client:hover:not(:disabled) { filter: brightness(1.06); }
-    .btn-wa-client:disabled {
+    .btn-wa-client:hover:not(:disabled),
+    .btn-wa-payment:hover:not(:disabled) { filter: brightness(1.06); }
+    .btn-wa-client:disabled,
+    .btn-wa-payment:disabled {
       opacity: 0.45;
       cursor: not-allowed;
       background: rgba(0,0,0,0.2);
@@ -689,6 +692,11 @@
       'שיהיו איתך, שיראו לך מה שאת צריכה לראות , ושתשמעי מה שאת צריכה לשמוע\n' +
       'לטובתך הגבוהה ביותר\n' +
       'מחכה לך 🤍✨';
+    var CLIENT_PAYMENT_WHATSAPP_MESSAGE_HE =
+      'היי אהובה \n' +
+      'משריינת לך את המקום סופית ברגע התשלום \n' +
+      'יכולה להעביר למספר הזה בביט /פייבוקס \n' +
+      'אם מעדיפה העברה בנקאית - אשלח לך פרטים ❤️';
     var DAYS_OPEN_DEFAULT = [0, 1, 2, 3, 4];
     var scheduleDaysOpen = DAYS_OPEN_DEFAULT.slice();
     /** תאריך (YYYY-MM-DD) → { closed } או { windows: [...] } — נשמר ב-hoursByDate ב-JSON */
@@ -1833,7 +1841,12 @@
           bid +
           '"' +
           (waOk ? '' : ' disabled title="אין מספר טלפון תקין"') +
-          '>שלחי וואטסאפ – הודעת הכנה לפני הפגישה</button>';
+          '>שלחי וואטסאפ – הודעת הכנה לפני הפגישה</button>' +
+          '<button type="button" class="btn-wa-payment" data-booking-wa-payment="' +
+          bid +
+          '"' +
+          (waOk ? '' : ' disabled title="אין מספר טלפון תקין"') +
+          '>שליחת הודעת תשלום</button>';
         ul.appendChild(li);
       });
     }
@@ -2241,9 +2254,12 @@
     });
 
     document.getElementById('bookings-list').addEventListener('click', function(e) {
-      var btn = e.target.closest('.btn-wa-client');
+      var btn = e.target.closest('.btn-wa-client, .btn-wa-payment');
       if (!btn || btn.disabled) return;
-      var id = btn.getAttribute('data-booking-wa');
+      var isPaymentButton = btn.classList.contains('btn-wa-payment');
+      var id = isPaymentButton
+        ? btn.getAttribute('data-booking-wa-payment')
+        : btn.getAttribute('data-booking-wa');
       var rec = findBookingById(id);
       if (!rec) {
         showBookingsMsg('לא נמצאה רשומת פגישה.', false);
@@ -2254,7 +2270,9 @@
         showBookingsMsg('אין מספר טלפון תקין ללקוחה.', false);
         return;
       }
-      var text = CLIENT_PREP_WHATSAPP_MESSAGE_HE;
+      var text = isPaymentButton
+        ? CLIENT_PAYMENT_WHATSAPP_MESSAGE_HE
+        : CLIENT_PREP_WHATSAPP_MESSAGE_HE;
       var url = 'https://wa.me/' + String(num).replace(/\D/g, '') + '?text=' + encodeURIComponent(text);
       try {
         window.open(url, '_blank', 'noopener,noreferrer');
