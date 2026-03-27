@@ -676,6 +676,9 @@
     .booking-section input[type="text"],
     .booking-section input[type="email"] {
       width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      display: block;
       padding: 0.75rem 1rem;
       border: 1px solid var(--border);
       border-radius: 8px;
@@ -683,6 +686,13 @@
       font-size: 1rem;
       background: #fff;
       color: var(--text);
+    }
+
+    /* Safari ב־iPhone: שדה תאריך/שעה הוא ווידג'ט WebKit שלא נמתח לרוחב מלא כמו text/email */
+    .booking-section input[type="date"],
+    .booking-section input[type="time"] {
+      -webkit-appearance: none;
+      appearance: none;
     }
 
     .booking-section textarea {
@@ -756,10 +766,14 @@
     .booking-calendar-links a.booking-google-cal-link {
       display: inline-block;
       font-weight: 600;
-      padding: 0.35rem 0.5rem;
-      border-radius: 6px;
+      padding: 0.65rem 1rem;
+      min-height: 44px;
+      line-height: 1.35;
+      border-radius: 8px;
       background: rgba(66, 133, 244, 0.12);
       color: #1565c0;
+      -webkit-tap-highlight-color: rgba(66, 133, 244, 0.25);
+      touch-action: manipulation;
     }
 
     .booking-msg {
@@ -1168,7 +1182,7 @@
         </div>
         <div class="pricing-item">
           <span class="name">הרשמה לערוץ תוכן</span>
-          <span class="price">222 ₪ חודשי</span>
+          <span class="price">222 ₪</span>
         </div>
         <div class="pricing-item">
           <span class="name">פגישה אישית בזום</span>
@@ -1416,7 +1430,8 @@
      * BOOKING_OWNER_EMAIL = נעמי כאורחת ב-Google Calendar.
      * BOOKING_LEDGER_WEBHOOK – אופציונלי: POST עם { booking } לעדכון naomi-bookings.json (Make/GitHub).
      * QUESTION_LEDGER_WEBHOOK – אופציונלי: POST עם { question } ל־naomi-questions.json.
-     * Supabase: NAOMI_SUPABASE_URL + NAOMI_SUPABASE_ANON_KEY – ראי BOOKING-SYNC-SUPABASE.md (naomi_bookings, naomi_questions).
+     * מניעת כפילות: נטען naomi-bookings.json + Supabase + localStorage; סלוט תפוס (חפיפת זמן) נחסם. אין מניעה 100% בין שני דפדפנים בו־זמנית בלי שרת – Supabase UNIQUE או Edge Function אם תרצי.
+     * Supabase: NAOMI_SUPABASE_URL + NAOMI_SUPABASE_ANON_KEY – ראי BOOKING-SYNC-SUPABASE.md (naomi_bookings + טריגר מניעת חפיפה, naomi_questions).
      * השבתת טופס: NAOMI_BOOKING_DISABLED = true תמיד מסתירה; = false תמיד מציגה; בלי הגדרה — לפי bookingsSuspended ב־JSON (ניהול).
      */
     (function() {
@@ -1471,6 +1486,9 @@
         'לטובתך הגבוהה ביותר\n' +
         'מחכה לך 🤍✨';
       var meetingAvailability = null;
+      /** פגישות קיימות (אחרי מיזוג) – לחסימת סלוטים תפוסים */
+      var takenBookingsMerged = [];
+      var lastTakenBookingsFetchAt = 0;
       var AVAILABILITY_JSON = 'naomi-availability.json';
       var DAYS_OPEN_DEFAULT = [0, 1, 2, 3, 4];
       var BOOKING_FALLBACK_SH = 11;
@@ -1821,7 +1839,7 @@
             : 45;
         for (var wi = 0; wi < wins.length; wi++) {
           var rng = windowOpenRangeMinutes(wins[wi]);
-          if (rng.openStart + meetLen <= rng.openEnd) return true;
+          if (rng.openStart + meetLen <= rng.openEnd) return hasAnyFreeSlotOnDate(dateStr);
         }
         return false;
       }
@@ -2049,19 +2067,20 @@
           .replace(/\/$/, '');
         var key = String(w.NAOMI_SUPABASE_ANON_KEY || SUPABASE_ANON_KEY || '').trim();
         var table = String(w.NAOMI_SUPABASE_TABLE || SUPABASE_BOOKINGS_TABLE || 'naomi_bookings').trim();
-        if (!base || !key) return;
+        if (!base || !key) return Promise.resolve({ skipped: true });
+        var normTime = normalizeBookingTimeStr(entry.timeStr);
         var row = {
           id: entry.id,
           created_at: entry.createdAt,
           date_str: entry.dateStr,
-          time_str: entry.timeStr,
+          time_str: normTime || String(entry.timeStr || '').trim(),
           duration_minutes: entry.durationMinutes,
           full_name: entry.fullName,
           phone: entry.phone,
           email: entry.email,
           birth_date: entry.birthDate
         };
-        fetch(base + '/rest/v1/' + encodeURIComponent(table), {
+        return fetch(base + '/rest/v1/' + encodeURIComponent(table), {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -2072,7 +2091,257 @@
           body: JSON.stringify(row),
           mode: 'cors',
           keepalive: true
-        }).catch(function() {});
+        }).then(function(res) {
+          if (res.ok) return { skipped: false };
+          return res.text().then(function(body) {
+            var err = { status: res.status, body: body || '' };
+            if (res.status === 409) err.conflict = true;
+            return Promise.reject(err);
+          });
+        });
+      }
+
+      function getBookingsJsonFetchUrl() {
+        if (typeof window.NAOMI_BOOKINGS_JSON_URL === 'string' && window.NAOMI_BOOKINGS_JSON_URL.trim()) {
+          return window.NAOMI_BOOKINGS_JSON_URL.trim();
+        }
+        var filename = 'naomi-bookings.json';
+        var path = window.location.pathname || '/';
+        if (!path.endsWith('/')) {
+          var lastSeg = path.split('/').pop() || '';
+          if (/\.[a-z0-9]{1,10}$/i.test(lastSeg)) {
+            path = path.replace(/[^/]+$/, '');
+          } else {
+            path = path + '/';
+          }
+        }
+        if (!path.endsWith('/')) path += '/';
+        return window.location.origin + path + filename;
+      }
+
+      function normalizeBookingTimeStr(ts) {
+        ts = String(ts || '').trim();
+        var tm = ts.match(/^(\d{1,2}):(\d{2})/);
+        if (!tm) return '';
+        return pad2(parseInt(tm[1], 10) || 0) + ':' + pad2(parseInt(tm[2], 10) || 0);
+      }
+
+      function timeStrToMinutes(ts) {
+        var n = normalizeBookingTimeStr(ts);
+        if (!n) return NaN;
+        var p = n.split(':');
+        return parseInt(p[0], 10) * 60 + parseInt(p[1], 10);
+      }
+
+      function meetingIntervalsOverlapMin(s1, len1, s2, len2) {
+        return s1 < s2 + len2 && s1 + len1 > s2;
+      }
+
+      function normalizeBookingsArrayForTaken(arr) {
+        if (!arr || !Array.isArray(arr)) return [];
+        return arr
+          .map(function(b) {
+            if (!b || typeof b !== 'object') return null;
+            if (!b.dateStr || !/^\d{4}-\d{2}-\d{2}$/.test(String(b.dateStr))) return null;
+            var ts = b.timeStr != null ? String(b.timeStr).trim() : '00:00';
+            var tm = ts.match(/^(\d{1,2}):(\d{2})/);
+            if (tm) ts = pad2(parseInt(tm[1], 10) || 0) + ':' + pad2(parseInt(tm[2], 10) || 0);
+            else ts = '09:00';
+            return {
+              id: b.id || 'm-' + Math.random().toString(36).slice(2, 10),
+              createdAt: b.createdAt || b.created_at || '',
+              dateStr: String(b.dateStr),
+              timeStr: ts,
+              durationMinutes:
+                b.durationMinutes != null && !isNaN(Number(b.durationMinutes))
+                  ? Math.max(15, Math.min(480, parseInt(b.durationMinutes, 10)))
+                  : null,
+              fullName: b.fullName || b.name || '',
+              phone: b.phone || '',
+              email: b.email || b.clientEmail || '',
+              birthDate: b.birthDate || b.birth_date || ''
+            };
+          })
+          .filter(Boolean);
+      }
+
+      function bookingTakenMergeKey(b) {
+        if (b && b.id) return 'id:' + b.id;
+        return (
+          'k:' +
+          (b.dateStr || '') +
+          '|' +
+          (b.timeStr || '') +
+          '|' +
+          (b.email || '') +
+          '|' +
+          (b.fullName || '')
+        );
+      }
+
+      function mergeTakenBookingsArrays(a, b) {
+        var map = {};
+        function take(arr) {
+          (arr || []).forEach(function(x) {
+            if (!x) return;
+            var k = bookingTakenMergeKey(x);
+            var prev = map[k];
+            if (!prev || (x.createdAt && prev.createdAt && String(x.createdAt) > String(prev.createdAt))) {
+              map[k] = x;
+            }
+          });
+        }
+        take(a);
+        take(b);
+        return Object.keys(map).map(function(k) {
+          return map[k];
+        });
+      }
+
+      function loadBookingsFromLocalStorageForTaken() {
+        try {
+          var raw = localStorage.getItem(BOOKINGS_LOCAL_STORAGE_KEY);
+          if (!raw) return [];
+          var arr = JSON.parse(raw);
+          if (!Array.isArray(arr)) return [];
+          return normalizeBookingsArrayForTaken(arr);
+        } catch (eL) {
+          return [];
+        }
+      }
+
+      function fetchBookingsJsonForTaken() {
+        var baseBook = getBookingsJsonFetchUrl();
+        var url = baseBook + (baseBook.indexOf('?') >= 0 ? '&' : '?') + '_=' + Date.now();
+        return fetch(url, { cache: 'no-store', headers: { Accept: 'application/json' } })
+          .then(function(r) {
+            if (!r.ok) throw new Error('bookings json');
+            return r.json();
+          })
+          .then(function(j) {
+            var arr = j && Array.isArray(j.bookings) ? j.bookings : Array.isArray(j) ? j : [];
+            return normalizeBookingsArrayForTaken(arr);
+          });
+      }
+
+      function fetchBookingsFromSupabaseForTaken() {
+        var w = typeof window !== 'undefined' ? window : {};
+        var base = String(w.NAOMI_SUPABASE_URL || SUPABASE_URL || '')
+          .trim()
+          .replace(/\/$/, '');
+        var key = String(w.NAOMI_SUPABASE_ANON_KEY || SUPABASE_ANON_KEY || '').trim();
+        var table = String(w.NAOMI_SUPABASE_TABLE || SUPABASE_BOOKINGS_TABLE || 'naomi_bookings').trim();
+        if (!base || !key) return Promise.resolve([]);
+        return fetch(
+          base + '/rest/v1/' + encodeURIComponent(table) + '?select=*&order=date_str.asc,time_str.asc',
+          {
+            headers: {
+              apikey: key,
+              Authorization: 'Bearer ' + key,
+              Accept: 'application/json'
+            },
+            cache: 'no-store'
+          }
+        )
+          .then(function(r) {
+            if (!r.ok) throw new Error('sb bookings');
+            return r.json();
+          })
+          .then(function(rows) {
+            if (!Array.isArray(rows)) return [];
+            return rows
+              .map(function(row) {
+                if (!row || !row.date_str || !/^\d{4}-\d{2}-\d{2}$/.test(String(row.date_str))) return null;
+                var ts = row.time_str != null ? String(row.time_str).trim() : '09:00';
+                var tm = ts.match(/^(\d{1,2}):(\d{2})/);
+                if (tm) ts = pad2(parseInt(tm[1], 10) || 0) + ':' + pad2(parseInt(tm[2], 10) || 0);
+                return {
+                  id: row.id,
+                  createdAt: row.created_at || '',
+                  dateStr: String(row.date_str),
+                  timeStr: ts,
+                  durationMinutes:
+                    row.duration_minutes != null && !isNaN(Number(row.duration_minutes))
+                      ? Math.max(15, Math.min(480, parseInt(row.duration_minutes, 10)))
+                      : null,
+                  fullName: row.full_name || '',
+                  phone: row.phone || '',
+                  email: row.email || '',
+                  birthDate: row.birth_date || ''
+                };
+              })
+              .filter(Boolean);
+          });
+      }
+
+      function refreshTakenBookingsAsync() {
+        lastTakenBookingsFetchAt = Date.now();
+        var local = loadBookingsFromLocalStorageForTaken();
+        var pJ = fetchBookingsJsonForTaken().catch(function() {
+          return [];
+        });
+        var pS = fetchBookingsFromSupabaseForTaken().catch(function() {
+          return [];
+        });
+        return Promise.all([pJ, pS]).then(function(pair) {
+          var merged = mergeTakenBookingsArrays(pair[0], pair[1]);
+          takenBookingsMerged = mergeTakenBookingsArrays(merged, local);
+        });
+      }
+
+      function isSlotOverlappingExistingBooking(dateStr, slotTimeStr, slotDurationMin) {
+        if (!takenBookingsMerged || !takenBookingsMerged.length) return false;
+        var slotStart = timeStrToMinutes(slotTimeStr);
+        if (isNaN(slotStart)) return false;
+        var sdur = slotDurationMin != null && !isNaN(Number(slotDurationMin))
+          ? Math.max(15, Math.min(480, parseInt(slotDurationMin, 10)))
+          : 45;
+        for (var i = 0; i < takenBookingsMerged.length; i++) {
+          var b = takenBookingsMerged[i];
+          if (!b || String(b.dateStr) !== String(dateStr)) continue;
+          var bStart = timeStrToMinutes(b.timeStr);
+          if (isNaN(bStart)) continue;
+          var bLen =
+            b.durationMinutes != null && !isNaN(Number(b.durationMinutes))
+              ? Math.max(15, Math.min(480, parseInt(b.durationMinutes, 10)))
+              : sdur;
+          if (meetingIntervalsOverlapMin(slotStart, sdur, bStart, bLen)) return true;
+        }
+        return false;
+      }
+
+      function hasAnyFreeSlotOnDate(dateStr) {
+        if (!dateStr || dateStr < bookingTodayKey()) return false;
+        if (!meetingAvailability || meetingAvailability.version == null) return true;
+
+        var cfg = meetingAvailability;
+        var dPick = new Date(dateStr + 'T12:00:00');
+        var wPick = isNaN(dPick.getTime()) ? 0 : dPick.getDay();
+        var winsForDay = getDayWindows(cfg, wPick, dateStr);
+        if (!winsForDay.length) return false;
+        var slot = cfg.slotMinutes != null ? cfg.slotMinutes : 90;
+        var meetLen = cfg.meetingDurationMinutes != null ? cfg.meetingDurationMinutes : 45;
+
+        var slotTimesMap = {};
+        for (var wx = 0; wx < winsForDay.length; wx++) {
+          var rngW = windowOpenRangeMinutes(winsForDay[wx]);
+          for (var t = rngW.openStart; t + meetLen <= rngW.openEnd; t += slot) {
+            slotTimesMap[minutesToHHMM(t)] = true;
+          }
+        }
+        var slotTimesList = Object.keys(slotTimesMap).sort();
+        for (var si = 0; si < slotTimesList.length; si++) {
+          var ts = slotTimesList[si];
+          if (
+            isSlotAllowed(dateStr, ts, cfg) &&
+            !isBookingTimeInPast(dateStr, ts) &&
+            !isBookingSlotTooSoon(dateStr, ts) &&
+            !isSlotOverlappingExistingBooking(dateStr, ts, meetLen)
+          ) {
+            return true;
+          }
+        }
+        return false;
       }
 
       function renderBookingTimeSlots() {
@@ -2140,7 +2409,8 @@
             : true;
           var pastOk = !isBookingTimeInPast(dateStr, selected);
           var leadOk = !isBookingSlotTooSoon(dateStr, selected);
-          if (!slotOk || !pastOk || !leadOk) {
+          var bookedOk = !isSlotOverlappingExistingBooking(dateStr, selected, meetLen);
+          if (!slotOk || !pastOk || !leadOk || !bookedOk) {
             hidden.value = '';
             selected = '';
             if (display) display.textContent = 'בחרו שעה מחדש.';
@@ -2166,9 +2436,13 @@
             allowed =
               isSlotAllowed(dateStr, timeStr, cfg) &&
               !isBookingTimeInPast(dateStr, timeStr) &&
-              !isBookingSlotTooSoon(dateStr, timeStr);
+              !isBookingSlotTooSoon(dateStr, timeStr) &&
+              !isSlotOverlappingExistingBooking(dateStr, timeStr, meetLen);
           } else {
-            allowed = !isBookingTimeInPast(dateStr, timeStr) && !isBookingSlotTooSoon(dateStr, timeStr);
+            allowed =
+              !isBookingTimeInPast(dateStr, timeStr) &&
+              !isBookingSlotTooSoon(dateStr, timeStr) &&
+              !isSlotOverlappingExistingBooking(dateStr, timeStr, meetLen);
           }
 
           var btn = document.createElement('button');
@@ -2179,7 +2453,10 @@
           if (!allowed) {
             btn.classList.add('disabled');
             btn.disabled = true;
-            btn.setAttribute('aria-label', 'לא זמין');
+            btn.setAttribute(
+              'aria-label',
+              isSlotOverlappingExistingBooking(dateStr, timeStr, meetLen) ? 'תפוס' : 'לא זמין'
+            );
           } else {
             if (selected === timeStr) btn.classList.add('selected');
             btn.setAttribute('aria-label', 'שעה ' + timeStr);
@@ -2256,6 +2533,27 @@
           }
         }
         return 'https://calendar.google.com/calendar/render?' + q.join('&');
+      }
+
+      /** פתיחת Google Calendar – ב־iPhone Safari ‎window.open‎ לעיתים נחסם או מחזיר null; ‎<a target=_blank>‎ אמין יותר */
+      function openGoogleCalendarUrl(url) {
+        if (!url) return;
+        try {
+          var a = document.createElement('a');
+          a.href = url;
+          a.target = '_blank';
+          a.rel = 'noopener noreferrer';
+          a.setAttribute('aria-hidden', 'true');
+          a.style.cssText =
+            'position:fixed;left:0;top:0;width:1px;height:1px;opacity:0.01;padding:0;margin:0;border:0;';
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+        } catch (e1) {
+          try {
+            window.open(url, '_blank');
+          } catch (e2) {}
+        }
       }
 
       function setBookingGcalLink(url) {
@@ -2352,9 +2650,15 @@
           showMsg(msg, 'היום או השעה לא פתוחים לפי לוח הזמנים. בחרו יום פתוח ושעה במרווח של ' + slotM + ' דקות מתוך חלון השעות.', false);
           return;
         }
-        var meetMs = (meetingAvailability && meetingAvailability.meetingDurationMinutes != null)
-          ? meetingAvailability.meetingDurationMinutes * 60 * 1000
-          : 45 * 60 * 1000;
+        var durMin =
+          meetingAvailability && meetingAvailability.meetingDurationMinutes != null
+            ? meetingAvailability.meetingDurationMinutes
+            : 45;
+        if (isSlotOverlappingExistingBooking(dateStr, timeStr, durMin)) {
+          showMsg(msg, 'המועד הזה כבר תפוס. בחרי תאריך או שעה אחרת.', false);
+          return;
+        }
+        var meetMs = durMin * 60 * 1000;
         var end = new Date(start.getTime() + meetMs);
         var gcalUrl = buildGoogleCalendarUrl(start, end, name, birthStr, phone, emailStr);
         var ownerLow = String(BOOKING_OWNER_EMAIL || '').trim().toLowerCase();
@@ -2369,50 +2673,87 @@
         var okText;
 
         if (isGoogle) {
-          var popupOk = false;
-          try {
-            var w = window.open(gcalUrl, '_blank', 'noopener,noreferrer');
-            popupOk = !!(w && !w.closed);
-          } catch (e0) {}
-          if (popupOk) {
-            setBookingGcalLink(null);
-            okText =
-              'נפתח דף לשמירה ב-Google Calendar – לחצי „שמירה” בגוגל כדי להוסיף ליומן. מומלץ תזכורת שעה לפני.' +
-              ownerHint +
-              zoomHint;
-          } else {
-            setBookingGcalLink(gcalUrl);
-            okText =
-              'הדפדפן חסם חלון – לחצי על הקישור למטה לשמירה ב-Google Calendar; מומלץ תזכורת שעה לפני.' +
-              ownerHint +
-              zoomHint;
-          }
-          showMsg(msg, okText, true);
-        } else if (isConfirm) {
+          openGoogleCalendarUrl(gcalUrl);
           setBookingGcalLink(gcalUrl);
           okText =
-            'הפרטים נקלטו. לחצי „שמירה ב־Google Calendar” כדי להוסיף את האירוע ליומן. אם החלון נחסם – השתמשי בקישור הגיבוי למטה.' +
+            'אם לא נפתח Google Calendar – לחצי על הקישור למטה. בדף Google לחצי „שמירה” כדי להוסיף ליומן. מומלץ תזכורת שעה לפני.' +
             ownerHint +
             zoomHint;
           showMsg(msg, okText, true);
-          var durMin =
-            meetingAvailability && meetingAvailability.meetingDurationMinutes != null
-              ? meetingAvailability.meetingDurationMinutes
-              : 45;
-          var ledgerEntry = {
-            id: 'b-' + Date.now() + '-' + Math.random().toString(36).slice(2, 9),
-            createdAt: new Date().toISOString(),
-            dateStr: dateStr,
-            timeStr: timeStr,
-            durationMinutes: durMin,
-            fullName: name,
-            phone: phone,
-            email: emailStr,
-            birthDate: birthStr
-          };
-          appendBookingToLocalLedger(ledgerEntry);
-          postBookingLedgerWebhook(ledgerEntry);
-          syncBookingToSupabase(ledgerEntry);
+        } else if (isConfirm) {
+          refreshTakenBookingsAsync()
+            .catch(function() {})
+            .then(function() {
+              if (isSlotOverlappingExistingBooking(dateStr, timeStr, durMin)) {
+                showMsg(
+                  msg,
+                  'המועד נתפס בינתיים או כבר תפוס. בחרי תאריך או שעה אחרת.',
+                  false
+                );
+                renderBookingCalendar();
+                renderBookingTimeSlots();
+                refreshBookingSlotHint();
+                return;
+              }
+              var normSlotTime = normalizeBookingTimeStr(timeStr);
+              var ledgerEntry = {
+                id: 'b-' + Date.now() + '-' + Math.random().toString(36).slice(2, 9),
+                createdAt: new Date().toISOString(),
+                dateStr: dateStr,
+                timeStr: normSlotTime || timeStr,
+                durationMinutes: durMin,
+                fullName: name,
+                phone: phone,
+                email: emailStr,
+                birthDate: birthStr
+              };
+              return syncBookingToSupabase(ledgerEntry)
+                .then(function() {
+                  setBookingGcalLink(gcalUrl);
+                  okText =
+                    'הפרטים נקלטו. לחצי „שמירה ב־Google Calendar” כדי להוסיף את האירוע ליומן. אם החלון נחסם – השתמשי בקישור הגיבוי למטה.' +
+                    ownerHint +
+                    zoomHint;
+                  showMsg(msg, okText, true);
+                  appendBookingToLocalLedger(ledgerEntry);
+                  postBookingLedgerWebhook(ledgerEntry);
+                  takenBookingsMerged.push({
+                    id: ledgerEntry.id,
+                    createdAt: ledgerEntry.createdAt,
+                    dateStr: ledgerEntry.dateStr,
+                    timeStr: normalizeBookingTimeStr(ledgerEntry.timeStr),
+                    durationMinutes: ledgerEntry.durationMinutes,
+                    fullName: ledgerEntry.fullName,
+                    phone: ledgerEntry.phone,
+                    email: ledgerEntry.email,
+                    birthDate: ledgerEntry.birthDate
+                  });
+                  renderBookingCalendar();
+                  renderBookingTimeSlots();
+                })
+                .catch(function(err) {
+                  if (err && err.conflict) {
+                    showMsg(
+                      msg,
+                      'המועד נתפס בינתיים או כבר תפוס (אושר אצל מישהו אחר). בחרי תאריך או שעה אחרת.',
+                      false
+                    );
+                  } else {
+                    showMsg(
+                      msg,
+                      'לא ניתן לשמור את ההזמנה כרגע (בעיית רשת או שרת). נסי שוב בעוד רגע.',
+                      false
+                    );
+                  }
+                  return refreshTakenBookingsAsync()
+                    .catch(function() {})
+                    .then(function() {
+                      renderBookingCalendar();
+                      renderBookingTimeSlots();
+                      refreshBookingSlotHint();
+                    });
+                });
+            });
         }
       }
 
@@ -2441,6 +2782,14 @@
         if (!isSlotAllowed(dateStr, timeStr, meetingAvailability)) {
           var slotM = meetingAvailability.slotMinutes != null ? meetingAvailability.slotMinutes : 90;
           showMsg(msg, 'השעה או התאריך לא מתאימים ללוח (חלון שעות / מרווח ' + slotM + ' דק׳).', false);
+          return;
+        }
+        var hintDur =
+          meetingAvailability.meetingDurationMinutes != null
+            ? meetingAvailability.meetingDurationMinutes
+            : 45;
+        if (isSlotOverlappingExistingBooking(dateStr, timeStr, hintDur)) {
+          showMsg(msg, 'מועד זה כבר תפוס.', false);
           return;
         }
         msg.textContent = '';
@@ -2495,11 +2844,35 @@
         var timeEl = document.getElementById('booking-time');
         if (dateEl) {
           dateEl.addEventListener('change', function() {
-            renderBookingTimeSlots();
-            refreshBookingSlotHint();
+            var nowTs = Date.now();
+            if (nowTs - lastTakenBookingsFetchAt > 25000) {
+              refreshTakenBookingsAsync()
+                .catch(function() {})
+                .then(function() {
+                  renderBookingCalendar();
+                  renderBookingTimeSlots();
+                  refreshBookingSlotHint();
+                });
+            } else {
+              renderBookingTimeSlots();
+              refreshBookingSlotHint();
+            }
           });
         }
         if (timeEl) timeEl.addEventListener('change', refreshBookingSlotHint);
+
+        try {
+          setInterval(function() {
+            if (document.hidden || isBookingUiDisabled()) return;
+            refreshTakenBookingsAsync()
+              .catch(function() {})
+              .then(function() {
+                renderBookingCalendar();
+                renderBookingTimeSlots();
+                refreshBookingSlotHint();
+              });
+          }, 90000);
+        } catch (eInt) {}
       }
 
       if (wBook.NAOMI_BOOKING_DISABLED === true) {
@@ -2523,7 +2896,11 @@
             var emb = parseEmbeddedAvailability();
             meetingAvailability = normalizeAvailability(emb);
           })
-          .finally(initBookingUI);
+          .finally(function() {
+            refreshTakenBookingsAsync()
+              .catch(function() {})
+              .finally(initBookingUI);
+          });
       }
 
       (function initQuestionForm() {

@@ -1,7 +1,8 @@
 {
   "version": 1,
-  "availabilityBySelectedDatesOnly": false,
+  "availabilityBySelectedDatesOnly": true,
   "bookingsSuspended": false,
+  "daysOpen": [0, 1, 2, 3, 4],
   "startHour": 11,
   "startMinute": 30,
   "endHour": 13,
@@ -9,94 +10,15 @@
   "slotMinutes": 90,
   "meetingDurationMinutes": 45,
   "hoursByDay": {
-    "0": {
-      "windows": [
-        {
-          "startHour": 11,
-          "startMinute": 30,
-          "endHour": 13,
-          "endMinute": 0
-        }
-      ]
-    },
-    "1": {
-      "windows": [
-        {
-          "startHour": 11,
-          "startMinute": 30,
-          "endHour": 13,
-          "endMinute": 0
-        }
-      ]
-    },
-    "2": {
-      "windows": [
-        {
-          "startHour": 11,
-          "startMinute": 30,
-          "endHour": 13,
-          "endMinute": 0
-        }
-      ]
-    },
-    "3": {
-      "windows": [
-        {
-          "startHour": 11,
-          "startMinute": 30,
-          "endHour": 13,
-          "endMinute": 0
-        }
-      ]
-    },
-    "4": {
-      "windows": [
-        {
-          "startHour": 11,
-          "startMinute": 30,
-          "endHour": 13,
-          "endMinute": 0
-        }
-      ]
-    },
-    "5": {
-      "closed": true
-    },
-    "6": {
-      "closed": true
-    }
+    "0": { "startHour": 11, "startMinute": 30, "endHour": 13, "endMinute": 0 },
+    "1": { "startHour": 11, "startMinute": 30, "endHour": 13, "endMinute": 0 },
+    "2": { "startHour": 11, "startMinute": 30, "endHour": 13, "endMinute": 0 },
+    "3": { "startHour": 11, "startMinute": 30, "endHour": 13, "endMinute": 0 },
+    "4": { "startHour": 11, "startMinute": 30, "endHour": 13, "endMinute": 0 },
+    "5": { "closed": true },
+    "6": { "closed": true }
   },
   "hoursByDate": {},
-  "daysOpen": [
-    0,
-    1,
-    2,
-    3,
-    4
-  ],
-  "blockedDates": [
-    "2026-04-01",
-    "2026-04-02",
-    "2026-04-05",
-    "2026-04-06",
-    "2026-04-07",
-    "2026-04-08",
-    "2026-04-09",
-    "2026-04-12",
-    "2026-04-13",
-    "2026-04-14",
-    "2026-04-15",
-    "2026-04-16",
-    "2026-04-19",
-    "2026-04-20",
-    "2026-04-21",
-    "2026-04-22",
-    "2026-04-23",
-    "2026-04-26",
-    "2026-04-27",
-    "2026-04-28",
-    "2026-04-29",
-    "2026-04-30"
-  ],
+  "blockedDates": [],
   "onlyOpenDates": []
 }

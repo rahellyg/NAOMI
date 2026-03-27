@@ -27,6 +27,61 @@ create policy "anon_insert_naomi_bookings"
 
 create policy "anon_select_naomi_bookings"
   on naomi_bookings for select to anon using (true);
+
+-- מניעת double booking בשרת: אין שתי פגישות עם חפיפת זמן באותו יום
+-- (לפי time_str + duration_minutes, ברירת מחדל 45 כמו בדף הנחיתה)
+create or replace function public.naomi_bookings_time_to_minutes(t text)
+returns integer
+language sql
+immutable
+as $$
+  select (split_part(btrim(t), ':', 1)::int * 60)
+       + split_part(btrim(t), ':', 2)::int;
+$$;
+
+create or replace function public.naomi_bookings_check_no_overlap()
+returns trigger
+language plpgsql
+as $f$
+declare
+  r record;
+  ns int;
+  ne int;
+  nd int;
+  os int;
+  oe int;
+  od int;
+begin
+  nd := coalesce(new.duration_minutes, 45);
+  ns := public.naomi_bookings_time_to_minutes(new.time_str);
+  ne := ns + nd;
+
+  for r in
+    select id, time_str, duration_minutes
+    from public.naomi_bookings
+    where date_str = new.date_str
+      and (tg_op = 'INSERT' or id is distinct from new.id)
+  loop
+    od := coalesce(r.duration_minutes, 45);
+    os := public.naomi_bookings_time_to_minutes(r.time_str);
+    oe := os + od;
+    if ns < oe and ne > os then
+      raise exception 'naomi_bookings_interval_overlap'
+        using errcode = '23505',
+              detail = 'booking overlaps existing row on this date';
+    end if;
+  end loop;
+
+  return new;
+end;
+$f$;
+
+drop trigger if exists naomi_bookings_overlap_guard on public.naomi_bookings;
+create trigger naomi_bookings_overlap_guard
+  before insert or update of date_str, time_str, duration_minutes
+  on public.naomi_bookings
+  for each row
+  execute function public.naomi_bookings_check_no_overlap();
 ```
 
 3. **Settings → API**: העתיקי  
@@ -45,6 +100,14 @@ create policy "anon_select_naomi_bookings"
 או ערכי ברירת המחדל בתוך הקבצים: `SUPABASE_URL` ו־`SUPABASE_ANON_KEY`.
 
 5. פרסמי את העדכון ל־GitHub. אחרי **אישור** בדף ההזמנה – השורה תיכנס ל־Supabase. בדף הניהול לחצי **רענון מהקובץ ב-GitHub** – הרשימה תימזג גם מ־Supabase.
+
+### כבר יצרת את `naomi_bookings` בלי הטריגר?
+
+הריצי ב־**SQL Editor** רק את הבלוק של הפונקציות והטריגר מתוך הסעיף למעלה (מ־`create or replace function public.naomi_bookings_time_to_minutes` ועד סוף `create trigger ...`). אם כבר יש בטבלה שורות **חופפות** באותו יום, מחיקה או תיקון ידני לפני ההרצה – אחרת הטריגר יישאר תקף רק לשורות חדשות.
+
+### התנהגות בדף הנחיתה
+
+כש־Supabase מוגדר, אחרי לחיצה על אישור ההזמנה נשלח קודם **POST** לטבלה. רק אם השרת מאשר – נשמרים `localStorage`, webhook והצגת ההודעה. חפיפה או כפילות מחזירות **409** – המשתמשת רואה הודעה בעברית והממשק מתרענן. בלי מפתחות Supabase ההתנהגות נשארת מקומית כמו קודם.
 
 ---
 
