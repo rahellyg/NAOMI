@@ -2,7 +2,6 @@
   "version": 1,
   "availabilityBySelectedDatesOnly": false,
   "bookingsSuspended": false,
-  "daysOpen": [0, 1, 2, 3, 4],
   "startHour": 11,
   "startMinute": 30,
   "endHour": 13,
@@ -10,15 +9,71 @@
   "slotMinutes": 90,
   "meetingDurationMinutes": 45,
   "hoursByDay": {
-    "0": { "startHour": 11, "startMinute": 30, "endHour": 13, "endMinute": 0 },
-    "1": { "startHour": 11, "startMinute": 30, "endHour": 13, "endMinute": 0 },
-    "2": { "startHour": 11, "startMinute": 30, "endHour": 13, "endMinute": 0 },
-    "3": { "startHour": 11, "startMinute": 30, "endHour": 13, "endMinute": 0 },
-    "4": { "startHour": 11, "startMinute": 30, "endHour": 13, "endMinute": 0 },
-    "5": { "closed": true },
-    "6": { "closed": true }
+    "0": {
+      "windows": [
+        {
+          "startHour": 11,
+          "startMinute": 30,
+          "endHour": 13,
+          "endMinute": 0
+        }
+      ]
+    },
+    "1": {
+      "windows": [
+        {
+          "startHour": 11,
+          "startMinute": 30,
+          "endHour": 13,
+          "endMinute": 0
+        }
+      ]
+    },
+    "2": {
+      "windows": [
+        {
+          "startHour": 11,
+          "startMinute": 30,
+          "endHour": 13,
+          "endMinute": 0
+        }
+      ]
+    },
+    "3": {
+      "windows": [
+        {
+          "startHour": 11,
+          "startMinute": 30,
+          "endHour": 13,
+          "endMinute": 0
+        }
+      ]
+    },
+    "4": {
+      "windows": [
+        {
+          "startHour": 11,
+          "startMinute": 30,
+          "endHour": 13,
+          "endMinute": 0
+        }
+      ]
+    },
+    "5": {
+      "closed": true
+    },
+    "6": {
+      "closed": true
+    }
   },
   "hoursByDate": {},
+  "daysOpen": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
   "blockedDates": [],
   "onlyOpenDates": []
 }
