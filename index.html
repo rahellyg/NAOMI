@@ -1435,6 +1435,10 @@
       var BOOKING_OWNER_EMAIL = 'naomi.amsalem@gmail.com';
       /** Webhook נפרד לרישום פגישה (למשל Make → עדכון naomi-bookings.json ב-GitHub). */
       var BOOKING_LEDGER_WEBHOOK = '';
+      /** Webhook לשליחת וואטסאפ עם פרטי הפגישה (Make/Twilio/WhatsApp Cloud). */
+      var BOOKING_WHATSAPP_WEBHOOK = '';
+      /** מספר יעד לוואטסאפ למנהל/ת הפגישות. */
+      var BOOKING_WHATSAPP_TO = '+972549329225';
       /** Webhook לרישום שאלה (למשל Make → naomi-questions.json). */
       var QUESTION_LEDGER_WEBHOOK = '';
       /** Supabase – ראי BOOKING-SYNC-SUPABASE.md (ריק = בלי סנכרון ענן). */
@@ -1984,6 +1988,46 @@
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ source: 'naomi-landing', type: 'booking_append', booking: booking }),
+          mode: 'cors',
+          keepalive: true
+        }).catch(function() {});
+      }
+
+      function buildBookingWhatsappMessage(booking) {
+        if (!booking) return '';
+        var dateHuman = String(booking.dateStr || '').split('-').reverse().join('/');
+        var timeHuman = String(booking.timeStr || '').trim();
+        var birthHuman = String(booking.birthDate || '').split('-').reverse().join('/');
+        var lines = [
+          'פגישה חדשה נקבעה 🗓️',
+          '',
+          'שם מלא: ' + (booking.fullName || ''),
+          'טלפון: ' + (booking.phone || ''),
+          'תאריך לידה: ' + (birthHuman || ''),
+          'תאריך פגישה: ' + (dateHuman || ''),
+          'שעה: ' + (timeHuman || ''),
+          'משך: ' + (booking.durationMinutes != null ? booking.durationMinutes + ' דקות' : '')
+        ];
+        return lines.filter(function(line) { return line !== ''; }).join('\n');
+      }
+
+      function postBookingWhatsappWebhook(booking) {
+        var w = typeof window !== 'undefined' ? window : {};
+        var url = String(w.NAOMI_BOOKING_WHATSAPP_WEBHOOK || BOOKING_WHATSAPP_WEBHOOK || '').trim();
+        if (!url) return;
+        var to = String(w.NAOMI_BOOKING_WHATSAPP_TO || BOOKING_WHATSAPP_TO || '').trim();
+        if (!to) return;
+        var message = buildBookingWhatsappMessage(booking);
+        fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            source: 'naomi-landing',
+            type: 'booking_whatsapp',
+            to: to,
+            message: message,
+            booking: booking
+          }),
           mode: 'cors',
           keepalive: true
         }).catch(function() {});
@@ -2652,6 +2696,7 @@
                   showMsg(msg, okText, true);
                   appendBookingToLocalLedger(ledgerEntry);
                   postBookingLedgerWebhook(ledgerEntry);
+                  postBookingWhatsappWebhook(ledgerEntry);
                   takenBookingsMerged.push({
                     id: ledgerEntry.id,
                     createdAt: ledgerEntry.createdAt,
