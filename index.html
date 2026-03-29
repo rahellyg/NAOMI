@@ -1409,7 +1409,7 @@
   <script>
     // WhatsApp webhook (Cloudflare Worker)
     window.NAOMI_BOOKING_WHATSAPP_WEBHOOK = 'https://naomi-whats.rahelly23.workers.dev';
-    window.NAOMI_BOOKING_WHATSAPP_TO = '+972549329225';
+    window.NAOMI_BOOKING_WHATSAPP_TO = '+972545719158';
   </script>
 
   <script>
@@ -1444,7 +1444,7 @@
       /** Webhook לשליחת וואטסאפ עם פרטי הפגישה (Make/Twilio/WhatsApp Cloud). */
       var BOOKING_WHATSAPP_WEBHOOK = '';
       /** מספר יעד לוואטסאפ למנהל/ת הפגישות. */
-      var BOOKING_WHATSAPP_TO = '+972549329225';
+      var BOOKING_WHATSAPP_TO = '+972545719158';
       /** Webhook לרישום שאלה (למשל Make → naomi-questions.json). */
       var QUESTION_LEDGER_WEBHOOK = '';
       /** Supabase – ראי BOOKING-SYNC-SUPABASE.md (ריק = בלי סנכרון ענן). */
@@ -2057,6 +2057,43 @@
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ source: 'naomi-landing', type: 'question_append', question: question }),
+          mode: 'cors',
+          keepalive: true
+        }).catch(function() {});
+      }
+
+      function buildQuestionWhatsappMessage(question) {
+        if (!question) return '';
+        var birthHuman = String(question.birthDate || '').split('-').reverse().join('/');
+        var lines = [
+          'שאלה חדשה התקבלה 💬',
+          '',
+          'שם מלא: ' + (question.fullName || ''),
+          'טלפון: ' + (question.phone || ''),
+          'תאריך לידה: ' + (birthHuman || ''),
+          'שאלה:',
+          question.questionText || ''
+        ];
+        return lines.filter(function(line) { return line !== ''; }).join('\n');
+      }
+
+      function postQuestionWhatsappWebhook(question) {
+        var wq = typeof window !== 'undefined' ? window : {};
+        var url = String(wq.NAOMI_BOOKING_WHATSAPP_WEBHOOK || BOOKING_WHATSAPP_WEBHOOK || '').trim();
+        if (!url) return;
+        var to = String(wq.NAOMI_BOOKING_WHATSAPP_TO || BOOKING_WHATSAPP_TO || '').trim();
+        if (!to) return;
+        var message = buildQuestionWhatsappMessage(question);
+        fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            source: 'naomi-landing',
+            type: 'question_whatsapp',
+            to: to,
+            message: message,
+            question: question
+          }),
           mode: 'cors',
           keepalive: true
         }).catch(function() {});
@@ -2928,6 +2965,7 @@
           };
           appendQuestionToLocalLedger(qEntry);
           postQuestionLedgerWebhook(qEntry);
+          postQuestionWhatsappWebhook(qEntry);
           syncQuestionToSupabase(qEntry);
           showMsg(msg, 'הפרטים נקלטו. מענה עד 7 ימים בוואטסאפ;', true);
           form.reset();
