@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "availabilityBySelectedDatesOnly": false,
+  "availabilityBySelectedDatesOnly": true,
   "bookingsSuspended": false,
   "startHour": 11,
   "startMinute": 30,
@@ -67,13 +67,9 @@
     }
   },
   "hoursByDate": {},
-  "daysOpen": [
-    0,
-    1,
-    2,
-    3,
-    4
-  ],
+  "daysOpen": [],
   "blockedDates": [],
-  "onlyOpenDates": []
+  "onlyOpenDates": [
+    "2026-04-05"
+  ]
 }
