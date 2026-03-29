@@ -2294,6 +2294,15 @@
           });
       }
 
+      function hasSupabaseBookingsConfig() {
+        var w = typeof window !== 'undefined' ? window : {};
+        var base = String(w.NAOMI_SUPABASE_URL || SUPABASE_URL || '')
+          .trim()
+          .replace(/\/$/, '');
+        var key = String(w.NAOMI_SUPABASE_ANON_KEY || SUPABASE_ANON_KEY || '').trim();
+        return !!(base && key);
+      }
+
       function fetchBookingsFromSupabaseForTaken() {
         var w = typeof window !== 'undefined' ? window : {};
         var base = String(w.NAOMI_SUPABASE_URL || SUPABASE_URL || '')
@@ -2347,15 +2356,38 @@
       function refreshTakenBookingsAsync() {
         lastTakenBookingsFetchAt = Date.now();
         var local = loadBookingsFromLocalStorageForTaken();
-        var pJ = fetchBookingsJsonForTaken().catch(function() {
-          return [];
+        var supabaseEnabled = hasSupabaseBookingsConfig();
+        var pJ = fetchBookingsJsonForTaken().then(function(arr) {
+          return { ok: true, arr: arr || [] };
+        }).catch(function() {
+          return { ok: false, arr: [] };
         });
-        var pS = fetchBookingsFromSupabaseForTaken().catch(function() {
-          return [];
+        var pS = fetchBookingsFromSupabaseForTaken().then(function(arr) {
+          return { ok: true, arr: arr || [] };
+        }).catch(function() {
+          return { ok: false, arr: [] };
         });
         return Promise.all([pJ, pS]).then(function(pair) {
-          var merged = mergeTakenBookingsArrays(pair[0], pair[1]);
-          takenBookingsMerged = mergeTakenBookingsArrays(merged, local);
+          var jsonRes = pair[0];
+          var supabaseRes = pair[1];
+          if (supabaseEnabled) {
+            if (supabaseRes.ok) {
+              takenBookingsMerged = supabaseRes.arr;
+              return;
+            }
+            if (jsonRes.ok) {
+              takenBookingsMerged = mergeTakenBookingsArrays(jsonRes.arr, local);
+              return;
+            }
+            takenBookingsMerged = local;
+            return;
+          }
+          var merged = mergeTakenBookingsArrays(jsonRes.arr, supabaseRes.arr);
+          if (jsonRes.ok || supabaseRes.ok) {
+            takenBookingsMerged = mergeTakenBookingsArrays(merged, local);
+          } else {
+            takenBookingsMerged = local;
+          }
         });
       }
 
