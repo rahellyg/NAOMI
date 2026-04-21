@@ -2813,11 +2813,30 @@
                       false
                     );
                   } else {
-                    showMsg(
-                      msg,
-                      'לא ניתן לשמור את ההזמנה כרגע (בעיית רשת או שרת). נסי שוב בעוד רגע.',
-                      false
-                    );
+                    // Fallback: keep booking flow working (including WhatsApp) even if cloud save fails.
+                    setBookingGcalLink(gcalUrl);
+                    okText =
+                      'ההזמנה נשמרה מקומית והודעת וואטסאפ נשלחה, אבל סנכרון ענן נכשל כרגע. מומלץ לרענן בעוד רגע.' +
+                      ownerHint;
+                    showMsg(msg, okText, true);
+                    appendBookingToLocalLedger(ledgerEntry);
+                    postBookingLedgerWebhook(ledgerEntry);
+                    postBookingWhatsappWebhook(ledgerEntry);
+                    takenBookingsMerged.push({
+                      id: ledgerEntry.id,
+                      createdAt: ledgerEntry.createdAt,
+                      dateStr: ledgerEntry.dateStr,
+                      timeStr: normalizeBookingTimeStr(ledgerEntry.timeStr),
+                      durationMinutes: ledgerEntry.durationMinutes,
+                      fullName: ledgerEntry.fullName,
+                      phone: ledgerEntry.phone,
+                      email: ledgerEntry.email,
+                      birthDate: ledgerEntry.birthDate
+                    });
+                    renderBookingCalendar();
+                    renderBookingTimeSlots();
+                    refreshBookingSlotHint();
+                    return;
                   }
                   return refreshTakenBookingsAsync()
                     .catch(function() {})
