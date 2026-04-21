@@ -2017,7 +2017,17 @@
         return lines.filter(function(line) { return line !== ''; }).join('\n');
       }
 
-      function sendBookingWhatsappBackground(url, payload, retryLeft) {
+      function sendBookingWhatsappBackground(url, payload, retryLeft, attempt) {
+        var tryNo = attempt || 1;
+        try {
+          console.info('[booking-whatsapp] sending', {
+            attempt: tryNo,
+            to: payload && payload.to,
+            bookingId: payload && payload.booking ? payload.booking.id : '',
+            date: payload && payload.booking ? payload.booking.dateStr : '',
+            time: payload && payload.booking ? payload.booking.timeStr : ''
+          });
+        } catch (e0) {}
         fetch(url, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -2026,19 +2036,37 @@
           keepalive: true
         })
           .then(function(res) {
-            if (res && res.ok) return;
+            if (res && res.ok) {
+              try {
+                console.info('[booking-whatsapp] sent successfully', {
+                  attempt: tryNo,
+                  status: res.status
+                });
+              } catch (e1) {}
+              return;
+            }
             throw new Error('WhatsApp webhook HTTP ' + (res ? res.status : 'unknown'));
           })
           .catch(function(err) {
             if (retryLeft > 0) {
+              try {
+                console.warn('[booking-whatsapp] send failed, retrying', {
+                  attempt: tryNo,
+                  nextAttempt: tryNo + 1,
+                  error: String((err && err.message) || err)
+                });
+              } catch (e2) {}
               setTimeout(function() {
-                sendBookingWhatsappBackground(url, payload, retryLeft - 1);
+                sendBookingWhatsappBackground(url, payload, retryLeft - 1, tryNo + 1);
               }, 1200);
               return;
             }
             try {
-              console.warn('WhatsApp background send failed', err);
-            } catch (e) {}
+              console.error('[booking-whatsapp] send failed (final)', {
+                attempt: tryNo,
+                error: String((err && err.message) || err)
+              });
+            } catch (e3) {}
           });
       }
 
@@ -2046,7 +2074,15 @@
         var w = typeof window !== 'undefined' ? window : {};
         var url = String(w.NAOMI_BOOKING_WHATSAPP_WEBHOOK || BOOKING_WHATSAPP_WEBHOOK || '').trim();
         var to = String(w.NAOMI_BOOKING_WHATSAPP_TO || BOOKING_WHATSAPP_TO || '').trim();
-        if (!url || !to) return;
+        if (!url || !to) {
+          try {
+            console.warn('[booking-whatsapp] skipped: missing webhook url or target number', {
+              hasUrl: !!url,
+              hasTo: !!to
+            });
+          } catch (e4) {}
+          return;
+        }
         var message = buildBookingWhatsappMessage(booking);
         var payload = {
           source: 'naomi-landing',
@@ -2055,7 +2091,7 @@
           message: message,
           booking: booking
         };
-        sendBookingWhatsappBackground(url, payload, 1);
+        sendBookingWhatsappBackground(url, payload, 1, 1);
       }
 
       function appendQuestionToLocalLedger(entry) {
