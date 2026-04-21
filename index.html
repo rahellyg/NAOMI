@@ -1409,7 +1409,7 @@
   <script>
     // WhatsApp webhook (Cloudflare Worker)
     window.NAOMI_BOOKING_WHATSAPP_WEBHOOK = 'https://naomi-whats.rahelly23.workers.dev';
-    window.NAOMI_BOOKING_WHATSAPP_TO = '+972545719158';
+    window.NAOMI_BOOKING_WHATSAPP_TO = '+972545719158,+972549329225';
   </script>
 
   <script>
@@ -1444,7 +1444,7 @@
       /** Webhook לשליחת וואטסאפ עם פרטי הפגישה (Make/Twilio/WhatsApp Cloud). */
       var BOOKING_WHATSAPP_WEBHOOK = '';
       /** מספר יעד לוואטסאפ למנהל/ת הפגישות. */
-      var BOOKING_WHATSAPP_TO = '+972545719158';
+      var BOOKING_WHATSAPP_TO = '+972545719158,+972549329225';
       /** Webhook לרישום שאלה (למשל Make → naomi-questions.json). */
       var QUESTION_LEDGER_WEBHOOK = '';
       /** Supabase – ראי BOOKING-SYNC-SUPABASE.md (ריק = בלי סנכרון ענן). */
@@ -2017,6 +2017,21 @@
         return lines.filter(function(line) { return line !== ''; }).join('\n');
       }
 
+      function parseWhatsappTargets(raw) {
+        var src = String(raw || '');
+        if (!src) return [];
+        var list = src
+          .split(/[\s,;]+/)
+          .map(function(v) { return String(v || '').trim(); })
+          .filter(function(v) { return !!v; });
+        var seen = {};
+        return list.filter(function(v) {
+          if (seen[v]) return false;
+          seen[v] = true;
+          return true;
+        });
+      }
+
       function sendBookingWhatsappBackground(url, payload, retryLeft, attempt) {
         var tryNo = attempt || 1;
         try {
@@ -2073,25 +2088,27 @@
       function postBookingWhatsappWebhook(booking) {
         var w = typeof window !== 'undefined' ? window : {};
         var url = String(w.NAOMI_BOOKING_WHATSAPP_WEBHOOK || BOOKING_WHATSAPP_WEBHOOK || '').trim();
-        var to = String(w.NAOMI_BOOKING_WHATSAPP_TO || BOOKING_WHATSAPP_TO || '').trim();
-        if (!url || !to) {
+        var targets = parseWhatsappTargets(w.NAOMI_BOOKING_WHATSAPP_TO || BOOKING_WHATSAPP_TO || '');
+        if (!url || !targets.length) {
           try {
             console.warn('[booking-whatsapp] skipped: missing webhook url or target number', {
               hasUrl: !!url,
-              hasTo: !!to
+              targets: targets.length
             });
           } catch (e4) {}
           return;
         }
         var message = buildBookingWhatsappMessage(booking);
-        var payload = {
-          source: 'naomi-landing',
-          type: 'booking_whatsapp',
-          to: to,
-          message: message,
-          booking: booking
-        };
-        sendBookingWhatsappBackground(url, payload, 1, 1);
+        targets.forEach(function(to) {
+          var payload = {
+            source: 'naomi-landing',
+            type: 'booking_whatsapp',
+            to: to,
+            message: message,
+            booking: booking
+          };
+          sendBookingWhatsappBackground(url, payload, 1, 1);
+        });
       }
 
       function appendQuestionToLocalLedger(entry) {
@@ -2136,22 +2153,24 @@
         var wq = typeof window !== 'undefined' ? window : {};
         var url = String(wq.NAOMI_BOOKING_WHATSAPP_WEBHOOK || BOOKING_WHATSAPP_WEBHOOK || '').trim();
         if (!url) return;
-        var to = String(wq.NAOMI_BOOKING_WHATSAPP_TO || BOOKING_WHATSAPP_TO || '').trim();
-        if (!to) return;
+        var targets = parseWhatsappTargets(wq.NAOMI_BOOKING_WHATSAPP_TO || BOOKING_WHATSAPP_TO || '');
+        if (!targets.length) return;
         var message = buildQuestionWhatsappMessage(question);
-        fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            source: 'naomi-landing',
-            type: 'question_whatsapp',
-            to: to,
-            message: message,
-            question: question
-          }),
-          mode: 'cors',
-          keepalive: true
-        }).catch(function() {});
+        targets.forEach(function(to) {
+          fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              source: 'naomi-landing',
+              type: 'question_whatsapp',
+              to: to,
+              message: message,
+              question: question
+            }),
+            mode: 'cors',
+            keepalive: true
+          }).catch(function() {});
+        });
       }
 
       function syncQuestionToSupabase(entry) {
