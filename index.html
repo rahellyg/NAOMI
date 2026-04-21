@@ -2017,26 +2017,45 @@
         return lines.filter(function(line) { return line !== ''; }).join('\n');
       }
 
-      function postBookingWhatsappWebhook(booking) {
-        var w = typeof window !== 'undefined' ? window : {};
-        var url = String(w.NAOMI_BOOKING_WHATSAPP_WEBHOOK || BOOKING_WHATSAPP_WEBHOOK || '').trim();
-        if (!url) return;
-        var to = String(w.NAOMI_BOOKING_WHATSAPP_TO || BOOKING_WHATSAPP_TO || '').trim();
-        if (!to) return;
-        var message = buildBookingWhatsappMessage(booking);
+      function sendBookingWhatsappBackground(url, payload, retryLeft) {
         fetch(url, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            source: 'naomi-landing',
-            type: 'booking_whatsapp',
-            to: to,
-            message: message,
-            booking: booking
-          }),
+          body: JSON.stringify(payload),
           mode: 'cors',
           keepalive: true
-        }).catch(function() {});
+        })
+          .then(function(res) {
+            if (res && res.ok) return;
+            throw new Error('WhatsApp webhook HTTP ' + (res ? res.status : 'unknown'));
+          })
+          .catch(function(err) {
+            if (retryLeft > 0) {
+              setTimeout(function() {
+                sendBookingWhatsappBackground(url, payload, retryLeft - 1);
+              }, 1200);
+              return;
+            }
+            try {
+              console.warn('WhatsApp background send failed', err);
+            } catch (e) {}
+          });
+      }
+
+      function postBookingWhatsappWebhook(booking) {
+        var w = typeof window !== 'undefined' ? window : {};
+        var url = String(w.NAOMI_BOOKING_WHATSAPP_WEBHOOK || BOOKING_WHATSAPP_WEBHOOK || '').trim();
+        var to = String(w.NAOMI_BOOKING_WHATSAPP_TO || BOOKING_WHATSAPP_TO || '').trim();
+        if (!url || !to) return;
+        var message = buildBookingWhatsappMessage(booking);
+        var payload = {
+          source: 'naomi-landing',
+          type: 'booking_whatsapp',
+          to: to,
+          message: message,
+          booking: booking
+        };
+        sendBookingWhatsappBackground(url, payload, 1);
       }
 
       function appendQuestionToLocalLedger(entry) {

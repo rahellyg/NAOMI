@@ -1740,20 +1740,32 @@
       return null;
     }
 
+    function bookingDateTimeMs(b) {
+      if (!b || !b.dateStr || !/^\d{4}-\d{2}-\d{2}$/.test(String(b.dateStr))) return NaN;
+      var ts = b.timeStr != null ? String(b.timeStr).trim() : '00:00';
+      var tm = ts.match(/^(\d{1,2}):(\d{2})/);
+      var hh = tm ? Math.max(0, Math.min(23, parseInt(tm[1], 10) || 0)) : 0;
+      var mm = tm ? Math.max(0, Math.min(59, parseInt(tm[2], 10) || 0)) : 0;
+      return new Date(String(b.dateStr) + 'T' + pad2(hh) + ':' + pad2(mm) + ':00').getTime();
+    }
+
     function renderBookingsList() {
       var ul = document.getElementById('bookings-list');
       if (!ul) return;
       ul.innerHTML = '';
-      var sorted = meetingsBookings.slice().sort(function(a, b) {
-        var da = (a.dateStr || '') + 'T' + (a.timeStr || '00:00');
-        var db = (b.dateStr || '') + 'T' + (b.timeStr || '00:00');
-        return da.localeCompare(db);
-      });
+      var nowMs = Date.now();
+      var sorted = meetingsBookings
+        .filter(function(b) {
+          var t = bookingDateTimeMs(b);
+          return !isNaN(t) && t >= nowMs;
+        })
+        .sort(function(a, b) {
+          return bookingDateTimeMs(a) - bookingDateTimeMs(b);
+        });
       if (!sorted.length) {
         var empty = document.createElement('li');
         empty.style.opacity = '0.88';
-        empty.textContent =
-          'אין פגישות. אם עדיין לא הגדרת Supabase – ראי BOOKING-SYNC-SUPABASE.md. אחרת: ודאי ש־naomi-bookings.json ב-GitHub מתעדכן, או ייבוא JSON.';
+        empty.textContent = 'אין פגישות עתידיות להצגה.';
         ul.appendChild(empty);
         return;
       }
