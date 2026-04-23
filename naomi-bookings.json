@@ -66,17 +66,6 @@
       "email": "",
       "birthDate": "2002-07-06",
       "durationMinutes": 45
-    },
-    {
-      "id": "b-1776928140162-ylhoxjm",
-      "createdAt": "2026-04-23T07:09:00.162+00:00",
-      "dateStr": "2026-04-29",
-      "timeStr": "11:30",
-      "durationMinutes": 45,
-      "fullName": "ראיסה יעיש",
-      "phone": "+972549329225",
-      "email": "",
-      "birthDate": "2000-10-10"
     }
   ]
 }
