@@ -1632,12 +1632,20 @@
     }
 
     function bookingCanonicalKey(b) {
+      var rawDate = String((b && b.dateStr) || '').trim();
+      var mDate = rawDate.match(/^(\d{4}-\d{2}-\d{2})/);
+      var dt = mDate ? mDate[1] : rawDate;
+      var rawTime = String((b && b.timeStr) || '').trim();
+      var mTime = rawTime.match(/^(\d{1,2}):(\d{2})/);
+      var tm = mTime
+        ? pad2(parseInt(mTime[1], 10) || 0) + ':' + pad2(parseInt(mTime[2], 10) || 0)
+        : rawTime;
       var nm = String((b && b.fullName) || '').trim().toLowerCase();
       var ph = String((b && b.phone) || '').replace(/\D/g, '');
       var em = String((b && b.email) || '').trim().toLowerCase();
       return [
-        String((b && b.dateStr) || ''),
-        String((b && b.timeStr) || ''),
+        dt,
+        tm,
         nm,
         ph,
         em
