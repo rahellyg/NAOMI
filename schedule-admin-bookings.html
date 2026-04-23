@@ -416,6 +416,57 @@
       background: rgba(0,0,0,0.2);
       color: var(--text);
     }
+    .btn-booking-delete {
+      margin-top: 0.45rem;
+      width: 100%;
+      padding: 0.52rem 0.75rem;
+      font-size: 0.8rem;
+      font-weight: 700;
+      border: 1px solid rgba(139, 21, 50, 0.35);
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: inherit;
+      background: rgba(255, 220, 226, 0.86);
+      color: #8b1532;
+    }
+    .btn-booking-delete:hover:not(:disabled) { filter: brightness(0.98); }
+    .btn-booking-delete:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+    .booking-edit-date-wrap {
+      margin-top: 0.45rem;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 0.45rem;
+      align-items: center;
+    }
+    .booking-edit-date-wrap input[type="date"] {
+      margin: 0;
+      padding: 0.48rem 0.55rem;
+      border-radius: 8px;
+      border: 1px solid rgba(92, 45, 122, 0.28);
+      font-family: inherit;
+      font-size: 0.82rem;
+    }
+    .btn-booking-date-save {
+      width: auto;
+      min-width: 6.2rem;
+      margin: 0;
+      padding: 0.48rem 0.65rem;
+      font-size: 0.78rem;
+      font-weight: 700;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: inherit;
+      background: rgba(92, 45, 122, 0.9);
+      color: #fff;
+    }
+    .btn-booking-date-save:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
     .site-credit-wrap {
       text-align: center;
       margin-top: 1.25rem;
@@ -1716,6 +1767,77 @@
         });
     }
 
+    function supabaseBookingsConfig() {
+      var w = typeof window !== 'undefined' ? window : {};
+      var base = String(w.NAOMI_SUPABASE_URL || SUPABASE_URL || '')
+        .trim()
+        .replace(/\/$/, '');
+      var key = String(w.NAOMI_SUPABASE_ANON_KEY || SUPABASE_ANON_KEY || '').trim();
+      var table = String(w.NAOMI_SUPABASE_TABLE || SUPABASE_BOOKINGS_TABLE || 'naomi_bookings').trim();
+      if (!base || !key || !table) return null;
+      return { base: base, key: key, table: table };
+    }
+
+    function upsertBookingToSupabase(booking) {
+      var cfg = supabaseBookingsConfig();
+      if (!cfg) return Promise.resolve({ skipped: true });
+      var row = {
+        id: booking.id,
+        created_at: booking.createdAt,
+        date_str: booking.dateStr,
+        time_str: booking.timeStr,
+        duration_minutes: booking.durationMinutes,
+        full_name: booking.fullName || '',
+        phone: booking.phone || '',
+        email: booking.email || '',
+        birth_date: booking.birthDate || ''
+      };
+      return fetch(cfg.base + '/rest/v1/' + encodeURIComponent(cfg.table), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          apikey: cfg.key,
+          Authorization: 'Bearer ' + cfg.key,
+          Prefer: 'resolution=merge-duplicates,return=minimal'
+        },
+        body: JSON.stringify(row),
+        cache: 'no-store'
+      }).then(function(res) {
+        if (res.ok) return { skipped: false };
+        return res.text().then(function(body) {
+          throw new Error('Supabase upsert failed: HTTP ' + res.status + (body ? ' · ' + body : ''));
+        });
+      });
+    }
+
+    function deleteBookingFromSupabase(bookingId) {
+      var cfg = supabaseBookingsConfig();
+      if (!cfg) return Promise.resolve({ skipped: true });
+      return fetch(
+        cfg.base + '/rest/v1/' + encodeURIComponent(cfg.table) + '?id=eq.' + encodeURIComponent(bookingId),
+        {
+          method: 'DELETE',
+          headers: {
+            apikey: cfg.key,
+            Authorization: 'Bearer ' + cfg.key,
+            Prefer: 'return=minimal'
+          },
+          cache: 'no-store'
+        }
+      ).then(function(res) {
+        if (res.ok) return { skipped: false };
+        return res.text().then(function(body) {
+          throw new Error('Supabase delete failed: HTTP ' + res.status + (body ? ' · ' + body : ''));
+        });
+      });
+    }
+
+    function saveBookingsToLocalStorage(arr) {
+      try {
+        localStorage.setItem(BOOKINGS_STORAGE_KEY, JSON.stringify(arr || []));
+      } catch (e) {}
+    }
+
     function showBookingsMsg(text, ok) {
       var el = document.getElementById('bookings-msg');
       if (!el) return;
@@ -1858,7 +1980,20 @@
           bid +
           '"' +
           (waOk ? '' : ' disabled title="אין מספר טלפון תקין"') +
-          '>שליחת הודעת תשלום</button>';
+          '>שליחת הודעת תשלום</button>' +
+          '<div class="booking-edit-date-wrap">' +
+          '<input type="date" class="booking-edit-date" value="' +
+          escapeHtml(b.dateStr || '') +
+          '" data-booking-date-input="' +
+          bid +
+          '">' +
+          '<button type="button" class="btn-booking-date-save" data-booking-date-save="' +
+          bid +
+          '">עדכן תאריך</button>' +
+          '</div>' +
+          '<button type="button" class="btn-booking-delete" data-booking-delete="' +
+          bid +
+          '">מחקי פגישה</button>';
         ul.appendChild(li);
       });
     }
@@ -2266,6 +2401,81 @@
     });
 
     document.getElementById('bookings-list').addEventListener('click', function(e) {
+      var dateBtn = e.target.closest('.btn-booking-date-save');
+      if (dateBtn && !dateBtn.disabled) {
+        var bookingId = dateBtn.getAttribute('data-booking-date-save');
+        var recDate = findBookingById(bookingId);
+        if (!recDate) {
+          showBookingsMsg('לא נמצאה רשומת פגישה לעדכון.', false);
+          return;
+        }
+        var inp = document.querySelector('.booking-edit-date[data-booking-date-input="' + bookingId + '"]');
+        var newDate = String((inp && inp.value) || '').trim();
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(newDate)) {
+          showBookingsMsg('נא לבחור תאריך תקין לעדכון.', false);
+          return;
+        }
+        if (newDate === recDate.dateStr) {
+          showBookingsMsg('התאריך לא השתנה.', true);
+          return;
+        }
+        var updated = Object.assign({}, recDate, { dateStr: newDate });
+        dateBtn.disabled = true;
+        showBookingsMsg('מעדכנת תאריך פגישה…', true);
+        upsertBookingToSupabase(updated)
+          .then(function() {
+            meetingsBookings = meetingsBookings.map(function(b) {
+              if (!b || b.id !== bookingId) return b;
+              return Object.assign({}, b, { dateStr: newDate });
+            });
+            saveBookingsToLocalStorage(meetingsBookings);
+            renderMonthCalendar();
+            renderBookingsList();
+            showBookingsMsg('תאריך הפגישה עודכן. מומלץ ללחוץ "שמור פגישות ל-GitHub".', true);
+          })
+          .catch(function(err) {
+            var em = err && err.message ? String(err.message) : String(err);
+            showBookingsMsg('נכשל לעדכן תאריך ב-DB: ' + em, false);
+          })
+          .finally(function() {
+            dateBtn.disabled = false;
+          });
+        return;
+      }
+
+      var delBtn = e.target.closest('.btn-booking-delete');
+      if (delBtn && !delBtn.disabled) {
+        var delId = delBtn.getAttribute('data-booking-delete');
+        var recDel = findBookingById(delId);
+        if (!recDel) {
+          showBookingsMsg('לא נמצאה רשומת פגישה למחיקה.', false);
+          return;
+        }
+        var okDel = window.confirm(
+          'למחוק את הפגישה של ' + (recDel.fullName || 'לקוחה') + ' בתאריך ' + (recDel.dateStr || '') + ' ' + (recDel.timeStr || '') + '?'
+        );
+        if (!okDel) return;
+        delBtn.disabled = true;
+        showBookingsMsg('מוחקת פגישה…', true);
+        deleteBookingFromSupabase(delId)
+          .then(function() {
+            meetingsBookings = meetingsBookings.filter(function(b) {
+              return !b || b.id !== delId;
+            });
+            saveBookingsToLocalStorage(meetingsBookings);
+            renderMonthCalendar();
+            renderBookingsList();
+            showBookingsMsg('הפגישה נמחקה. מומלץ ללחוץ "שמור פגישות ל-GitHub".', true);
+          })
+          .catch(function(err) {
+            var m2 = err && err.message ? String(err.message) : String(err);
+            showBookingsMsg('נכשל למחוק פגישה מה-DB: ' + m2, false);
+          })
+          .finally(function() {
+            delBtn.disabled = false;
+          });
+        return;
+      }
       var btn = e.target.closest('.btn-wa-client, .btn-wa-payment');
       if (!btn || btn.disabled) return;
       var isPaymentButton = btn.classList.contains('btn-wa-payment');
