@@ -6,66 +6,77 @@
       "createdAt": "2026-03-29T17:04:20.13+00:00",
       "dateStr": "2026-04-05",
       "timeStr": "11:30",
-      "durationMinutes": 45,
       "fullName": "גל פינקלשטיין",
       "phone": "0507490066",
       "email": "",
-      "birthDate": "1992-10-15"
+      "birthDate": "1992-10-15",
+      "durationMinutes": 45
     },
     {
       "id": "b-1775462991692-hmph44h",
       "createdAt": "2026-04-06T08:09:51.692+00:00",
       "dateStr": "2026-04-08",
       "timeStr": "11:30",
-      "durationMinutes": 45,
       "fullName": "ליאל פרחן",
       "phone": "0525832117",
       "email": "",
-      "birthDate": "1996-06-24"
+      "birthDate": "1996-06-24",
+      "durationMinutes": 45
     },
     {
       "id": "b-1776547998633-v9wtk74",
       "createdAt": "2026-04-18T21:33:18.633+00:00",
       "dateStr": "2026-04-23",
       "timeStr": "11:30",
-      "durationMinutes": 45,
       "fullName": "קארין",
       "phone": "0507378883",
       "email": "",
-      "birthDate": "2002-11-11"
+      "birthDate": "2002-11-11",
+      "durationMinutes": 45
     },
     {
       "id": "b-1776888429201-20lyfhu",
       "createdAt": "2026-04-22T20:07:09.201+00:00",
       "dateStr": "2026-04-26",
       "timeStr": "11:30",
-      "durationMinutes": 45,
       "fullName": "גבי הכט",
       "phone": "0503131675",
       "email": "",
-      "birthDate": "1996-03-29"
+      "birthDate": "1996-03-29",
+      "durationMinutes": 45
     },
     {
       "id": "b-1776888357662-xizb7xy",
       "createdAt": "2026-04-22T20:05:57.662+00:00",
       "dateStr": "2026-04-27",
       "timeStr": "11:30",
-      "durationMinutes": 45,
       "fullName": "גבי הכט",
       "phone": "0503131675",
       "email": "",
-      "birthDate": "1996-03-29"
+      "birthDate": "1996-03-29",
+      "durationMinutes": 45
     },
     {
       "id": "b-1776540274841-c7s0c9h",
       "createdAt": "2026-04-18T19:24:34.841+00:00",
       "dateStr": "2026-04-28",
       "timeStr": "11:30",
-      "durationMinutes": 45,
       "fullName": "עדן ישייב",
       "phone": "054-3037044",
       "email": "",
-      "birthDate": "2002-07-06"
+      "birthDate": "2002-07-06",
+      "durationMinutes": 45
+    },
+    {
+      "id": "b-1776928140162-ylhoxjm",
+      "createdAt": "2026-04-23T07:09:00.162+00:00",
+      "dateStr": "2026-04-29",
+      "timeStr": "11:30",
+      "durationMinutes": 45,
+      "fullName": "ראיסה יעיש",
+      "phone": "+972549329225",
+      "email": "",
+      "birthDate": "2000-10-10"
     }
   ]
 }
