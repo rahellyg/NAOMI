@@ -1833,6 +1833,47 @@
       });
     }
 
+    function deleteBookingByIdentityFromSupabase(booking) {
+      var cfg = supabaseBookingsConfig();
+      if (!cfg || !booking) return Promise.resolve({ skipped: true });
+      var targetKey = bookingCanonicalKey(booking);
+      var url =
+        cfg.base +
+        '/rest/v1/' +
+        encodeURIComponent(cfg.table) +
+        '?select=id,date_str,time_str,full_name,phone,email';
+      return fetch(url, {
+        headers: {
+          apikey: cfg.key,
+          Authorization: 'Bearer ' + cfg.key,
+          Accept: 'application/json'
+        },
+        cache: 'no-store'
+      })
+        .then(function(res) {
+          if (!res.ok) throw new Error('Supabase lookup failed: HTTP ' + res.status);
+          return res.json();
+        })
+        .then(function(rows) {
+          if (!Array.isArray(rows) || !rows.length) return { skipped: false, deleted: 0 };
+          var ids = [];
+          rows.forEach(function(r) {
+            var k = bookingCanonicalKey({
+              dateStr: r.date_str || '',
+              timeStr: r.time_str || '',
+              fullName: r.full_name || '',
+              phone: r.phone || '',
+              email: r.email || ''
+            });
+            if (k === targetKey && r.id && ids.indexOf(r.id) === -1) ids.push(r.id);
+          });
+          if (!ids.length) return { skipped: false, deleted: 0 };
+          return Promise.all(ids.map(function(id) { return deleteBookingFromSupabase(id); })).then(function() {
+            return { skipped: false, deleted: ids.length };
+          });
+        });
+    }
+
     function saveBookingsToLocalStorage(arr) {
       try {
         localStorage.setItem(BOOKINGS_STORAGE_KEY, JSON.stringify(arr || []));
@@ -2469,6 +2510,7 @@
         var deleteOps = ids.length
           ? ids.map(function(id) { return deleteBookingFromSupabase(id); })
           : [deleteBookingFromSupabase(delId)];
+        deleteOps.push(deleteBookingByIdentityFromSupabase(recDel));
         Promise.all(deleteOps)
           .then(function() {
             meetingsBookings = meetingsBookings.filter(function(b) {
