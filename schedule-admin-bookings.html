@@ -1631,20 +1631,21 @@
         .filter(Boolean);
     }
 
+    function bookingCanonicalKey(b) {
+      var nm = String((b && b.fullName) || '').trim().toLowerCase();
+      var ph = String((b && b.phone) || '').replace(/\D/g, '');
+      var em = String((b && b.email) || '').trim().toLowerCase();
+      return [
+        String((b && b.dateStr) || ''),
+        String((b && b.timeStr) || ''),
+        nm,
+        ph,
+        em
+      ].join('|');
+    }
+
     function bookingMergeKey(b) {
-      if (b.id) return 'id:' + b.id;
-      return (
-        'k:' +
-        b.dateStr +
-        '|' +
-        b.timeStr +
-        '|' +
-        (b.email || '') +
-        '|' +
-        (b.fullName || '') +
-        '|' +
-        (b.phone || '')
-      );
+      return 'k:' + bookingCanonicalKey(b);
     }
 
     function mergeBookingsArrays(a, b) {
@@ -2457,10 +2458,22 @@
         if (!okDel) return;
         delBtn.disabled = true;
         showBookingsMsg('מוחקת פגישה…', true);
-        deleteBookingFromSupabase(delId)
+        var delKey = bookingCanonicalKey(recDel);
+        var candidates = meetingsBookings.filter(function(b) {
+          return b && (b.id === delId || bookingCanonicalKey(b) === delKey);
+        });
+        var ids = [];
+        candidates.forEach(function(b) {
+          if (b && b.id && ids.indexOf(b.id) === -1) ids.push(b.id);
+        });
+        var deleteOps = ids.length
+          ? ids.map(function(id) { return deleteBookingFromSupabase(id); })
+          : [deleteBookingFromSupabase(delId)];
+        Promise.all(deleteOps)
           .then(function() {
             meetingsBookings = meetingsBookings.filter(function(b) {
-              return !b || b.id !== delId;
+              if (!b) return false;
+              return !(b.id === delId || bookingCanonicalKey(b) === delKey);
             });
             saveBookingsToLocalStorage(meetingsBookings);
             renderMonthCalendar();
